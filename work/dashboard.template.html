@@ -181,6 +181,37 @@
   .cmptab .c.up { color:var(--in); } .cmptab .c.down { color:var(--out); }
   .cmptab .r { color:var(--ink-2); }
 
+  .pick-input { width:100%; margin-top:12px; padding:13px 14px; font-family:var(--sans); font-size:var(--t-md);
+    color:var(--ink); background:var(--card-2); border:1px solid var(--line); border-radius:10px; }
+  .pick-input:focus-visible { outline:2px solid var(--in); outline-offset:2px; }
+  .pick-grp { font-size:12.5px; font-weight:800; color:var(--muted); padding:14px 2px 6px; }
+  .pick-item { display:flex; align-items:center; gap:10px; width:100%; text-align:left; font-family:inherit;
+    background:transparent; border:0; border-bottom:1px solid var(--line-2); padding:14px 2px; cursor:pointer; color:inherit; }
+  .pick-item:hover { background:var(--card-2); }
+  .pick-item:focus-visible { outline:2px solid var(--in); outline-offset:-2px; }
+  .pick-item.on { color:var(--in); font-weight:800; }
+  .pick-item .nm2 { flex:1; font-size:var(--t-md); font-weight:700; }
+  .pick-item .n2 { font-family:var(--num); font-size:var(--t-cap); color:var(--muted); }
+  button.chev { background:transparent; border:0; font-family:var(--sans); cursor:pointer; }
+
+  .regbar { display:flex; flex-direction:column; gap:6px; margin-top:12px; }
+  .regrow { display:grid; grid-template-columns:1fr 56px; gap:10px; align-items:center; font-size:var(--t-cap); }
+  .regrow .rn { color:var(--ink-2); }
+  .regrow.ours .rn { color:var(--in); font-weight:800; }
+  .regrow .rc { font-family:var(--num); font-weight:700; text-align:right; color:var(--ink-2); }
+  .warnbox { background:var(--out-wk); color:var(--out); border-radius:10px; padding:13px 15px;
+    font-size:var(--t-sm); line-height:1.7; margin-top:12px; }
+  .warnbox b { font-weight:800; }
+
+  @media print {
+    .tabbar, .chev, #city, .chips, .segbar, .go { display:none !important; }
+    .screen { display:block !important; page-break-inside:avoid; }
+    .app { max-width:none; border:0; }
+    main { padding-bottom:0; }
+    .pcard { break-inside:avoid; box-shadow:none; }
+    body { font-size:11pt; }
+  }
+
   .empty { padding:36px 22px; text-align:center; color:var(--ink-2); font-size:var(--t-sm); line-height:1.75;
     background:var(--card); border:1px dashed var(--line); border-radius:var(--r); }
   .empty b { color:var(--ink); font-weight:800; }
@@ -337,7 +368,7 @@
         <div class="kicker">우리 시</div>
         <div class="name" id="stNm">—</div>
       </div>
-      <span class="chev">바꾸기 ▾</span>
+      <button class="chev" id="btnPick" type="button">바꾸기 ▾</button>
       <select id="city" aria-label="지자체 선택"></select>
     </div>
     <div class="stats">
@@ -349,7 +380,7 @@
 
   <main>
     <!-- 1. 정책 -->
-    <section class="screen on" id="sc-policy">
+    <section class="screen" id="sc-policy">
       <div class="shead">
         <h2>우리 시가 하는 것</h2>
         <p><b>중앙부처 정책은 여기 없습니다</b> — 전국이 똑같아서 차이를 만들지 않습니다(정보 탭에서 확인).
@@ -375,7 +406,7 @@
     </section>
 
 
-    <section class="screen" id="sc-gap">
+    <section class="screen on" id="sc-gap">
       <div class="shead">
         <h2>다른 시엔 있는데 우리는 없는 것</h2>
         <p>전국 기초 정책을 사업 유형으로 묶어, <b>여러 시군이 하는데 우리 시엔 없는 것</b>만 골랐습니다.
@@ -383,9 +414,13 @@
       </div>
 
       <div class="panel" id="gapSummary"></div>
+      <div class="panel" id="regNotice"></div>
 
       <div class="subhead"><h3>없는 사업 유형</h3><span id="gapNote"></span></div>
       <ul class="cards" id="gapList"></ul>
+
+      <div class="subhead"><h3>우리만 하는 것</h3><span id="onlyNote"></span></div>
+      <ul class="cards" id="onlyList"></ul>
 
       <div class="subhead"><h3>분야 커버리지</h3><span>우리 시가 손대지 않은 영역</span></div>
       <div class="panel" id="coverPanel"></div>
@@ -489,13 +524,26 @@
 
 <nav class="tabbar" role="tablist" aria-label="주요 화면">
   <div class="tabbar-in">
-    <button class="tb" role="tab" aria-selected="true" data-sc="policy"><span class="ic">◎</span>우리 시<span class="cnt num" id="tc1">—</span></button>
+    <button class="tb" role="tab" aria-selected="true" data-sc="gap"><span class="ic">⇄</span>비교<span class="cnt num" id="tc5">—</span></button>
+    <button class="tb" role="tab" aria-selected="false" data-sc="policy"><span class="ic">◎</span>우리 시<span class="cnt num" id="tc1">—</span></button>
     <button class="tb" role="tab" aria-selected="false" data-sc="end"><span class="ic">⊘</span>마감<span class="cnt num" id="tc3">—</span></button>
-    <button class="tb" role="tab" aria-selected="false" data-sc="gap"><span class="ic">⇄</span>비교<span class="cnt num" id="tc5">—</span></button>
     <button class="tb" role="tab" aria-selected="false" data-sc="region"><span class="ic">§</span>근거<span class="cnt num" id="tc4">—</span></button>
     <button class="tb" role="tab" aria-selected="false" data-sc="info"><span class="ic">≡</span>정보<span class="cnt num">·</span></button>
   </div>
 </nav>
+
+<div class="sheet" id="picker" hidden>
+  <div class="scrim" id="pickScrim"></div>
+  <div class="sheet-panel" role="dialog" aria-modal="true" aria-label="지자체 선택">
+    <div class="grab"></div>
+    <div class="sheet-head">
+      <div class="row"><h3 style="font-size:var(--t-lg)">어디를 볼까요</h3>
+        <button class="xbtn" id="pickClose" aria-label="닫기">✕</button></div>
+      <input class="pick-input" id="pickQ" type="search" placeholder="시·군·구 이름 검색 (예: 양산, 관악)" aria-label="지자체 검색">
+    </div>
+    <div class="sheet-body"><div id="pickList"></div></div>
+  </div>
+</div>
 
 <div class="sheet" id="drawer" hidden>
   <div class="scrim" id="scrim"></div>
@@ -542,7 +590,7 @@ const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt
 const nl2br = s => esc(s).replace(/\n/g, "<br>");
 const dash = s => s ? String(s).replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3") : "";
 const lawUrl = m => `https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=${m}&type=HTML`;
-let curField = "전체", curCity = "경상남도 양산시", showClosed = false, curTab = "policy", curLevel = "전체";
+let curField = "전체", curCity = "경상남도 양산시", showClosed = false, curTab = "gap", curLevel = "전체";
 
 function download(name, text) {
   const b = new Blob(["﻿" + text], { type: "text/plain;charset=utf-8" });
@@ -564,10 +612,43 @@ DB.rows.slice().sort((a, b) => a.o.localeCompare(b.o, "ko")).forEach(r => {
   if (r.o === curCity) o.selected = true;
   $("city").appendChild(o);
 });
-$("city").addEventListener("change", e => {
-  curCity = byOrg.has(e.target.value) ? e.target.value : FALLBACK.o;
-  curLevel = "전체";
-  $("city").value = curCity; render();
+function setCity(v, push = true) {
+  curCity = byOrg.has(v) ? v : FALLBACK.o;
+  curLevel = "전체"; curField = "전체";
+  $("city").value = curCity;
+  if (push) writeUrl();
+  render();
+}
+$("city").addEventListener("change", e => setCity(e.target.value));
+
+/* ── URL 상태 ── 링크 하나로 각자 자기 시 화면을 열 수 있어야 공유가 성립한다 */
+function writeUrl(replace = false) {
+  const q = new URLSearchParams();
+  q.set("city", curCity);
+  if (curTab !== "gap") q.set("tab", curTab);
+  const url = location.pathname + "?" + q.toString();
+  try { history[replace ? "replaceState" : "pushState"]({ city: curCity, tab: curTab }, "", url); } catch {}
+}
+function readUrl() {
+  const q = new URLSearchParams(location.search);
+  const c = q.get("city");
+  if (c) {
+    /* 「양산」처럼 짧게 적어도 찾아준다 — 링크를 손으로 쓰는 경우가 많다 */
+    const exact = byOrg.has(c) ? c : DB.rows.find(r => r.o.endsWith(" " + c) || r.o === c)?.o;
+    if (exact) curCity = exact;
+  }
+  const tb = q.get("tab");
+  if (tb && ["gap", "policy", "end", "region", "info"].includes(tb)) curTab = tb;
+}
+
+/* ── 뒤로가기 ── 설치형 앱에서 안드로이드 뒤로가기가 앱을 닫아버리던 문제 */
+window.addEventListener("popstate", e => {
+  if (!$("drawer").hidden) { closeDrawer(true); return; }
+  if (!$("picker").hidden) { closePicker(true); return; }
+  const s = e.state || {};
+  if (s.city && byOrg.has(s.city)) { curCity = s.city; $("city").value = curCity; }
+  if (s.tab) selectTab(s.tab, false);
+  render();
 });
 
 $("tabs").innerHTML = ["전체", ...FIELDS].map(f =>
@@ -583,12 +664,53 @@ $("doors").innerHTML = DOORS.map(([n, w, href]) =>
      <span class="t"><b>${esc(n)}</b><span>${esc(w)}</span></span><span class="go">›</span></a>`).join("");
 
 /* 탭 전환 */
-$$(".tb").forEach(b => b.addEventListener("click", () => {
-  curTab = b.dataset.sc;
+function selectTab(name, push = true) {
+  curTab = name;
   $$(".tb").forEach(x => x.setAttribute("aria-selected", x.dataset.sc === curTab));
   $$(".screen").forEach(s => s.classList.toggle("on", s.id === "sc-" + curTab));
-  window.scrollTo({ top: 0, behavior: "instant" });
-}));
+  try { window.scrollTo({ top: 0, behavior: "instant" }); } catch { window.scrollTo(0, 0); }
+  if (push) writeUrl();
+}
+$$(".tb").forEach(b => b.addEventListener("click", () => selectTab(b.dataset.sc)));
+
+/* ── 지자체 검색 시트 ── 235곳을 셀렉트 스크롤로 찾게 두면 안 된다 */
+function renderPicker(q = "") {
+  const kw = q.trim();
+  const rows = DB.rows.filter(r => !kw || r.o.includes(kw) || r.o.replace(/\s/g, "").includes(kw.replace(/\s/g, "")));
+  const bySidoGroup = {};
+  rows.forEach(r => { const s = r.o.split(" ")[0]; (bySidoGroup[s] = bySidoGroup[s] || []).push(r); });
+  const own = o => (PD.byOrg[o] || []).length;
+  $("pickList").innerHTML = rows.length
+    ? Object.entries(bySidoGroup).map(([s, list]) =>
+        `<div class="pick-grp">${esc(s)}</div>` +
+        list.sort((a, b) => a.o.localeCompare(b.o, "ko")).map(r =>
+          `<button class="pick-item${r.o === curCity ? " on" : ""}" data-org="${esc(r.o)}">
+            <span class="nm2">${esc(r.o.split(" ").slice(1).join(" ") || r.o)}</span>
+            <span class="n2">자체 ${own(r.o)}건</span></button>`).join("")).join("")
+    : `<div class="empty" style="margin-top:16px">「${esc(kw)}」에 맞는 지자체가 없습니다.</div>`;
+  $$("#pickList .pick-item").forEach(b => b.addEventListener("click", () => {
+    setCity(b.dataset.org); closePicker();
+  }));
+}
+function openPicker() {
+  $("picker").hidden = false;
+  const raf = typeof requestAnimationFrame === "function" ? requestAnimationFrame : (f => setTimeout(f, 16));
+  raf(() => $("picker").classList.add("open"));
+  document.body.style.overflow = "hidden";
+  $("pickQ").value = ""; renderPicker(); $("pickQ").focus();
+  try { history.pushState({ sheet: "picker", city: curCity, tab: curTab }, "", location.href); } catch {}
+}
+function closePicker(fromPop = false) {
+  $("picker").classList.remove("open");
+  document.body.style.overflow = "";
+  setTimeout(() => { $("picker").hidden = true; }, 280);
+  if (!fromPop) { try { history.back(); } catch {} }
+}
+$("btnPick").addEventListener("click", openPicker);
+$("pickClose").addEventListener("click", () => closePicker());
+$("pickScrim").addEventListener("click", () => closePicker());
+$("pickQ").addEventListener("input", e => renderPicker(e.target.value));
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("picker").hidden) closePicker(); });
 
 /* ═══════════ 상세 시트 ═══════════ */
 let lastFocus = null, dPayload = { title: "", text: "" };
@@ -602,11 +724,14 @@ function openDrawer(kick, title, html, plain) {
   raf(() => $("drawer").classList.add("open"));
   document.body.style.overflow = "hidden";
   $("dClose").focus();
+  /* 히스토리에 남겨야 뒤로가기가 시트만 닫고 앱을 안 닫는다 */
+  try { history.pushState({ sheet: "detail", city: curCity, tab: curTab }, "", location.href); } catch {}
 }
-function closeDrawer() {
+function closeDrawer(fromPop = false) {
   $("drawer").classList.remove("open");
   document.body.style.overflow = "";
   setTimeout(() => { $("drawer").hidden = true; lastFocus?.focus(); }, 300);
+  if (!fromPop) { try { history.back(); } catch {} }
 }
 $("dClose").addEventListener("click", closeDrawer);
 $("scrim").addEventListener("click", closeDrawer);
@@ -682,6 +807,7 @@ function polCard(p, extraBadge) {
     <span class="meta">
       <span><i>대상</i>${ages}</span>
       <span><i>기간</i>${esc(periodText(p))}</span>
+      ${p.sc != null && p.sc > 0 ? `<span><i>규모</i>${p.sc.toLocaleString()}명${p.lm ? " 한정" : ""}</span>` : ""}
       <span><i>문의</i><span class="tel">${esc(r.t || "—")}</span></span>
     </span></button></li>`;
 }
@@ -885,14 +1011,37 @@ function gapCard(t) {
 function renderGap() {
   const gaps = gapsFor(curCity);
   const mine = myTypes(curCity);
-  const short = curCity.split(" ").slice(-1)[0];
+  const sido = curCity.split(" ")[0];
+  const short = esc(curCity.split(" ").slice(-1)[0]);
   const hasBasic = (PD.byOrg[curCity] || []).length;
 
   $("gapSummary").innerHTML =
     `<div class="gaprow"><span class="gapnum">${gaps.length}</span><span class="sub">종 없음 / 보편 유형 ${CP.types.length}종</span></div>
-     <p class="gapsub">${esc(short)}는 여러 시군이 공통으로 하는 사업 유형 <b>${CP.types.length}종</b> 가운데
+     <p class="gapsub">${short}는 여러 시군이 공통으로 하는 사업 유형 <b>${CP.types.length}종</b> 가운데
        <b>${mine.size ? CP.types.length - gaps.length : 0}종</b>을 하고 있고 <b>${gaps.length}종</b>이 없습니다.
-       ${hasBasic ? "" : `<br><b>온통청년에 ${esc(short)} 기초 정책이 등록돼 있지 않습니다.</b> 실제로 없는 것인지, 등록만 안 된 것인지는 담당부서 확인이 필요합니다.`}</p>`;
+       ${hasBasic ? "" : `<br><b>온통청년에 ${short} 기초 정책이 등록돼 있지 않습니다.</b> 실제로 없는 것인지, 등록만 안 된 것인지는 담당부서 확인이 필요합니다.`}</p>`;
+
+  /* ── 등록률 ──
+     서울 59건·경기 108건은 정책이 없는 게 아니라 온통청년 등록분이 적은 것이다
+     (자체 포털 운영). 이걸 안 밝히면 앱이 거짓을 말한다. */
+  const reg = (PD.registry || []).find(x => x.s === sido);
+  const top = (PD.registry || [])[0];
+  const rank = (PD.registry || []).findIndex(x => x.s === sido) + 1;
+  $("regNotice").innerHTML = reg ? `
+    <h3>이 숫자를 어떻게 읽어야 하나</h3>
+    <div class="sub">온통청년 등록 실태 · 지역 귀속 정책 기준</div>
+    <div class="regbar">
+      ${(PD.registry || []).slice(0, 6).map(x =>
+        `<div class="regrow${x.s === sido ? " ours" : ""}"><span class="rn">${esc(x.s)}</span><span class="rc">${x.n}</span></div>`).join("")}
+      ${rank > 6 ? `<div class="regrow ours"><span class="rn">${esc(sido)} (${rank}위)</span><span class="rc">${reg.n}</span></div>` : ""}
+    </div>
+    <div class="warnbox">
+      <b>「없다」가 아니라 「온통청년에 등록된 것이 없다」입니다.</b><br>
+      ${esc(sido)}는 등록 <b>${reg.n}건</b>으로 ${(PD.registry || []).length}개 시도 중 <b>${rank}위</b>입니다.
+      ${reg.portal ? `${esc(sido)}는 <b>${esc(reg.portal)}</b>를 따로 운영해 온통청년 등록이 적습니다 — 실제 정책은 더 많습니다.`
+        : `등록률은 지자체 정책 의지가 아니라 <b>등록 관행</b>에 좌우됩니다.`}
+      <br>제안서에 쓸 때는 반드시 이 한계를 함께 적으십시오.
+    </div>` : "";
 
   $("gapNote").textContent = `${CP.minAdopt}곳 이상 채택 기준`;
   $("gapList").innerHTML = gaps.length
@@ -900,6 +1049,23 @@ function renderGap() {
     : `<li class="empty">보편 유형은 모두 하고 있습니다.</li>`;
   [...$("gapList").querySelectorAll(".pcard")].forEach((b, i) => b.addEventListener("click", () => openGap(gaps[i])));
   $("tc5").textContent = gaps.length;
+
+  /* ── 우리만 하는 것 ──
+     정책단은 비판만 하는 게 아니다. 성과·방어 논거가 필요할 때 쓸 목록이 있어야 한다. */
+  const common = new Set(CP.types.map(t => t.k));          // 3곳 이상이 하는 보편 유형
+  const rare = (CP.orgTypes[curCity] || []).filter(k => !common.has(k));
+  const ours = (PD.byOrg[curCity] || []).map(i => PD.pol[i]).sort(sortPol);
+
+  $("onlyNote").textContent = ours.length
+    ? `자체 정책 ${ours.length}건${rare.length ? ` · 그중 흔하지 않은 유형 ${rare.length}종` : ""}`
+    : "등록된 자체 정책 없음";
+  $("onlyList").innerHTML = ours.length
+    ? ours.slice(0, 12).map(p => polCard(p)).join("") +
+      (ours.length > 12 ? `<li class="more">${ours.length}건 중 12건 표시</li>` : "")
+    : `<li class="empty">온통청년에 등록된 <b>${short} 자체 정책이 없습니다.</b>
+        <span class="esub">등록 관행 차이일 수 있습니다 — 담당부서 확인이 필요합니다.</span></li>`;
+  const shown12 = ours.slice(0, 12);
+  [...$("onlyList").querySelectorAll(".pcard")].forEach((b, i) => b.addEventListener("click", () => openPolicy(shown12[i])));
 
   /* 분야 커버리지 */
   const mc = myCover(curCity);
@@ -1131,5 +1297,11 @@ function renderCentral() {
 }
 
 function render() { renderCard(); renderDist(); renderPolicies(); renderGap(); renderDesig(); renderCentral(); }
+
+/* URL 로 들어온 상태를 먼저 반영하고, 히스토리 시작점을 남긴다 */
+readUrl();
+$("city").value = curCity;
+selectTab(curTab, false);
+writeUrl(true);
 render();
 </script>

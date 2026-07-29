@@ -58,7 +58,7 @@ console.log("\n── 앱 셸 ──");
 T("하단 탭 5개", $$(".tb").length === 5, $$(".tb").map(b => b.dataset.sc).join(","));
 T("비교 탭 존재", !!$$(".tb").find(b => b.dataset.sc === "gap"));
 T("화면 5개", $$(".screen").length === 5);
-T("기본 화면은 정책", $("#sc-policy")?.classList.contains("on"));
+T("기본 화면은 비교", $("#sc-gap")?.classList.contains("on"));
 T("헤더 고정 요소", !!$(".appbar") && !!$("#stNm") && !!$("#city"));
 T("지자체 선택지", $("#city")?.options.length > 200, `${$("#city")?.options.length}개`);
 
@@ -70,7 +70,23 @@ T("종료 수", +$("#c3")?.textContent > 0, $("#c3")?.textContent);
 T("탭 배지 채워짐", $$(".tb .cnt").slice(0, 4).every(c => /\d/.test(c.textContent)),
   $$(".tb .cnt").map(c => c.textContent).join("/"));
 
+console.log("\n── 지자체 검색 ──");
+click($("#btnPick")); await wait(200);
+T("검색 시트 열림", $("#picker")?.hidden === false);
+$("#pickQ").value = "양산";
+$("#pickQ").dispatchEvent(new window.Event("input", { bubbles: true }));
+await wait(160);
+T("검색 결과", $$("#pickList .pick-item").length > 0, `${$$("#pickList .pick-item").length}건`);
+T("검색 결과에 양산", ($("#pickList")?.textContent || "").includes("양산"));
+$("#pickQ").value = "없는이름ㅁㄴㅇ";
+$("#pickQ").dispatchEvent(new window.Event("input", { bubbles: true }));
+await wait(160);
+T("결과 없을 때 안내", !!$("#pickList .empty"));
+click($("#pickClose")); await wait(320);
+T("검색 시트 닫힘", $("#picker")?.hidden === true);
+
 console.log("\n── 정책 화면 ──");
+tab("policy"); await wait(220);
 const c1 = $$("#list1 .pcard");
 T("카드 렌더", c1.length > 0, `${c1.length}장`);
 T("제목·금액 채워짐", c1.every(c => (c.querySelector(".nm")?.textContent || "").trim() && (c.querySelector(".amt")?.textContent || "").trim()));
@@ -150,6 +166,10 @@ T("요약 숫자", /\d/.test($("#gapSummary .gapnum")?.textContent || ""), $("#g
 const gc = $$("#gapList .pcard");
 T("없는 유형 카드", gc.length > 0, `${gc.length}장`);
 T("채택 지자체 수 표시", gc.every(c => /\d+곳이 운영/.test(c.querySelector(".amt")?.textContent || "")));
+T("등록률 안내", ($("#regNotice")?.textContent || "").includes("등록된 것이 없다"),
+  ($("#regNotice .regrow.ours .rc")?.textContent || "").trim() + "건");
+T("우리만 하는 것 섹션", !!$("#onlyList") && (($$("#onlyList .pcard").length > 0) || !!$("#onlyList .empty")),
+  `${$$("#onlyList .pcard").length}장`);
 T("커버리지 표", $$("#coverPanel .covrow").length >= 5, `${$$("#coverPanel .covrow").length}행`);
 T("커버리지 있음/없음 구분", $$("#coverPanel .covrow.miss").length > 0 || $$("#coverPanel .covrow.have").length > 0);
 T("1:1 대조 선택지", $("#cmpCity")?.options.length > 200, `${$("#cmpCity")?.options.length}개`);

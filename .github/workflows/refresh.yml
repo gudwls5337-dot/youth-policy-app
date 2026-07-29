@@ -1,0 +1,88 @@
+# 주 1회 데이터 갱신 → 검증 → 배포
+#
+# 지속성 설계
+#  · 검증이 깨지면 커밋하지 않는다. 틀린 데이터가 공개되는 것보다 낡은 게 낫다.
+#  · 원본 스냅샷은 최근 8개만 남긴다. 매주 8MB 를 쌓으면 1년에 400MB 가 된다.
+#  · 변경이 없으면 커밋하지 않는다.
+#
+# 필요한 설정: 저장소 Settings > Secrets > Actions 에 ONTONG_POLICY_API_KEY 추가
+
+name: refresh
+on:
+  schedule:
+    - cron: "0 20 * * 0"      # 매주 월요일 05:00 KST
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm ci || npm install
+
+      - name: .env 구성
+        env:
+          KEY: ${{ secrets.ONTONG_POLICY_API_KEY }}
+        run: |
+          if [ -z "$KEY" ]; then
+            echo "::error::ONTONG_POLICY_API_KEY 시크릿이 없습니다. Settings > Secrets > Actions 에 추가하세요."
+            exit 1
+          fi
+          {
+            echo "ONTONG_POLICY_API_KEY=$KEY"
+            echo "ONTONG_SPACE_API_KEY="
+            echo "LAW_GO_KR_OC=test"
+            echo "SNAPSHOT_DATE=$(date -u -d '+9 hours' +%F)"
+            echo "REQUEST_DELAY_MS=300"
+          } > .env
+
+      - name: 조례 수집 (법제처 · 키 불필요)
+        run: |
+          node scripts/snapshot-ordinances.mjs
+          node scripts/extract-definitions.mjs
+
+      - name: 정책 수집 (온통청년)
+        run: node scripts/snapshot-policies.mjs
+
+      - name: 빌드
+        run: npm run build
+
+      - name: 검증 — 깨지면 여기서 멈춘다
+        run: |
+          node scripts/validate.mjs
+          node scripts/smoke.mjs
+
+      - name: 스냅샷 정리 — 최근 8개만 유지
+        run: |
+          for pat in '청년자치법규_전수' '청년정책_전수'; do
+            ls -1 data/*"$pat"*.json 2>/dev/null | sort | head -n -8 | while read -r f; do
+              echo "삭제: $f"; git rm -q --ignore-unmatch "$f" 2>/dev/null || rm -f "$f"
+            done
+          done
+
+      - name: 커밋 · 배포
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm -f .env
+          git add -A
+          if git diff --cached --quiet; then
+            echo "변경 없음 — 커밋 생략"
+          else
+            git commit -m "데이터 갱신 $(date -u -d '+9 hours' +%F)
+
+          자동 수집 · 검증 통과분만 반영.
+
+          Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>"
+            git push
+          fi

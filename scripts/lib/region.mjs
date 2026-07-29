@@ -1,0 +1,73 @@
+/**
+ * 지역 판정 — zipCd(행정구역 코드) 기반
+ *
+ * 처음엔 기관명 텍스트만 봤다. 그래서 「청년정책과」처럼 부서명만 있는 건이
+ * 미분류로 빠졌다(170건, 충남에 83건 집중).
+ * zipCd 는 API 가 직접 붙인 코드라 텍스트 표기에 흔들리지 않는다.
+ *
+ * 코드북은 별도 파일을 들이지 않고 **데이터에서 역추출**한다.
+ * 기관명으로 확실히 판정된 건들의 (단일 zipCd ↔ 지자체명) 쌍을 모으면
+ * 코드북이 만들어지고, 그 자체가 검증된다.
+ */
+
+/** zipCd 앞 2자리 → 시도. 실측으로 확인한 값만 넣는다(2026-07-30). */
+export const SIDO_BY_CODE = {
+  11: "서울특별시", 12: "전남광주통합특별시", 26: "부산광역시", 27: "대구광역시",
+  28: "인천광역시", 29: "전남광주통합특별시", 30: "대전광역시", 31: "울산광역시",
+  36: "세종특별자치시", 41: "경기도", 43: "충청북도", 44: "충청남도",
+  45: "전북특별자치도", 46: "전남광주통합특별시", 47: "경상북도", 48: "경상남도",
+  50: "제주특별자치도", 51: "강원특별자치도", 52: "전북특별자치도",
+};
+
+/** 전국 사업 판정 — 코드가 이보다 많으면 특정 지역 사업이 아니다 */
+export const NATIONWIDE_MIN = 150;
+
+export const codes = r => String(r?.zipCd ?? "").split(",").map(s => s.trim()).filter(Boolean);
+
+/** 단일 시도를 가리키면 그 시도명, 아니면 null */
+export function sidoOf(r) {
+  const cs = codes(r);
+  if (!cs.length || cs.length > NATIONWIDE_MIN) return null;
+  const set = new Set(cs.map(c => SIDO_BY_CODE[+String(c).slice(0, 2)]).filter(Boolean));
+  return set.size === 1 ? [...set][0] : null;
+}
+
+export const isNationwide = r => codes(r).length > NATIONWIDE_MIN;
+
+/**
+ * 기관명으로 확실히 판정된 건에서 (5자리 코드 → 지자체 풀네임) 코드북을 만든다.
+ * @param rows 원본 레코드
+ * @param resolve (row) => "경상남도 양산시" | null   기관명 기반 1차 판정 결과
+ */
+export function buildCodebook(rows, resolve) {
+  const votes = new Map();                 // code → Map(org → 표수)
+  for (const r of rows) {
+    const cs = codes(r);
+    if (cs.length !== 1) continue;          // 코드가 하나일 때만 신뢰한다
+    const org = resolve(r);
+    if (!org || org.split(" ").length < 2) continue;
+    const c = cs[0];
+    if (!votes.has(c)) votes.set(c, new Map());
+    const m = votes.get(c);
+    m.set(org, (m.get(org) || 0) + 1);
+  }
+  const book = {};
+  const conflicts = [];
+  for (const [c, m] of votes) {
+    const sorted = [...m.entries()].sort((a, b) => b[1] - a[1]);
+    const [top, n] = sorted[0];
+    const total = sorted.reduce((a, [, v]) => a + v, 0);
+    /* 과반이 아니면 채택하지 않는다. 추측으로 코드북을 오염시키지 않는다. */
+    if (n / total >= 0.6) book[c] = top;
+    else conflicts.push({ c, cands: sorted.slice(0, 3) });
+  }
+  return { book, conflicts };
+}
+
+/** 코드북으로 기초 지자체 판정. 여러 코드가 한 지자체를 가리켜야 인정한다. */
+export function basicOf(r, book) {
+  const cs = codes(r);
+  if (!cs.length || cs.length > 6) return null;   // 6곳 넘으면 광역 단위 사업
+  const set = new Set(cs.map(c => book[c]).filter(Boolean));
+  return set.size === 1 ? [...set][0] : null;
+}
