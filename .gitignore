@@ -1,0 +1,9 @@
+# 인증키 — 절대 커밋 금지
+.env
+.env.local
+
+node_modules/
+*.log
+
+# 아티팩트 배포용 사본 (docs/index.html 과 동일)
+work/mock-dashboard.html

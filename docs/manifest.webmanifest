@@ -1,0 +1,36 @@
+{
+  "name": "청년정책 상황판",
+  "short_name": "청년정책",
+  "description": "전국 지자체 청년정책과 조례를 한 화면에. 우리 시 기준으로 신청 가능·신설·종료를 구분해 보여줍니다.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#EEF1F2",
+  "theme_color": "#00897A",
+  "lang": "ko",
+  "categories": [
+    "government",
+    "utilities"
+  ],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
