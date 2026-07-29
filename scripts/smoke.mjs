@@ -56,6 +56,7 @@ T("최소 글자 12px", tiny.length === 0, tiny.join(", ") || "OK");
 
 console.log("\n── 앱 셸 ──");
 T("하단 탭 5개", $$(".tb").length === 5, $$(".tb").map(b => b.dataset.sc).join(","));
+T("비교 탭 존재", !!$$(".tb").find(b => b.dataset.sc === "gap"));
 T("화면 5개", $$(".screen").length === 5);
 T("기본 화면은 정책", $("#sc-policy")?.classList.contains("on"));
 T("헤더 고정 요소", !!$(".appbar") && !!$("#stNm") && !!$("#city"));
@@ -79,7 +80,9 @@ T("상태 배지 있음", c1.every(c => c.querySelector(".bdg")));
 T("전화 표시", c1.some(c => /\d{2,3}-\d{3,4}-\d{3,4}/.test(c.querySelector(".tel")?.textContent || "")));
 
 console.log("\n── 레벨 필터 ──");
-T("레벨 칩 4개", $$("#levelbar [data-lv]").length === 4, $$("#levelbar [data-lv]").map(b => b.textContent).join(" / "));
+T("레벨 칩 3개 (중앙 제외)", $$("#levelbar [data-lv]").length === 3, $$("#levelbar [data-lv]").map(b => b.textContent).join(" / "));
+T("우리 시 목록에 중앙 없음", $$("#list1 .pcard .badges").every(e => !e.textContent.includes("중앙")),
+  `${$$("#list1 .pcard .badges").filter(e => e.textContent.includes("중앙")).length}장 섞임`);
 T("기본은 전체", $("#levelbar [data-lv]")?.getAttribute("aria-pressed") === "true");
 const lvBasic = $$("#levelbar [data-lv]").find(b => b.dataset.lv === "기초");
 if (lvBasic && !lvBasic.disabled) {
@@ -112,7 +115,14 @@ await pickCity("경상남도 양산시");
 console.log("\n── 분야 칩 ──");
 click($$("#tabs .chip").find(b => b.textContent === "주거"));
 await wait(150);
-T("주거 필터", $$("#list1 .pcard").length > 0, `${$$("#list1 .pcard").length}장`);
+/* 0건일 수 있다 — 중앙을 뺐으니 분야별로 비는 게 정상이다.
+   중요한 건 "빈 화면이 아니라 이유가 적힌 안내"가 나오는 것. */
+T("주거 필터 결과 또는 안내", $$("#list1 .pcard").length > 0 || !!$("#list1 .empty"),
+  $$("#list1 .pcard").length ? `${$$("#list1 .pcard").length}장` : "안내 표시");
+if (!$$("#list1 .pcard").length) {
+  T("필터 안내에 이유 있음", ($("#list1 .empty")?.textContent || "").includes("정보 탭"),
+    ($("#list1 .empty")?.textContent || "").slice(0, 40));
+}
 click($$("#tabs .chip").find(b => b.textContent === "전체"));
 await wait(150);
 
@@ -126,16 +136,48 @@ await wait(180);
 T("다시 숨김", $$("#list1 .pcard").every(c => !c.className.includes("closed")));
 
 console.log("\n── 탭 전환 ──");
-tab("new"); await wait(150);
-T("신설 화면", $("#sc-new")?.classList.contains("on") && !$("#sc-policy")?.classList.contains("on"));
-T("신설 카드", $$("#list2 .pcard").length > 0, `${$$("#list2 .pcard").length}장`);
-T("신설 배지", ($("#list2 .bdg")?.textContent || "").includes("신설"));
 
 tab("end"); await wait(150);
 T("종료 화면", $("#sc-end")?.classList.contains("on"));
 const l3 = $$("#list3 .pcard");
 T("전부 종료", l3.length > 0 && l3.every(c => c.className.includes("closed")), `${l3.length}장`);
 T("마감일·사유", /(신청마감|사업종료|종료)\s*\d{4}-\d{2}-\d{2}/.test($("#list3 .meta")?.textContent || ""));
+
+console.log("\n── 비교 화면 ──");
+tab("gap"); await wait(200);
+T("비교 화면 전환", $("#sc-gap")?.classList.contains("on"));
+T("요약 숫자", /\d/.test($("#gapSummary .gapnum")?.textContent || ""), $("#gapSummary .gapnum")?.textContent);
+const gc = $$("#gapList .pcard");
+T("없는 유형 카드", gc.length > 0, `${gc.length}장`);
+T("채택 지자체 수 표시", gc.every(c => /\d+곳이 운영/.test(c.querySelector(".amt")?.textContent || "")));
+T("커버리지 표", $$("#coverPanel .covrow").length >= 5, `${$$("#coverPanel .covrow").length}행`);
+T("커버리지 있음/없음 구분", $$("#coverPanel .covrow.miss").length > 0 || $$("#coverPanel .covrow.have").length > 0);
+T("1:1 대조 선택지", $("#cmpCity")?.options.length > 200, `${$("#cmpCity")?.options.length}개`);
+T("1:1 대조 표", $$("#cmpBody .cmptab").length === 1 && ($("#cmpBody")?.textContent || "").includes("신청 가능 정책"));
+
+click($("#gapList .pcard")); await wait(200);
+T("제안 근거 시트 열림", $("#drawer")?.hidden === false, $("#dTitle")?.textContent.slice(0, 28));
+const sheetTxt = $("#dBody")?.textContent || "";
+T("채택 지자체 수", /\d+곳/.test(sheetTxt));
+T("이미 하는 곳 명단", sheetTxt.includes("이미 하는 곳"));
+T("우리 시 근거 조례", sheetTxt.includes("우리 시 근거"));
+T("담당부서 전화", !!$("#dBody .ptel"), $("#dBody .ptel")?.textContent);
+T("다음 절차", sheetTxt.includes("다음 절차"));
+T("한계 명시", sheetTxt.includes("등록된 것이 없다") || sheetTxt.includes("미등록"));
+click($("#dClose")); await wait(360);
+
+/* 비교 결과가 지자체마다 달라야 한다 */
+const gapOf = () => $$("#gapList .pcard .nm").map(e => e.textContent);
+await pickCity("경상남도 양산시"); tab("gap"); await wait(200); const gA = gapOf();
+await pickCity("전남광주통합특별시 순천시"); tab("gap"); await wait(200); const gB = gapOf();
+T("지자체별 없는 유형이 다름", gA.length !== gB.length || overlap(gA, gB) < Math.max(gA.length, gB.length),
+  `양산 ${gA.length}종 / 순천 ${gB.length}종`);
+await pickCity("경상남도 양산시");
+
+console.log("\n── 중앙 정책 (정보 탭) ──");
+tab("info"); await wait(180);
+T("중앙 목록 렌더", $$("#listCentral .pcard").length > 0, `${$$("#listCentral .pcard").length}장`);
+T("전부 중앙", $$("#listCentral .pcard .badges").every(e => e.textContent.includes("중앙")));
 
 tab("region"); await wait(150);
 T("지역 화면", $("#sc-region")?.classList.contains("on"));
@@ -197,15 +239,21 @@ await wait(180);
 T("폴백 동작", $$("#list1 .pcard").length > 0 && $("#ageBig").textContent.trim() !== "—", $("#stNm").textContent);
 
 console.log("\n── 전 지자체 순회 ──");
-const empty = [], noTel = [], noAge = [];
+const blank = [], allClosed = [], noTel = [], noAge = [];
 for (const o of [...sel.options].map(o => o.value)) {
   sel.value = o;
   sel.dispatchEvent(new window.Event("change", { bubbles: true }));
-  if ($$("#list1 .pcard").length === 0) empty.push(o);
+  const cards = $$("#list1 .pcard").length;
+  const notice = $("#list1 .empty");
+  /* 카드가 없어도 이유가 적힌 안내가 있으면 정상이다. 아무것도 없으면 고장이다. */
+  if (!cards && !notice) blank.push(o);
+  if (!cards && notice) allClosed.push(o);
   if (!($("#tel").getAttribute("href") || "").startsWith("tel:")) noTel.push(o);
   if ($("#ageBig").textContent.trim() === "미상") noAge.push(o);
 }
-T("전 지자체 목록 있음", empty.length === 0, empty.length ? `빈 곳 ${empty.length}: ${empty.slice(0, 4).join(", ")}` : "235곳");
+T("빈 화면 없음 (카드 또는 안내)", blank.length === 0,
+  blank.length ? `아무것도 없는 곳 ${blank.length}: ${blank.slice(0, 4).join(", ")}` : "235곳");
+console.log(`  INFO  신청 가능 0건이라 안내가 나온 곳 ${allClosed.length}곳${allClosed.length ? " (예: " + allClosed.slice(0, 3).join(", ") + ")" : ""}`);
 console.log(`  INFO  전화 없음 ${noTel.length}곳 · 연령 미상 ${noAge.length}곳 (알려진 결손)`);
 
 const uniq = [...new Set(runtime)];

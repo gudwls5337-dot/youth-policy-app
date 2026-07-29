@@ -153,7 +153,38 @@
   .bdg.new  { background:var(--in-wk); color:var(--in-ink); }
   .bdg.lv   { background:var(--line-2); color:var(--ink-3); }
 
-  .empty { padding:48px 24px; text-align:center; color:var(--muted); font-size:var(--t-sm); }
+  /* 비교 화면 */
+  .gapnum { font-family:var(--num); font-size:34px; font-weight:800; letter-spacing:-.03em; color:var(--out); line-height:1.1; }
+  .gaprow { display:flex; gap:14px; align-items:baseline; }
+  .gapsub { font-size:var(--t-sm); color:var(--ink-2); line-height:1.65; margin-top:10px; }
+  .gapsub b { color:var(--ink); font-weight:800; }
+  .adopt { font-family:var(--num); font-size:var(--t-lg); font-weight:800; color:var(--out); }
+  .pcard.gap { border-left-color:var(--out); }
+  .pcard.gap .amt { color:var(--out); }
+  .covgrid { display:flex; flex-direction:column; gap:7px; }
+  .covrow { display:grid; grid-template-columns:1fr 54px 66px; gap:10px; align-items:center; font-size:var(--t-cap); }
+  .covrow .cn { color:var(--ink-2); font-weight:600; }
+  .covrow.have .cn { color:var(--ink); }
+  .covrow.miss .cn { color:var(--out); font-weight:800; }
+  .covrow .mine { font-family:var(--num); font-weight:800; text-align:right; }
+  .covrow.have .mine { color:var(--in); }
+  .covrow.miss .mine { color:var(--out); }
+  .covrow .nat { font-family:var(--num); color:var(--muted); text-align:right; }
+  .cmp-pick { display:flex; flex-direction:column; gap:6px; margin-bottom:14px; }
+  .cmp-lab { font-size:12.5px; font-weight:800; color:var(--muted); }
+  .cmp-sel { font-family:var(--sans); font-size:var(--t-md); font-weight:800; color:var(--ink); background:var(--card-2);
+    border:1px solid var(--line); border-radius:10px; padding:12px 14px; width:100%; cursor:pointer; }
+  .cmp-sel:focus-visible { outline:2px solid var(--in); outline-offset:2px; }
+  .cmptab { display:grid; grid-template-columns:1fr auto auto; gap:8px 12px; font-size:var(--t-cap); }
+  .cmptab .h { font-weight:800; color:var(--muted); font-size:12.5px; padding-bottom:6px; border-bottom:1px solid var(--line-2); }
+  .cmptab .c { font-family:var(--num); font-weight:800; text-align:right; }
+  .cmptab .c.up { color:var(--in); } .cmptab .c.down { color:var(--out); }
+  .cmptab .r { color:var(--ink-2); }
+
+  .empty { padding:36px 22px; text-align:center; color:var(--ink-2); font-size:var(--t-sm); line-height:1.75;
+    background:var(--card); border:1px dashed var(--line); border-radius:var(--r); }
+  .empty b { color:var(--ink); font-weight:800; }
+  .empty .esub { display:block; margin-top:10px; font-size:var(--t-cap); color:var(--ink-3); line-height:1.7; }
   .more { padding:16px 20px 4px; text-align:center; color:var(--muted); font-size:var(--t-cap); }
 
   /* ═══════════ 지역 화면 ═══════════ */
@@ -320,37 +351,60 @@
     <!-- 1. 정책 -->
     <section class="screen on" id="sc-policy">
       <div class="shead">
-        <h2>지금 신청할 수 있는 것</h2>
-        <p><b>우리 시 → 도 → 중앙부처</b> 순으로 놓았습니다. 중앙 정책은 전국이 같지만 <b>우리 시·도 정책은 지역마다 다릅니다</b> — 아래 칩으로 갈라 보십시오.</p>
+        <h2>우리 시가 하는 것</h2>
+        <p><b>중앙부처 정책은 여기 없습니다</b> — 전국이 똑같아서 차이를 만들지 않습니다(정보 탭에서 확인).
+          여기 있는 것은 <b>우리 시와 도가 직접 만든 정책</b>이고, 정책단이 바꿀 수 있는 범위입니다.</p>
       </div>
+      <div class="chips" id="levelbar"></div>
       <div class="chips" id="tabs"></div>
-      <div class="chips" id="levelbar" style="padding-top:0"></div>
       <div class="segbar" id="statusbar"></div>
       <ul class="cards" id="list1"></ul>
     </section>
 
     <!-- 2. 신설 -->
-    <section class="screen" id="sc-new">
-      <div class="shead">
-        <h2>올해 새로 나온 것</h2>
-        <p><b>2026년에 처음 등록된 정책</b>입니다. 새로 생긴 문은 아무도 알려주지 않습니다.</p>
-      </div>
-      <ul class="cards" id="list2"></ul>
-    </section>
+    
 
     <!-- 3. 종료 -->
     <section class="screen" id="sc-end">
       <div class="shead">
-        <h2>사라지는 것</h2>
+        <h2>언제 끝나는가</h2>
         <p><b>기준일에 이미 신청이 마감됐거나 사업이 끝난 것</b>입니다. 통합 플랫폼은 이런 걸 조용히 지웁니다.
           <b>왜 없어졌는지는 담당부서만 압니다.</b></p>
       </div>
       <ul class="cards gone" id="list3"></ul>
     </section>
 
-    <!-- 4. 지역 -->
+
+    <section class="screen" id="sc-gap">
+      <div class="shead">
+        <h2>다른 시엔 있는데 우리는 없는 것</h2>
+        <p>전국 기초 정책을 사업 유형으로 묶어, <b>여러 시군이 하는데 우리 시엔 없는 것</b>만 골랐습니다.
+          카드를 누르면 <b>제안 근거 초안</b>이 나옵니다 — 어느 시가 하는지, 근거 조례가 무엇인지, 우리 시 담당부서가 어디인지.</p>
+      </div>
+
+      <div class="panel" id="gapSummary"></div>
+
+      <div class="subhead"><h3>없는 사업 유형</h3><span id="gapNote"></span></div>
+      <ul class="cards" id="gapList"></ul>
+
+      <div class="subhead"><h3>분야 커버리지</h3><span>우리 시가 손대지 않은 영역</span></div>
+      <div class="panel" id="coverPanel"></div>
+
+      <div class="subhead"><h3>1:1 대조</h3><span>다른 시와 나란히</span></div>
+      <div class="panel">
+        <div class="cmp-pick">
+          <label class="cmp-lab" for="cmpCity">비교 대상</label>
+          <select id="cmpCity" class="cmp-sel" aria-label="비교할 지자체"></select>
+        </div>
+        <div id="cmpBody"></div>
+      </div>
+    </section>
+    <!-- 4. 근거 -->
     <section class="screen" id="sc-region">
-      <div class="shead"><h2>우리 시의 조례</h2></div>
+      <div class="shead">
+        <h2>근거와 절차</h2>
+        <p>정책을 새로 만들거나 대상을 넓히려면 <b>조례가 먼저</b>입니다. 우리 시 조례가 무엇을 허용하는지, 담당부서가 어디인지.</p>
+      </div>
       <div class="panel">
         <h3>청년의 범위</h3>
         <div class="sub">법제처 조례 원문 실측</div>
@@ -383,6 +437,14 @@
         <p>찾은 사례를 실제로 밀어 넣는 곳. <b>어디에 넣느냐에 따라 도달하는 사람이 다릅니다.</b></p>
       </div>
       <div id="doors"></div>
+
+      <div class="shead" style="padding-top:24px">
+        <h2>중앙부처 정책</h2>
+        <p><b>전국이 똑같습니다.</b> 지역코드 실측으로 <span class="num">239</span>/<span class="num">261</span>건이 전국 단위였습니다.
+          정책단이 손댈 수 없어 「우리 시」에서 뺐습니다 — 참고용입니다.</p>
+      </div>
+      <div class="segbar" id="centralBar"></div>
+      <ul class="cards" id="listCentral"></ul>
 
       <div class="shead" style="padding-top:24px">
         <h2>앱으로 설치</h2>
@@ -427,10 +489,10 @@
 
 <nav class="tabbar" role="tablist" aria-label="주요 화면">
   <div class="tabbar-in">
-    <button class="tb" role="tab" aria-selected="true" data-sc="policy"><span class="ic">◎</span>정책<span class="cnt num" id="tc1">—</span></button>
-    <button class="tb" role="tab" aria-selected="false" data-sc="new"><span class="ic">✦</span>신설<span class="cnt num" id="tc2">—</span></button>
-    <button class="tb" role="tab" aria-selected="false" data-sc="end"><span class="ic">⊘</span>종료<span class="cnt num" id="tc3">—</span></button>
-    <button class="tb" role="tab" aria-selected="false" data-sc="region"><span class="ic">▤</span>지역<span class="cnt num" id="tc4">—</span></button>
+    <button class="tb" role="tab" aria-selected="true" data-sc="policy"><span class="ic">◎</span>우리 시<span class="cnt num" id="tc1">—</span></button>
+    <button class="tb" role="tab" aria-selected="false" data-sc="end"><span class="ic">⊘</span>마감<span class="cnt num" id="tc3">—</span></button>
+    <button class="tb" role="tab" aria-selected="false" data-sc="gap"><span class="ic">⇄</span>비교<span class="cnt num" id="tc5">—</span></button>
+    <button class="tb" role="tab" aria-selected="false" data-sc="region"><span class="ic">§</span>근거<span class="cnt num" id="tc4">—</span></button>
     <button class="tb" role="tab" aria-selected="false" data-sc="info"><span class="ic">≡</span>정보<span class="cnt num">·</span></button>
   </div>
 </nav>
@@ -454,6 +516,7 @@
 <script>
 const DB = /*__BOARD__*/null;
 const PD = /*__POLICIES__*/null;
+const CP = /*__COMPARE__*/null;
 
 const DESIG_A = [["서울특별시 관악구","1차 · 2024"],["부산광역시 부산진구","1차 · 2024"],["경상남도 거창군","1차 · 2024"],
   ["서울특별시 성동구","2차 · 2025"],["전남광주통합특별시 순천시","2차 · 2025"],["충청남도 공주시","2차 · 2025"]];
@@ -588,15 +651,23 @@ function periodText(p) {
    실측으로 양산시와 관악구의 상위 10건이 10/10 동일했다(2026-07-30 지적).
    "우리 시 청년정책"인데 우리 시 것이 안 보이면 화면이 거짓말을 하는 셈이다. */
 const LV_RANK = { "기초": 0, "광역": 1, "중앙": 2, "미분류": 3 };
+const st = p => (p.ov === 0 ? 0 : p.ov === 2 ? 1 : 2);
+const sortPol = (a, b) => st(a) - st(b)
+  || (LV_RANK[a.lv] ?? 9) - (LV_RANK[b.lv] ?? 9)
+  || (b.r || "").localeCompare(a.r || "");
+
+/** 우리 시 정책 = 기초 + 광역. **중앙은 제외한다.**
+ *  중앙 정책 239/261 건이 전국 코드를 갖는 전국 단위 사업이라 지자체 간 차이를
+ *  만들지 않고, 목록만 부풀려 우리 시 정책을 밀어낸다(2026-07-30 지적). */
 function policiesFor(org) {
   const sido = org.split(" ")[0];
-  const ids = [...(PD.byOrg[org] || []), ...(PD.bySido[sido] || []), ...PD.central];
+  const ids = [...(PD.byOrg[org] || []), ...(PD.bySido[sido] || [])];
   const seen = new Set();
-  const st = p => (p.ov === 0 ? 0 : p.ov === 2 ? 1 : 2);
-  return ids.filter(i => !seen.has(i) && seen.add(i)).map(i => PD.pol[i])
-    .sort((a, b) => st(a) - st(b)
-      || (LV_RANK[a.lv] ?? 9) - (LV_RANK[b.lv] ?? 9)
-      || (b.r || "").localeCompare(a.r || ""));
+  return ids.filter(i => !seen.has(i) && seen.add(i)).map(i => PD.pol[i]).sort(sortPol);
+}
+/** 중앙 정책 — 참고용. 정보 탭에서만 보여준다. */
+function centralPolicies() {
+  return PD.central.map(i => PD.pol[i]).sort(sortPol);
 }
 
 function polCard(p, extraBadge) {
@@ -618,15 +689,38 @@ function bind(ul, list) {
   [...ul.querySelectorAll(".pcard")].forEach((b, i) => b.addEventListener("click", () => openPolicy(list[i])));
 }
 const LIMIT = 40;
-function renderList(el, list, extraBadge, totalOverride) {
+function renderList(el, list, extraBadge, totalOverride, emptyHtml) {
   const preSliced = totalOverride != null;
   const shown = preSliced ? list : list.slice(0, LIMIT);
   const total = totalOverride ?? list.length;
   el.innerHTML = shown.length
     ? shown.map(p => polCard(p, extraBadge)).join("") +
       (total > shown.length ? `<li class="more">${shown.length}건 표시 · 전체 ${total}건은 정보 탭에서 CSV로</li>` : "")
-    : `<li class="empty">해당하는 정책이 없습니다.</li>`;
+    : `<li class="empty">${emptyHtml || "해당하는 정책이 없습니다."}</li>`;
   bind(el, shown);
+}
+
+/** 빈 화면 안내 — 중앙을 뺀 뒤 기초·광역이 0건인 지자체가 13곳 있다.
+ *  "없다"로 끝내면 앱이 고장 난 것처럼 보이고, 무엇보다 왜 없는지를 숨긴다. */
+function emptyNotice(all, live, closed, filtered) {
+  const short = esc(curCity.split(" ").slice(-1)[0]);
+  const sido = esc(curCity.split(" ")[0]);
+  const tail = `<span class="esub">중앙부처 정책 ${PD.central.length}건은 <b>정보 탭</b>에서 볼 수 있습니다.</span>`;
+
+  /* ① 등록 자체가 없음 */
+  if (!all) return `온통청년에 등록된 <b>${short}·${sido} 정책이 없습니다.</b>
+    <span class="esub">기초 정책이 등록된 지자체는 <b>${CP.orgsWithBasic}/235곳</b>뿐입니다.
+      실제로 안 하는 것인지 등록만 안 된 것인지는 <b>담당부서 확인이 필요</b>합니다.</span>${tail}`;
+
+  /* ② 있지만 전부 마감 — 13개 지자체가 여기 해당한다 */
+  if (!live && closed) return `신청 가능한 정책이 없습니다. <b>등록된 ${closed}건이 모두 마감</b>됐습니다.
+    <span class="esub">「마감」 탭에서 언제·왜 끝났는지 확인하고, 후속 사업 여부는 담당부서에 문의하십시오.</span>${tail}`;
+
+  /* ③ 필터 때문에 비었음 */
+  if (filtered) return `이 조건에 맞는 <b>${short}·${sido} 정책</b>이 없습니다.
+    <span class="esub">위 칩을 「전체」로 되돌리면 ${live}건이 나옵니다.</span>${tail}`;
+
+  return `조건에 맞는 정책이 없습니다.`;
 }
 
 function openPolicy(p) {
@@ -680,8 +774,8 @@ function renderPolicies() {
 
   /* 레벨별 건수 — 시를 바꾸면 이 숫자가 바뀌는 것이 곧 증거다 */
   const cnt = lv => live.filter(p => p.lv === lv).length;
-  const LEVELS = [["전체", live.length], ["기초", cnt("기초")], ["광역", cnt("광역")], ["중앙", cnt("중앙")]];
-  const LABEL = { "전체": "전체", "기초": basic, "광역": sido, "중앙": "중앙부처" };
+  const LEVELS = [["전체", live.length], ["기초", cnt("기초")], ["광역", cnt("광역")]];
+  const LABEL = { "전체": "전체", "기초": basic, "광역": sido };
 
   const byField = a => curField === "전체" ? a : a.filter(p => p.f === curField);
   const byLevel = a => curLevel === "전체" ? a : a.filter(p => p.lv === curLevel);
@@ -690,7 +784,9 @@ function renderPolicies() {
   const cur = showClosed
     ? [...pick(live).slice(0, 30), ...pick(closed).slice(0, 15)]
     : pick(live);
-  renderList($("list1"), cur, null, showClosed ? pick(live).length + pick(closed).length : null);
+  renderList($("list1"), cur, null, showClosed ? pick(live).length + pick(closed).length : null,
+    emptyNotice(all.length, live.length, closed.length,
+      curField !== "전체" || curLevel !== "전체"));
 
   $("levelbar").innerHTML = LEVELS.map(([lv, n]) =>
     `<button class="chip lvchip" aria-pressed="${curLevel === lv}" data-lv="${lv}"${n === 0 && lv !== "전체" ? " disabled" : ""}>${esc(LABEL[lv])} ${n}</button>`).join("");
@@ -704,17 +800,163 @@ function renderPolicies() {
   $$("#statusbar [data-sc]").forEach(b =>
     b.addEventListener("click", () => { showClosed = b.dataset.sc === "1"; renderPolicies(); }));
 
-  const nw = all.filter(p => p.nw);
-  renderList($("list2"), nw, '<span class="bdg new">올해 신설</span>');
   const gn = closed.slice().sort((a, b) => (b.cl || "").localeCompare(a.cl || ""));
-  renderList($("list3"), gn);
+  renderList($("list3"), gn, null, null, "마감된 우리 시·도 정책이 없습니다.");
 
   $("c1").textContent = live.length;
   $("c3").textContent = closed.length;
   $("tc1").textContent = live.length;
-  $("tc2").textContent = nw.length;
   $("tc3").textContent = closed.length;
   $("tc4").textContent = DB.parsed;
+}
+
+/* ═══════════ 비교 — 우리는 없는 정책 ═══════════ */
+const myTypes = org => new Set(CP.orgTypes[org] || []);
+const myCover = org => new Set(CP.orgCover[org] || []);
+const gapsFor = org => { const m = myTypes(org); return CP.types.filter(t => !m.has(t.k)); };
+
+/** 제안 근거 초안 — 정책단이 회의에 그대로 가져갈 수 있는 형태 */
+function openGap(t) {
+  const r = orgOf(curCity);
+  const ex = PD.pol[t.ex];
+  const others = t.orgs.filter(o => o !== curCity);
+  /* 사례 지자체의 조례 근거를 함께 붙인다 — "저기도 조례로 하고 있다"가 핵심 논거다 */
+  const cases = others.slice(0, 6).map(o => {
+    const b = byOrg.get(o);
+    return { o, age: b && b.a ? `${b.a}~${b.b}세` : "미상", law: b ? `「${b.n}」 ${b.c || ""}` : "조례 미확인", m: b?.m };
+  });
+
+  const html =
+    F("채택 지자체", `<span class="adopt">${t.n}곳</span>이 이 유형을 운영합니다.
+       <span class="sub">우리 시(${esc(curCity.split(" ").slice(-1)[0])})에는 같은 유형이 없습니다.</span>`, "") +
+    F("대표 사례", `${esc(ex.n)}<span class="sub">${esc(ex.i || "")} · ${esc(periodText(ex))}</span>`) +
+    F("지원 내용 (사례)", nl2br(ex.v) || "—") +
+    (ex.h ? F("신청 방법 (사례)", nl2br(ex.h)) : "") +
+    F("이미 하는 곳", `<ul>${cases.map(c =>
+      `<li><b>${esc(c.o)}</b> — 청년 ${c.age} · ${esc(c.law)}${c.m ? ` <a class="lnk" href="${lawUrl(c.m)}" target="_blank" rel="noopener">원문</a>` : ""}</li>`).join("")}</ul>` +
+      (others.length > 6 ? `<span class="sub">외 ${others.length - 6}곳</span>` : "")) +
+    F("우리 시 근거", `「${esc(r.n)}」 ${esc(r.c || "")}
+       <span class="sub">청년 ${r.a && r.b ? `${r.a}~${r.b}세` : "미상"} · 공포 ${dash(r.p)} ·
+       <a class="lnk" href="${lawUrl(r.m)}" target="_blank" rel="noopener">원문</a><br>
+       조례에 청년 정의와 지원 근거가 이미 있으면 <b>조례 개정 없이 사업 신설이 가능</b>한 경우가 많습니다.
+       최종 판단은 담당부서·법무 검토가 필요합니다.</span>`) +
+    F("우리 시 담당부서", `${esc(r.d || "담당부서 미상")}<br>
+       ${r.t ? `<a class="ptel" href="tel:${r.t.replace(/\D/g, "")}">${esc(r.t)}</a>` : "—"}`) +
+    F("다음 절차", `<ul>
+       <li>담당부서에 <b>유사 사업 검토 이력</b>이 있는지 먼저 확인</li>
+       <li>사례 지자체 조례·시행 규모를 근거로 정책단 안건 상정</li>
+       <li>예산이 필요하면 <b>차기 본예산 편성 일정</b>에 맞춰 제안</li>
+       <li>온통청년 정책 제안 창구로 병행 제출(정보 탭)</li>
+     </ul>`) +
+    F("한계", `<span class="sub">이 비교는 온통청년에 <b>등록된</b> 기초 정책 ${CP.basicTotal}건 기준입니다.
+       기초 정책이 등록된 지자체는 ${CP.orgsWithBasic}/235곳뿐이라, <b>실제로는 하고 있는데 등록만 안 된 경우</b>가 있습니다.
+       "없다"가 아니라 "등록된 것이 없다"로 읽으십시오.</span>`);
+
+  const plain = [
+    `[정책 제안 근거] ${t.label}`,
+    `유형: ${t.k} · 채택 ${t.n}곳 · 우리 시(${curCity}) 없음`, "",
+    `대표 사례: ${ex.n}`,
+    `주관: ${ex.i}`,
+    `지원 내용: ${(ex.v || "-").replace(/\n/g, " ")}`,
+    ...(ex.h ? [`신청 방법: ${ex.h.replace(/\n/g, " ")}`] : []), "",
+    "이미 하는 곳",
+    ...cases.map(c => `  - ${c.o} (청년 ${c.age}) ${c.law}${c.m ? ` ${lawUrl(c.m)}` : ""}`),
+    ...(others.length > 6 ? [`  외 ${others.length - 6}곳`] : []), "",
+    `우리 시 근거: 「${r.n}」 ${r.c || ""} (청년 ${r.a && r.b ? `${r.a}~${r.b}세` : "미상"}, 공포 ${dash(r.p)})`,
+    `우리 시 원문: ${lawUrl(r.m)}`,
+    `우리 시 담당부서: ${r.d || "-"} ${r.t || ""}`, "",
+    `※ 온통청년 등록 기초 정책 ${CP.basicTotal}건 기준(수집 ${CP.date}).`,
+    `   기초 정책이 등록된 지자체는 ${CP.orgsWithBasic}/235곳이므로 "미등록"과 "미시행"은 다릅니다.`,
+  ].join("\n");
+
+  openDrawer(`없는 유형 · ${t.n}곳 채택`, t.label, html, plain);
+}
+
+function gapCard(t) {
+  const others = t.orgs.filter(o => o !== curCity).slice(0, 3).map(o => o.split(" ").slice(-1)[0]);
+  return `<li><button class="pcard gap">
+    <span class="top"><span class="nm">${esc(t.label)}</span><span class="go">›</span></span>
+    <span class="amt">${t.n}곳이 운영 중</span>
+    <span class="badges"><span class="bdg soon">우리 시 없음</span><span class="bdg lv">${esc(t.k)}</span></span>
+    <span class="meta"><span><i>예</i>${esc(others.join(", "))}${t.orgs.length > 4 ? " 외" : ""}</span></span>
+  </button></li>`;
+}
+
+function renderGap() {
+  const gaps = gapsFor(curCity);
+  const mine = myTypes(curCity);
+  const short = curCity.split(" ").slice(-1)[0];
+  const hasBasic = (PD.byOrg[curCity] || []).length;
+
+  $("gapSummary").innerHTML =
+    `<div class="gaprow"><span class="gapnum">${gaps.length}</span><span class="sub">종 없음 / 보편 유형 ${CP.types.length}종</span></div>
+     <p class="gapsub">${esc(short)}는 여러 시군이 공통으로 하는 사업 유형 <b>${CP.types.length}종</b> 가운데
+       <b>${mine.size ? CP.types.length - gaps.length : 0}종</b>을 하고 있고 <b>${gaps.length}종</b>이 없습니다.
+       ${hasBasic ? "" : `<br><b>온통청년에 ${esc(short)} 기초 정책이 등록돼 있지 않습니다.</b> 실제로 없는 것인지, 등록만 안 된 것인지는 담당부서 확인이 필요합니다.`}</p>`;
+
+  $("gapNote").textContent = `${CP.minAdopt}곳 이상 채택 기준`;
+  $("gapList").innerHTML = gaps.length
+    ? gaps.map(gapCard).join("")
+    : `<li class="empty">보편 유형은 모두 하고 있습니다.</li>`;
+  [...$("gapList").querySelectorAll(".pcard")].forEach((b, i) => b.addEventListener("click", () => openGap(gaps[i])));
+  $("tc5").textContent = gaps.length;
+
+  /* 분야 커버리지 */
+  const mc = myCover(curCity);
+  $("coverPanel").innerHTML =
+    `<div class="covgrid">
+      <div class="covrow"><span class="h" style="font-weight:800;color:var(--muted);font-size:12.5px">유형</span>
+        <span class="h" style="text-align:right">우리</span><span class="h" style="text-align:right">전국</span></div>
+      ${CP.cover.filter(c => c.n >= 3).map(c => {
+        const have = mc.has(c.k);
+        return `<div class="covrow ${have ? "have" : "miss"}">
+          <span class="cn">${esc(c.k)}</span>
+          <span class="mine">${have ? "있음" : "없음"}</span>
+          <span class="nat">${c.n}곳</span></div>`;
+      }).join("")}
+    </div>`;
+
+  renderCompare();
+}
+
+/* ── 1:1 대조 ── */
+function renderCompare() {
+  const sel = $("cmpCity");
+  if (!sel.options.length) {
+    sel.innerHTML = DB.rows.slice().sort((a, b) => a.o.localeCompare(b.o, "ko"))
+      .map(r => `<option value="${esc(r.o)}">${esc(r.o)}</option>`).join("");
+    /* 기본 비교 대상 — 기초 정책이 가장 많은 곳 */
+    const best = Object.entries(PD.byOrg).sort((a, b) => b[1].length - a[1].length)[0]?.[0];
+    if (best) sel.value = best;
+    sel.addEventListener("change", renderCompare);
+  }
+  const other = sel.value;
+  if (other === curCity) { sel.selectedIndex = (sel.selectedIndex + 1) % sel.options.length; }
+  const o = sel.value;
+
+  const mineList = policiesFor(curCity).filter(p => p.ov !== 1);
+  const otherList = policiesFor(o).filter(p => p.ov !== 1);
+  const a = orgOf(curCity), b = orgOf(o);
+  const mt = myTypes(curCity), ot = myTypes(o);
+  const onlyThem = [...ot].filter(k => !mt.has(k)).length;
+  const onlyUs = [...mt].filter(k => !ot.has(k)).length;
+
+  const row = (label, mineV, otherV, better) =>
+    `<span class="r">${label}</span><span class="c ${better === 1 ? "up" : better === -1 ? "down" : ""}">${mineV}</span><span class="c">${otherV}</span>`;
+  const cmp = (x, y) => x > y ? 1 : x < y ? -1 : 0;
+
+  $("cmpBody").innerHTML = `<div class="cmptab">
+    <span class="h">항목</span><span class="h" style="text-align:right">${esc(curCity.split(" ").slice(-1)[0])}</span><span class="h" style="text-align:right">${esc(o.split(" ").slice(-1)[0])}</span>
+    ${row("신청 가능 정책", mineList.length, otherList.length, cmp(mineList.length, otherList.length))}
+    ${row("우리 시 자체 정책", (PD.byOrg[curCity] || []).length, (PD.byOrg[o] || []).length, cmp((PD.byOrg[curCity] || []).length, (PD.byOrg[o] || []).length))}
+    ${row("청년 상한 연령", a.b ? a.b + "세" : "미상", b.b ? b.b + "세" : "미상", cmp(a.b || 0, b.b || 0))}
+    ${row("사업 유형 보유", mt.size, ot.size, cmp(mt.size, ot.size))}
+    ${row("저기만 하는 유형", "—", onlyThem, 0)}
+    ${row("우리만 하는 유형", onlyUs, "—", 0)}
+  </div>
+  <p class="gapsub">조례 근거 — ${esc(curCity.split(" ").slice(-1)[0])} 「${esc(a.n)}」 ${esc(a.c || "")} ·
+    ${esc(o.split(" ").slice(-1)[0])} 「${esc(b.n)}」 ${esc(b.c || "")}
+    <a class="lnk" href="${lawUrl(b.m)}" target="_blank" rel="noopener">상대 조례 원문</a></p>`;
 }
 
 /* ═══════════ 지역 ═══════════ */
@@ -873,6 +1115,21 @@ $("dlCity").addEventListener("click", () => {
   }
 })();
 
-function render() { renderCard(); renderDist(); renderPolicies(); renderDesig(); }
+/* ── 중앙 정책 (참고용) ── */
+let showAllCentral = false;
+function renderCentral() {
+  const C = centralPolicies();
+  const live = C.filter(p => p.ov !== 1);
+  const shown = showAllCentral ? live : live.slice(0, 12);
+  $("centralBar").innerHTML =
+    `<span class="note">신청 가능 ${live.length}건 / 전체 ${C.length}건 · 전국 공통</span>` +
+    (live.length > 12 ? `<button class="chip" id="cMore" style="margin-left:auto">${showAllCentral ? "접기" : `전체 ${live.length}건 보기`}</button>` : "");
+  $("listCentral").innerHTML = shown.map(p => polCard(p)).join("") || `<li class="empty">없습니다.</li>`;
+  [...$("listCentral").querySelectorAll(".pcard")].forEach((b, i) => b.addEventListener("click", () => openPolicy(shown[i])));
+  const m = $("cMore");
+  if (m) m.addEventListener("click", () => { showAllCentral = !showAllCentral; renderCentral(); });
+}
+
+function render() { renderCard(); renderDist(); renderPolicies(); renderGap(); renderDesig(); renderCentral(); }
 render();
 </script>

@@ -8,7 +8,7 @@
     "collect:ordinances": "node scripts/snapshot-ordinances.mjs",
     "collect:definitions": "node scripts/extract-definitions.mjs",
     "collect:policies": "node scripts/snapshot-policies.mjs",
-    "build": "node scripts/build-board.mjs && node scripts/build-policies.mjs && node scripts/build.mjs",
+    "build": "node scripts/build-board.mjs && node scripts/build-policies.mjs && node scripts/build-compare.mjs && node scripts/build.mjs",
     "validate": "node scripts/validate.mjs",
     "validate:deep": "node scripts/validate.mjs --resample=40",
     "validate:loop": "node scripts/validate.mjs --loop=3600 --resample=15",
