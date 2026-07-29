@@ -16,9 +16,16 @@
     "check": "npm run validate && npm run smoke",
     "audit:prepare": "node scripts/audit-prepare.mjs 12",
     "audit:report": "node scripts/audit-report.mjs",
-    "refresh": "npm run collect:policies && npm run build && npm run check"
+    "refresh": "npm run collect:policies && npm run build && npm run check",
+    "deploy": "node scripts/deploy.mjs",
+    "pwa": "node scripts/make-pwa.mjs"
   },
   "dependencies": {
     "jsdom": "^29.1.1"
+  },
+  "homepage": "https://gudwls5337-dot.github.io/youth-policy-app/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gudwls5337-dot/youth-policy-app.git"
   }
 }
