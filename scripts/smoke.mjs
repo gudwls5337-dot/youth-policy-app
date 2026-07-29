@@ -78,6 +78,37 @@ T("첫 카드가 진행 중", c1.length > 0 && !c1[0].className.includes("closed
 T("상태 배지 있음", c1.every(c => c.querySelector(".bdg")));
 T("전화 표시", c1.some(c => /\d{2,3}-\d{3,4}-\d{3,4}/.test(c.querySelector(".tel")?.textContent || "")));
 
+console.log("\n── 레벨 필터 ──");
+T("레벨 칩 4개", $$("#levelbar [data-lv]").length === 4, $$("#levelbar [data-lv]").map(b => b.textContent).join(" / "));
+T("기본은 전체", $("#levelbar [data-lv]")?.getAttribute("aria-pressed") === "true");
+const lvBasic = $$("#levelbar [data-lv]").find(b => b.dataset.lv === "기초");
+if (lvBasic && !lvBasic.disabled) {
+  click(lvBasic); await wait(160);
+  T("기초 필터 = 우리 시 것만", $$("#list1 .pcard").length > 0 &&
+    $$("#list1 .pcard").every(c => (c.querySelector(".badges")?.textContent || "").includes("기초")),
+    `${$$("#list1 .pcard").length}장`);
+  click($$("#levelbar [data-lv]").find(b => b.dataset.lv === "전체")); await wait(160);
+}
+T("우리 시 것이 맨 위", ($("#list1 .pcard .badges")?.textContent || "").match(/기초|광역/) !== null,
+  $("#list1 .pcard .badges")?.textContent.replace(/\s+/g, " "));
+
+console.log("\n── 지자체별 목록이 실제로 다른가 ──");
+function top10() {
+  return $$("#list1 .pcard .nm").slice(0, 10).map(e => e.textContent);
+}
+async function pickCity(v) {
+  const s = $("#city"); s.value = v; s.dispatchEvent(new window.Event("change", { bubbles: true })); await wait(200);
+}
+await pickCity("경상남도 양산시"); const tA = top10();
+await pickCity("서울특별시 관악구"); const tB = top10();
+await pickCity("전남광주통합특별시 순천시"); const tC = top10();
+const overlap = (x, y) => x.filter(v => y.includes(v)).length;
+T("양산 ∩ 관악 겹침 3건 이하", overlap(tA, tB) <= 3, `${overlap(tA, tB)}/10`);
+T("양산 ∩ 순천 겹침 3건 이하", overlap(tA, tC) <= 3, `${overlap(tA, tC)}/10`);
+T("세 도시 상위 1건이 서로 다름", new Set([tA[0], tB[0], tC[0]]).size === 3,
+  [tA[0], tB[0], tC[0]].map(s => (s || "").slice(0, 18)).join(" / "));
+await pickCity("경상남도 양산시");
+
 console.log("\n── 분야 칩 ──");
 click($$("#tabs .chip").find(b => b.textContent === "주거"));
 await wait(150);

@@ -110,6 +110,9 @@
     padding:9px 16px; cursor:pointer; white-space:nowrap;
   }
   .chip[aria-pressed="true"] { background:var(--ink); border-color:var(--ink); color:var(--bg); }
+  .lvchip { font-size:var(--t-cap); padding:7px 13px; }
+  .lvchip[aria-pressed="true"] { background:var(--in); border-color:var(--in); color:#fff; }
+  .lvchip[disabled] { opacity:.42; cursor:default; }
   .chip:focus-visible { outline:2px solid var(--in); outline-offset:2px; }
 
   .segbar { display:flex; gap:8px; padding:0 18px 14px; align-items:center; flex-wrap:wrap; }
@@ -318,9 +321,10 @@
     <section class="screen on" id="sc-policy">
       <div class="shead">
         <h2>지금 신청할 수 있는 것</h2>
-        <p>중앙·광역·기초를 합쳐 이 지역에 해당하는 전부입니다. <b>카드를 누르면 상세와 전화번호</b>가 나옵니다.</p>
+        <p><b>우리 시 → 도 → 중앙부처</b> 순으로 놓았습니다. 중앙 정책은 전국이 같지만 <b>우리 시·도 정책은 지역마다 다릅니다</b> — 아래 칩으로 갈라 보십시오.</p>
       </div>
       <div class="chips" id="tabs"></div>
+      <div class="chips" id="levelbar" style="padding-top:0"></div>
       <div class="segbar" id="statusbar"></div>
       <ul class="cards" id="list1"></ul>
     </section>
@@ -475,7 +479,7 @@ const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt
 const nl2br = s => esc(s).replace(/\n/g, "<br>");
 const dash = s => s ? String(s).replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3") : "";
 const lawUrl = m => `https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=${m}&type=HTML`;
-let curField = "전체", curCity = "경상남도 양산시", showClosed = false, curTab = "policy";
+let curField = "전체", curCity = "경상남도 양산시", showClosed = false, curTab = "policy", curLevel = "전체";
 
 function download(name, text) {
   const b = new Blob(["﻿" + text], { type: "text/plain;charset=utf-8" });
@@ -499,6 +503,7 @@ DB.rows.slice().sort((a, b) => a.o.localeCompare(b.o, "ko")).forEach(r => {
 });
 $("city").addEventListener("change", e => {
   curCity = byOrg.has(e.target.value) ? e.target.value : FALLBACK.o;
+  curLevel = "전체";
   $("city").value = curCity; render();
 });
 
@@ -574,13 +579,24 @@ function periodText(p) {
 }
 
 /* ═══════════ 정책 ═══════════ */
+/* 정렬 우선순위
+   ① 상태 — 신청 가능한 것이 먼저
+   ② 레벨 — 우리 시 → 도 → 중앙
+   ③ 등록일 — 최신순
+
+   ②가 없으면 중앙 정책 130건이 모든 지자체에서 똑같이 위를 독점한다.
+   실측으로 양산시와 관악구의 상위 10건이 10/10 동일했다(2026-07-30 지적).
+   "우리 시 청년정책"인데 우리 시 것이 안 보이면 화면이 거짓말을 하는 셈이다. */
+const LV_RANK = { "기초": 0, "광역": 1, "중앙": 2, "미분류": 3 };
 function policiesFor(org) {
   const sido = org.split(" ")[0];
   const ids = [...(PD.byOrg[org] || []), ...(PD.bySido[sido] || []), ...PD.central];
   const seen = new Set();
-  const rank = p => (p.ov === 0 ? 0 : p.ov === 2 ? 1 : 2);
+  const st = p => (p.ov === 0 ? 0 : p.ov === 2 ? 1 : 2);
   return ids.filter(i => !seen.has(i) && seen.add(i)).map(i => PD.pol[i])
-    .sort((a, b) => rank(a) - rank(b) || (b.r || "").localeCompare(a.r || ""));
+    .sort((a, b) => st(a) - st(b)
+      || (LV_RANK[a.lv] ?? 9) - (LV_RANK[b.lv] ?? 9)
+      || (b.r || "").localeCompare(a.r || ""));
 }
 
 function polCard(p, extraBadge) {
@@ -659,12 +675,27 @@ function renderPolicies() {
   const all = policiesFor(curCity);
   const live = all.filter(p => p.ov !== 1);
   const closed = all.filter(p => p.ov === 1);
+  const sido = curCity.split(" ")[0];
+  const basic = curCity.split(" ").slice(1).join(" ") || curCity;
+
+  /* 레벨별 건수 — 시를 바꾸면 이 숫자가 바뀌는 것이 곧 증거다 */
+  const cnt = lv => live.filter(p => p.lv === lv).length;
+  const LEVELS = [["전체", live.length], ["기초", cnt("기초")], ["광역", cnt("광역")], ["중앙", cnt("중앙")]];
+  const LABEL = { "전체": "전체", "기초": basic, "광역": sido, "중앙": "중앙부처" };
+
   const byField = a => curField === "전체" ? a : a.filter(p => p.f === curField);
+  const byLevel = a => curLevel === "전체" ? a : a.filter(p => p.lv === curLevel);
+  const pick = a => byLevel(byField(a));
 
   const cur = showClosed
-    ? [...byField(live).slice(0, 30), ...byField(closed).slice(0, 15)]
-    : byField(live);
-  renderList($("list1"), cur, null, showClosed ? byField(live).length + byField(closed).length : null);
+    ? [...pick(live).slice(0, 30), ...pick(closed).slice(0, 15)]
+    : pick(live);
+  renderList($("list1"), cur, null, showClosed ? pick(live).length + pick(closed).length : null);
+
+  $("levelbar").innerHTML = LEVELS.map(([lv, n]) =>
+    `<button class="chip lvchip" aria-pressed="${curLevel === lv}" data-lv="${lv}"${n === 0 && lv !== "전체" ? " disabled" : ""}>${esc(LABEL[lv])} ${n}</button>`).join("");
+  $$("#levelbar [data-lv]").forEach(b =>
+    b.addEventListener("click", () => { curLevel = b.dataset.lv; renderPolicies(); }));
 
   $("statusbar").innerHTML =
     `<button class="chip" aria-pressed="${!showClosed}" data-sc="0">신청 가능 ${live.length}</button>` +
