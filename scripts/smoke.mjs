@@ -22,7 +22,8 @@ const dom = new JSDOM(`<!doctype html><html><head></head><body>${html}</body></h
     w.IntersectionObserver = class { observe() {} unobserve() {} disconnect() {} };
     w.URL.createObjectURL = () => "blob:stub";
     w.URL.revokeObjectURL = () => {};
-    w.navigator.clipboard = { writeText: async () => {} };
+    /* 복사 텍스트가 곧 산출물이다 — 붙여넣기 결과를 실제로 읽어 검사한다 */
+    w.navigator.clipboard = { writeText: async t => { w.__copied = t; } };
     w.HTMLAnchorElement.prototype.click = function () {};
     w.scrollTo = () => {};
   },
@@ -166,6 +167,104 @@ T("종료 화면", $("#sc-end")?.classList.contains("on"));
 const l3 = $$("#list3 .pcard");
 T("전부 종료", l3.length > 0 && l3.every(c => c.className.includes("closed")), `${l3.length}장`);
 T("마감일·사유", /(신청마감|사업종료|종료)\s*\d{4}-\d{2}-\d{2}/.test($("#list3 .meta")?.textContent || ""));
+
+console.log("\n── 둘러보기 ──");
+tab("browse"); await wait(240);
+T("둘러보기 화면", $("#sc-browse")?.classList.contains("on"));
+const bt = $$("#browseTypes [data-bt]");
+T("유형 칩", bt.length >= 10, `${bt.length}종`);
+const bc = $$("#browseList .pcard");
+T("다른 시 카드 렌더", bc.length > 0, `${bc.length}장`);
+T("지역 배지", bc.every(c => (c.querySelector(".badges")?.textContent || "").trim().length > 0));
+/* 다른 시 정책 카드에 우리 시 전화가 붙으면 전화를 잘못 걸게 된다 */
+const ourTel = $("#tel")?.textContent.replace(/\D/g, "");
+const telsOnCards = [...new Set(bc.map(c => (c.querySelector(".tel")?.textContent || "").replace(/\D/g, "")).filter(Boolean))];
+T("카드 전화가 해당 지자체 것", telsOnCards.filter(t2 => t2 !== ourTel).length > 0,
+  `${telsOnCards.length}종 · 우리(${ourTel}) 외 ${telsOnCards.filter(t2 => t2 !== ourTel).length}종`);
+
+console.log("\n── 제안서 (둘러보기 → 제안) ──");
+/* 우리 시가 등록한 유형과 등록이 없는 유형은 문서가 달라야 한다 */
+async function pickType(want) {
+  for (const b of $$("#browseTypes [data-bt]")) {
+    click(b); await wait(140);
+    const owned = ($("#btnPropose")?.textContent || "").includes("확대·개선");
+    if (owned === want) return b.dataset.bt;
+  }
+  return null;
+}
+const tGap = await pickType(false);
+T("등록 없는 유형 존재", !!tGap, tGap || "못 찾음");
+T("CTA 라벨에 유형명", ($("#btnPropose")?.textContent || "").includes(tGap || " "),
+  $("#btnPropose")?.textContent);
+T("CTA 안내가 「등록이 없다」 표현", ($("#proposeNote")?.textContent || "").includes("등록된 정책이 없습니다"),
+  ($("#proposeNote")?.textContent || "").slice(0, 46));
+
+click($("#btnPropose")); await wait(240);
+T("제안서 시트 열림", $("#drawer")?.hidden === false, $("#dTitle")?.textContent);
+T("제목이 제안서", ($("#dTitle")?.textContent || "").includes("제안서"));
+T("머리말이 신규 도입", ($("#dKick")?.textContent || "").includes("신규 도입"), $("#dKick")?.textContent);
+const ps = $("#dBody")?.textContent || "";
+T("분모가 235 아님 (등록된 곳 기준)", /등록된 \d+곳이 이 유형을 운영/.test(ps),
+  (ps.match(/\/ 자체 정책이 등록된 \d+곳/) || ["없음"])[0]);
+T("「등록이 없다」 구분 명시", ps.includes("「등록이 없다」와 「시행하지 않는다」는 다릅니다"));
+T("우수 판정 안 함 명시", ps.includes("우수 여부는 판정하지 않았습니다"));
+const cases = $$("#dBody .case");
+T("사례 2건 이상", cases.length >= 2, `${cases.length}건`);
+T("사례에 지자체명·기간·주관", cases.every(c => /기간/.test(c.textContent) && /주관/.test(c.textContent)));
+T("사례 지자체가 서로 다름",
+  new Set(cases.map(c => c.querySelector(".cw")?.textContent)).size === cases.length);
+T("우리 조례 인용 블록", !!$("#dBody .pquote"), ($("#dBody .pquote")?.textContent || "").slice(0, 28) + "…");
+T("법제처 원문 링크", ($("#dBody")?.innerHTML || "").includes("law.go.kr/DRF"));
+T("담당부서 전화", !!$("#dBody .ptel"), $("#dBody .ptel")?.textContent);
+T("조례 개정과 구분", ps.includes("조례 개정") && ps.includes("사업 신설·확대"));
+T("창구 4단계", $$("#dBody .steps li").length === 4, `${$$("#dBody .steps li").length}단계`);
+T("한계 명시 (사전 밖 제외)", ps.includes("하한"));
+
+click($("#dCopy")); await wait(120);
+const cp = window.__copied || "";
+T("복사 텍스트 생성", cp.length > 600, `${cp.length}자`);
+T("복사본 제목", cp.startsWith("[정책 제안]"), cp.split("\n")[0]);
+const SECTS = ["■ 제안 요지", "■ 다른 시 사례", "■ 우리 시 근거", "■ 난이도", "■ 어디에 넣는가", "■ 출처와 한계"];
+T("복사본 6절 구성", SECTS.every(h => cp.includes(h)),
+  SECTS.filter(h => !cp.includes(h)).join(", ") || "전부 있음");
+T("복사본에 조례 근거", /조례: 「.+」/.test(cp), (cp.match(/조례: 「.+」.*/) || [""])[0].slice(0, 44));
+T("복사본에 법제처 URL", cp.includes("law.go.kr/DRF"));
+T("복사본에 담당부서 전화", /소관 부서: .+\d{2,3}-\d{3,4}-\d{4}/.test(cp),
+  (cp.match(/소관 부서: .*/) || [""])[0]);
+T("복사본에 사례 URL 또는 주관", /   주관: /.test(cp));
+T("복사본에 수집일", cp.includes("수집"));
+click($("#dClose")); await wait(360);
+T("제안서 닫힘", $("#drawer")?.hidden === true);
+
+/* 카드 → 상세 → 제안하기 경로. 본 정책이 사례 1번으로 올라와야 한다 */
+/* 지역 배지는 .badges 의 첫 칩이다 (그다음이 상태, 마지막이 기초/광역) */
+const seedOrg = ($("#browseList .pcard .badges .bdg:first-child")?.textContent || "").trim();
+click($("#browseList .pcard")); await wait(200);
+T("다른 시 상세에 제안 버튼", $("#dPropose")?.hidden === false);
+click($("#dPropose")); await wait(240);
+T("상세 → 제안서 전환", ($("#dTitle")?.textContent || "").includes("제안서"), $("#dTitle")?.textContent);
+T("본 정책의 지자체가 사례 1번", ($("#dBody .case .cw")?.textContent || "").includes(seedOrg),
+  `${$("#dBody .case .cw")?.textContent} vs 배지 ${seedOrg}`);
+click($("#dClose")); await wait(360);
+T("한 번 눌러 닫힘 (히스토리 중복 없음)", $("#drawer")?.hidden === true);
+
+/* 우리 시가 이미 등록한 유형 — 문서가 확대·개선으로 바뀌어야 한다 */
+const tHave = await pickType(true);
+T("우리 시 보유 유형 존재", !!tHave, tHave || "못 찾음");
+if (tHave) {
+  click($("#btnPropose")); await wait(240);
+  T("확대·개선 제안", ($("#dKick")?.textContent || "").includes("확대·개선"), $("#dKick")?.textContent);
+  T("우리 시 등록분 섹션", !!$("#dBody .case.mine"),
+    ($("#dBody .case.mine .cn2")?.textContent || "없음").slice(0, 30));
+  T("우리 것이라고 「없다」 말하지 않음", !($("#dBody")?.textContent || "").includes("등록된 정책이 없습니다."));
+  click($("#dClose")); await wait(360);
+}
+
+/* 우리 시 정책에는 제안 버튼이 없어야 한다 */
+tab("policy"); await wait(180);
+click($("#list1 .pcard")); await wait(200);
+T("우리 시 정책엔 제안 버튼 없음", $("#dPropose")?.hidden === true);
+click($("#dClose")); await wait(360);
 
 console.log("\n── 비교 화면 (조례 조문) ──");
 tab("gap"); await wait(220);

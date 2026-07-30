@@ -67,10 +67,21 @@ export function buildCodebook(rows, resolve, resolveWide) {
   return { book, conflicts };
 }
 
-/** 코드북으로 기초 지자체 판정. 여러 코드가 한 지자체를 가리켜야 인정한다. */
+/**
+ * 코드북으로 기초 지자체 판정. **모든** 코드가 같은 한 지자체를 가리켜야 인정한다.
+ *
+ * 모르는 코드를 filter(Boolean) 으로 버리던 이전 판은 광역 전역 사업을 기초 사업으로
+ * 만들었다. 「울산청년지원센터 운영」은 zipCd 가 울산 5개 구·군인데 코드북에 동구
+ * (31170) 만 있어서 **울산광역시 정책 132건이 울산 동구 자체 정책**이 됐다
+ * (2026-07-30 4단 감사). 그 버킷은 전국에서 두 번째로 큰 기초 버킷이었다.
+ *
+ * 기초 사업은 코드가 하나다. 코드가 여럿이면 광역 단위이거나 판정 불가다 — 둘 다 null.
+ */
 export function basicOf(r, book) {
   const cs = codes(r);
   if (!cs.length || cs.length > 6) return null;   // 6곳 넘으면 광역 단위 사업
-  const set = new Set(cs.map(c => book[c]).filter(Boolean));
+  const mapped = cs.map(c => book[c]);
+  if (mapped.some(o => !o)) return null;          // 모르는 코드가 섞이면 판정하지 않는다
+  const set = new Set(mapped);
   return set.size === 1 ? [...set][0] : null;
 }

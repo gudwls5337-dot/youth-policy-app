@@ -203,6 +203,30 @@
     font-size:var(--t-sm); line-height:1.7; margin-top:12px; }
   .warnbox b { font-weight:800; }
 
+  /* ═══════════ 제안서 ═══════════
+     둘러보기에서 본 다른 시 정책을 「우리 시에 제안하기」로 잇는 한 장. */
+  .ctawrap { padding:0 14px 16px; }
+  .ctawrap .btn { width:100%; margin:0; }
+  .ctawrap .ctanote { font-size:12.5px; color:var(--muted); line-height:1.65; margin-top:9px; }
+  .case { background:var(--card-2); border:1px solid var(--line-2); border-radius:10px; padding:13px 14px; margin-bottom:10px; }
+  .case:last-child { margin-bottom:0; }
+  .case .cw { font-size:12.5px; font-weight:800; color:var(--in-ink); letter-spacing:.01em; }
+  .case .cn2 { font-size:var(--t-sm); font-weight:800; line-height:1.5; margin-top:3px; color:var(--ink); }
+  .case .cv { font-size:var(--t-cap); color:var(--ink-2); line-height:1.7; margin-top:7px; }
+  .case .cm2 { font-size:12.5px; color:var(--ink-3); line-height:1.7; margin-top:7px; }
+  .case .cm2 b { color:var(--ink-2); font-weight:700; }
+  .case.mine { background:var(--in-wk); border-color:var(--in); }
+  .case.closed2 .cn2 { color:var(--ink-3); }
+  /* .pfield dd li 규칙보다 선택자 특이도가 높아야 목록 점 대신 번호가 나온다 */
+  .pfield dd .steps { counter-reset:s; gap:11px; }
+  .pfield dd .steps li { padding-left:28px; }
+  .pfield dd .steps li::before {
+    counter-increment:s; content:counter(s); left:0; top:.1em; width:20px; height:20px;
+    border-radius:99px; background:var(--in); color:#fff;
+    font-family:var(--num); font-size:12px; font-weight:800; text-align:center; line-height:20px;
+  }
+  .pfield dd .steps li b { color:var(--ink); font-weight:800; }
+
   @media print {
     .tabbar, .chev, #city, .chips, .segbar, .go { display:none !important; }
     .screen { display:block !important; page-break-inside:avoid; }
@@ -420,6 +444,10 @@
       </div>
       <div class="chips" id="browseTypes"></div>
       <div class="segbar" id="browseNote"></div>
+      <div class="ctawrap">
+        <button class="btn" id="btnPropose" type="button">우리 시에 제안하기</button>
+        <p class="ctanote" id="proposeNote"></p>
+      </div>
       <ul class="cards" id="browseList"></ul>
     </section>
 
@@ -575,9 +603,12 @@
       <div class="row"><h3 id="dTitle"></h3><button class="xbtn" id="dClose" aria-label="닫기">✕</button></div>
     </div>
     <div class="sheet-body"><dl id="dBody"></dl></div>
-    <div class="sheet-foot">
-      <button class="btn" id="dCopy">내용 복사</button>
-      <button class="btn ghost" id="dSave">텍스트 저장</button>
+    <div class="sheet-foot" style="flex-direction:column">
+      <button class="btn" id="dPropose" hidden>우리 시에 제안하기</button>
+      <div style="display:flex;gap:8px;width:100%">
+        <button class="btn" id="dCopy">내용 복사</button>
+        <button class="btn ghost" id="dSave">텍스트 저장</button>
+      </div>
     </div>
   </div>
 </div>
@@ -744,18 +775,28 @@ document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("picker
 
 /* ═══════════ 상세 시트 ═══════════ */
 let lastFocus = null, dPayload = { title: "", text: "" };
-function openDrawer(kick, title, html, plain) {
-  lastFocus = document.activeElement;
+/** propose = {k, seed} 를 주면 하단에 「우리 시에 제안하기」가 붙는다. */
+function openDrawer(kick, title, html, plain, propose) {
+  /* 시트 안에서 시트를 열 때(정책 상세 → 제안서) 히스토리를 두 번 쌓으면
+     뒤로가기 한 번이 남아 앱이 멈춘 것처럼 보인다. 이미 열려 있으면 안 쌓는다. */
+  const wasOpen = $("drawer").hidden === false;
+  if (!wasOpen) lastFocus = document.activeElement;
   $("dKick").textContent = kick; $("dTitle").textContent = title;
   $("dBody").innerHTML = html;
   dPayload = { title, text: plain };
+  const pb = $("dPropose");
+  if (pb) {
+    pb.hidden = !propose;
+    pb.onclick = propose ? (() => openProposal(propose.k, propose.seed)) : null;
+  }
   $("drawer").hidden = false;
+  $("dBody").parentElement.scrollTop = 0;
   const raf = typeof requestAnimationFrame === "function" ? requestAnimationFrame : (f => setTimeout(f, 16));
   raf(() => $("drawer").classList.add("open"));
   document.body.style.overflow = "hidden";
   $("dClose").focus();
   /* 히스토리에 남겨야 뒤로가기가 시트만 닫고 앱을 안 닫는다 */
-  try { history.pushState({ sheet: "detail", city: curCity, tab: curTab }, "", location.href); } catch {}
+  if (!wasOpen) try { history.pushState({ sheet: "detail", city: curCity, tab: curTab }, "", location.href); } catch {}
 }
 function closeDrawer(fromPop = false) {
   $("drawer").classList.remove("open");
@@ -879,7 +920,7 @@ function emptyNotice(all, live, closed, filtered) {
   return `조건에 맞는 정책이 없습니다.`;
 }
 
-function openPolicy(p, forOrg) {
+function openPolicy(p, forOrg, polIdx) {
   const who = forOrg || curCity;
   const r = orgOf(who);
   const tel = r.t ? `<a class="ptel" href="tel:${r.t.replace(/\D/g, "")}">${esc(r.t)}</a>` : "—";
@@ -919,7 +960,173 @@ function openPolicy(p, forOrg) {
     `출처: 온통청년 청년정책 API (수집 ${PD.date}) · 조례 담당부서는 법제처 Open API`,
   ].join("\n");
 
-  openDrawer(`${p.f}${p.s ? " · " + p.s : ""} · ${p.lv}`, p.n, html, plain);
+  /* 다른 시 정책을 보고 있을 때만 제안 경로를 연다. 우리 시 것에 「제안하기」는 뜻이 없고,
+     사전에 없는 유형은 사례를 모을 수 없다(원칙 5 — 추정하지 않는다). */
+  const tk = typeSigOf(p.n);
+  const canPropose = !!forOrg && forOrg !== curCity && !!tk && (CP.types || []).some(x => x.k === tk);
+  openDrawer(`${p.f}${p.s ? " · " + p.s : ""} · ${p.lv}`, p.n, html, plain,
+    canPropose ? { k: tk, seed: polIdx } : null);
+}
+
+/* ── 제안서 ── §8-1
+   둘러보기의 가장 큰 빈 곳은 「다른 시 사례를 봤다」에서 「우리도 하자」로 넘어가는 경로였다.
+   이 시트가 그 경로다 — 사례 3건 + 우리 근거 조례 + 담당부서 + 창구를 한 장에 담는다.
+
+   두 가지를 섞지 않는다
+     정책 제안 = 예산·담당부서 소관 (여기)
+     조례 개정 = 시장·의원 발의  (조례비교 탭)
+   난이도가 10배 다르므로 문서에 명시한다.
+
+   원칙 1 — 분모는 235곳이 아니다. 자체 정책이 온통청년에 등록된 곳(CP.orgsWithBasic)이다.
+   「우리 시에 없다」고 쓰지 않고 「등록된 정책이 없다」로만 쓴다. */
+
+/** 그 유형으로 등록된 기초 정책 전부 — 둘러보기 목록과 같은 규칙으로 뽑는다 */
+function typeItems(k) {
+  const out = [];
+  for (const [org, ids] of Object.entries(PD.byOrg))
+    for (const i of ids) if (typeSigOf(PD.pol[i].n) === k) out.push({ p: PD.pol[i], org, i });
+  return out;
+}
+/** 사례 뽑기 — 접수중 등록 우선 · 최근 등록순 · 지자체 중복 제거 · 우리 시 제외.
+ *  보고 있던 정책이 있으면 그것을 1번으로 올린다. */
+function pickCases(items, seedIdx, n = 3) {
+  const pool = items.filter(x => x.org !== curCity);
+  const sorted = pool.slice().sort((a, b) =>
+    (a.p.ov - b.p.ov) || (b.p.r || "").localeCompare(a.p.r || ""));
+  const out = [], seen = new Set();
+  const push = x => { if (x && !seen.has(x.org)) { seen.add(x.org); out.push(x); } };
+  if (seedIdx != null) push(pool.find(x => x.i === seedIdx));
+  for (const x of sorted) { if (out.length >= n) break; push(x); }
+  return out;
+}
+
+const CASE_STATE = p => p.ov === 1 ? "마감 등록" : p.ov === 2 ? "마감 임박 등록" : "접수중 등록";
+function caseHtml(x, mine) {
+  const p = x.p;
+  const v = String(p.v || "").trim();
+  const ages = (p.a || p.b) ? `만 ${p.a ?? "?"}~${p.b ?? "?"}세` : "";
+  return '<div class="case' + (mine ? " mine" : "") + (p.ov === 1 ? " closed2" : "") + '">' +
+    '<div class="cw">' + esc(mine ? curCity.split(" ").slice(-1)[0] + " (우리 시)" : x.org) + '</div>' +
+    '<div class="cn2">' + esc(p.n) + '</div>' +
+    (v ? '<div class="cv">' + nl2br(v.slice(0, 170)) + (v.length > 170 ? "…" : "") + '</div>' : "") +
+    '<div class="cm2"><b>기간</b> ' + esc(periodText(p)) + ' · ' + CASE_STATE(p) +
+      (ages ? '<br><b>대상</b> ' + ages : "") +
+      (p.sc != null && p.sc > 0 ? (ages ? " · " : "<br>") + '<b>규모</b> ' + p.sc.toLocaleString() + '명' + (p.lm ? " 한정" : "") : "") +
+      '<br><b>주관</b> ' + esc(p.i || "—") + ' · 등록 ' + esc(p.r || "미상") +
+      (p.u ? '<br><a class="lnk" href="' + esc(p.u) + '" target="_blank" rel="noopener">' + esc(p.u.slice(0, 44)) + '</a>' : "") +
+    '</div></div>';
+}
+function casePlain(x, no) {
+  const p = x.p;
+  return [
+    `${no}) ${x.org} — 「${p.n}」`,
+    `   지원 내용: ${String(p.v || "-").replace(/\n+/g, " / ").slice(0, 220)}`,
+    `   기간: ${periodText(p)} (${CASE_STATE(p)})`,
+    `   대상: ${(p.a || p.b) ? `만 ${p.a ?? "?"}~${p.b ?? "?"}세` : "연령 정보 없음"}` +
+      (p.sc != null && p.sc > 0 ? ` / 규모 ${p.sc.toLocaleString()}명${p.lm ? " 한정" : ""}` : ""),
+    `   주관: ${p.i || "-"} (등록 ${p.r || "미상"})`,
+    ...(p.u ? [`   안내: ${p.u}`] : []),
+  ].join("\n");
+}
+
+function openProposal(k, seedIdx) {
+  const t = (CP.types || []).find(x => x.k === k);
+  const items = typeItems(k);
+  const label = (t && (t.label || t.k)) || k;
+  const cases = pickCases(items, seedIdx);
+  const ours = items.filter(x => x.org === curCity)
+    .sort((a, b) => (a.p.ov - b.p.ov) || (b.p.r || "").localeCompare(a.p.r || ""));
+  const r = orgOf(curCity);
+  const short = curCity.split(" ").slice(-1)[0];
+  const denom = CP.orgsWithBasic;
+  const nAdopt = t ? t.n : new Set(items.map(x => x.org)).size;
+  const nLive = t ? t.nLive : new Set(items.filter(x => x.p.ov !== 1).map(x => x.org)).size;
+  const isNew = ours.length === 0;
+  const tel = r.t ? `<a class="ptel" href="tel:${r.t.replace(/\D/g, "")}">${esc(r.t)}</a>` : "—";
+  const ourLive = ours.filter(x => x.p.ov !== 1).length;
+
+  const html =
+    F("제안 요지", '<span class="adopt">' + nAdopt + '곳</span> / 자체 정책이 등록된 ' + denom + '곳이 이 유형을 운영' +
+      '<span class="sub">그중 <b>' + nLive + '곳</b>이 접수중으로 등록돼 있습니다. ' + (isNew
+        ? esc(short) + '는 이 유형으로 <b>등록된 정책이 없습니다.</b>'
+        : esc(short) + '도 <b>' + ours.length + '건</b> 등록돼 있습니다' +
+          (ourLive === 0 ? ' — 다만 <b>접수중으로 등록된 건이 0건</b>입니다.' : '. 지원 수준·규모를 사례와 대조하십시오.')) +
+      '</span>', "") +
+    F("먼저 확인할 것", '<div class="keynote">온통청년은 <b>지자체 자발 등록</b>이고 갱신 인센티브가 없습니다. ' +
+      '<b>「등록이 없다」와 「시행하지 않는다」는 다릅니다.</b> ' +
+      (isNew ? '담당부서에 <b>이미 하고 있는지 먼저 확인</b>하십시오 — 확인 없이 「없다」고 말하면 회의에서 한 번에 반박당합니다.'
+             : '우리 시 등록분이 낡았을 수 있으니 <b>올해 회차를 시 홈페이지에서 확인</b>하십시오.') +
+      '</div>') +
+    F("다른 시 사례 " + cases.length + "건", (cases.length
+        ? cases.map(x => caseHtml(x)).join("")
+        : '<div class="case">사례를 뽑을 수 없습니다.</div>') +
+      '<span class="sub">등록된 사실만 옮겼습니다 — <b>우수 여부는 판정하지 않았습니다.</b> ' +
+      '접수중 등록을 먼저, 지자체가 겹치지 않게 뽑았습니다.</span>') +
+    (ours.length ? F(esc(short) + " 등록분 " + ours.length + "건", ours.slice(0, 3).map(x => caseHtml(x, true)).join("") +
+      (ours.length > 3 ? '<span class="sub">외 ' + (ours.length - 3) + '건</span>' : "")) : "") +
+    F("우리 시 근거 — 그대로 인용", '「' + esc(r.n) + '」 ' + esc(r.c || "") +
+      '<div class="pquote">' + esc(r.q || "조례가 연령을 명시하지 않았습니다.") + '</div>' +
+      '<span class="sub">청년 ' + (r.a && r.b ? '만 ' + r.a + '~' + r.b + '세' : "연령 미상") +
+      (r.b && DB.hi[r.b] ? ' · 상한 ' + r.b + '세는 전국 ' + DB.hi[r.b] + '곳이 쓰는 정의' : "") +
+      ' · <a class="lnk" href="' + lawUrl(r.m) + '" target="_blank" rel="noopener">법제처 원문</a></span>') +
+    F("담당부서 — 여기부터", esc(r.d || "담당부서 미상") + '<br>' + tel +
+      '<span class="sub">청년 조례 소관 부서입니다. 이 사업 담당이 다르면 연결을 요청하십시오.</span>') +
+    F("난이도 — 조례 개정이 아니다", '이 제안은 <b>사업 신설·확대</b>입니다. 예산과 담당부서 소관에서 결정되므로 ' +
+      '조례 개정보다 경로가 짧습니다.' +
+      '<span class="sub">조례 개정은 시장 또는 의원 발의 사항입니다 — 그 제안은 「조례비교」 탭에서 따로 만듭니다.</span>') +
+    F("어디에 넣는가", '<ul class="steps">' +
+      '<li><b>청년정책단 안건으로 상정</b> — 회의록에 남긴다. 기록이 다음 단계의 재료다</li>' +
+      '<li><b>담당부서 사전 협의</b> — 위 사례를 들고 간다. 예산 편성 일정을 함께 확인한다</li>' +
+      '<li><b>국민신문고</b> — 소관 부서에 회신 의무가 있어 답변이 문서로 남는다 ' +
+        '<a href="https://www.epeople.go.kr/" target="_blank" rel="noopener">epeople.go.kr</a></li>' +
+      '<li><b>온통청년 정책제안</b> — 국무조정실 청년정책조정실로 전달된다 ' +
+        '<a href="https://www.youthcenter.go.kr/" target="_blank" rel="noopener">youthcenter.go.kr</a></li>' +
+      '</ul>') +
+    F("출처와 한계", '정책 — 온통청년 청년정책 API 전수 · 수집 ' + PD.date + '<br>' +
+      '조례 — 법제처 국가법령정보센터 조례 원문 ' + DB.orgs + '곳 전수 · 수집 ' + DB.date +
+      '<span class="sub">유형 판정은 핵심어 사전 ' + ((CP.typeCoverage || {}).dict ?? "?") + '종입니다. ' +
+      '사전 밖 특수사업 ' + ((CP.typeCoverage || {}).unsigned ?? "?") + '건은 비교에서 빠졌으니 ' +
+      '<b>' + nAdopt + '곳은 하한</b>입니다.<br>등록 데이터라 예산 규모·집행 성과는 들어 있지 않습니다.</span>');
+
+  const plain = [
+    `[정책 제안] 「${label}」 — ${curCity} ${isNew ? "신규 도입" : "확대·개선"} 제안`,
+    `근거일: 정책 ${PD.date} 수집 · 조례 ${DB.date} 수집`, "",
+    "■ 제안 요지",
+    `자체 청년정책이 온통청년에 등록된 ${denom}곳 중 ${nAdopt}곳이 이 유형을 운영하고 있고, 그중 ${nLive}곳이 접수중으로 등록돼 있습니다.`,
+    isNew
+      ? `${curCity}는 이 유형으로 등록된 정책이 없습니다.`
+      : `${curCity}도 ${ours.length}건 등록돼 있습니다${ourLive === 0 ? " (다만 접수중으로 등록된 건은 0건)" : ""}.`,
+    `  ※ 온통청년은 지자체 자발 등록이고 갱신 인센티브가 없습니다. 「등록이 없다」와 「시행하지 않는다」는 다릅니다.`,
+    `  ※ ${isNew ? "담당부서에 이미 하고 있는지 먼저 확인하십시오." : "우리 시 등록분이 낡았을 수 있으니 올해 회차를 시 홈페이지에서 확인하십시오."}`, "",
+    `■ 다른 시 사례 ${cases.length}건 (등록된 사실만 · 우수 판정 아님)`,
+    ...cases.map((x, n) => casePlain(x, n + 1)),
+    ...(ours.length ? ["", `■ ${curCity} 등록분 ${ours.length}건`,
+      ...ours.slice(0, 3).map((x, n) => casePlain(x, n + 1))] : []), "",
+    "■ 우리 시 근거 (그대로 인용 가능)",
+    `조례: 「${r.n}」 ${r.c || ""}`,
+    `원문: ${r.q || "-"}`,
+    `청년 연령: ${r.a && r.b ? `만 ${r.a}~${r.b}세` : "미상"}` +
+      (r.b && DB.hi[r.b] ? ` (상한 ${r.b}세는 전국 ${DB.hi[r.b]}곳이 쓰는 정의)` : ""),
+    `법제처 원문: ${lawUrl(r.m)}`,
+    `소관 부서: ${r.d || "-"}  ${r.t || ""}`,
+    `  ※ 청년 조례 소관 부서입니다. 사업 담당이 다르면 연결을 요청하십시오.`, "",
+    "■ 난이도",
+    "이 제안은 사업 신설·확대입니다 — 예산과 담당부서 소관에서 결정됩니다.",
+    "조례 개정(시장·의원 발의)보다 경로가 짧습니다.", "",
+    "■ 어디에 넣는가",
+    "① 청년정책단 안건으로 상정 — 회의록에 남긴다. 기록이 다음 단계의 재료다",
+    "② 담당부서 사전 협의 — 위 사례를 들고 간다. 예산 편성 일정을 함께 확인한다",
+    "③ 국민신문고 — 소관 부서에 회신 의무가 있어 답변이 문서로 남는다  https://www.epeople.go.kr/",
+    "④ 온통청년 정책제안 — 국무조정실 청년정책조정실로 전달된다  https://www.youthcenter.go.kr/", "",
+    "■ 출처와 한계",
+    `정책: 온통청년 청년정책 API 전수 (수집 ${PD.date})`,
+    `조례: 법제처 국가법령정보센터 조례 원문 ${DB.orgs}곳 전수 (수집 ${DB.date})`,
+    `유형 판정: 핵심어 사전 ${(CP.typeCoverage || {}).dict ?? "?"}종. 사전 밖 특수사업 ${(CP.typeCoverage || {}).unsigned ?? "?"}건은 비교에서 빠졌으므로 ${nAdopt}곳은 하한입니다.`,
+    "등록 데이터라 예산 규모·집행 성과는 들어 있지 않습니다.",
+  ].join("\n");
+
+  openDrawer(`${isNew ? "신규 도입 제안" : "확대·개선 제안"} · ${nAdopt}곳 채택`,
+    `「${label}」 제안서`, html, plain, null);
 }
 
 /* ── 둘러보기: 다른 시는 이런 걸 합니다 ──
@@ -940,13 +1147,7 @@ function renderBrowse() {
 
   /* 그 유형을 하는 모든 지자체의 정책 카드 */
   const mine = new Set(CP.orgTypes[curCity] || []);
-  const list = [];
-  for (const [org, ids] of Object.entries(PD.byOrg)) {
-    for (const i of ids) {
-      const p = PD.pol[i];
-      if (typeSigOf(p.n) === curBrowseType) list.push({ p, org });
-    }
-  }
+  const list = typeItems(curBrowseType);
   list.sort((a, b) => (a.p.ov - b.p.ov) || (b.p.r || "").localeCompare(a.p.r || ""));
 
   $("browseNote").innerHTML =
@@ -954,14 +1155,29 @@ function renderBrowse() {
     (mine.has(curBrowseType) ? '<b style="color:var(--in)">우리 시도 함</b>' : '우리 시 등록 없음') +
     ' · 접수중 ' + t2.nLive + '곳</span>';
 
+  /* 제안서로 넘어가는 경로 — 사례를 봐도 제안으로 이어지지 않던 빈 곳(§8-1) */
+  const short = esc(curCity.split(" ").slice(-1)[0]);
+  const has = mine.has(curBrowseType);
+  const btn = $("btnPropose");
+  btn.textContent = has
+    ? '「' + (t2.label || t2.k) + '」 확대·개선 제안서 만들기'
+    : '「' + (t2.label || t2.k) + '」 ' + curCity.split(" ").slice(-1)[0] + '에 제안하기';
+  btn.onclick = () => openProposal(curBrowseType);
+  $("proposeNote").innerHTML = has
+    ? short + '도 이 유형을 등록하고 있습니다. 제안서에서 <b>지원 수준·규모를 다른 시와 나란히</b> 놓고 봅니다.'
+    : short + '는 이 유형으로 <b>등록된 정책이 없습니다</b> — 실제 시행 여부는 담당부서 확인이 먼저입니다. ' +
+      '제안서에 사례 3건 · 우리 조례 근거 · 담당부서 · 창구가 한 장으로 들어갑니다.';
+
   const shown = list.slice(0, 40);
   $("browseList").innerHTML = shown.length
+    /* 전화는 그 정책의 지자체 것을 보여준다. forOrg 를 안 넘기면
+       다른 시 정책 카드에 우리 시 번호가 붙어 전화를 잘못 걸게 된다. */
     ? shown.map(({ p, org }) =>
-        polCard(p, '<span class="bdg lv">' + esc(org.split(" ").slice(-1)[0]) + '</span>')).join("") +
+        polCard(p, '<span class="bdg lv">' + esc(org.split(" ").slice(-1)[0]) + '</span>', org)).join("") +
       (list.length > 40 ? '<li class="more">' + shown.length + '건 표시 · 전체 ' + list.length + '건</li>' : "")
     : '<li class="empty">이 유형으로 등록된 정책이 없습니다.</li>';
   [...$("browseList").querySelectorAll(".pcard")].forEach((b, i) =>
-    b.addEventListener("click", () => openPolicy(shown[i].p, shown[i].org)));
+    b.addEventListener("click", () => openPolicy(shown[i].p, shown[i].org, shown[i].i)));
   $("tc6").textContent = types.length;
 }
 

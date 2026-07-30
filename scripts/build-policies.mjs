@@ -59,10 +59,27 @@ const dupNames = new Set(Object.entries(BASIC.reduce((a, b) => (a[b.nm] = (a[b.n
 const sidoShort = s => s.replace(/(특별자치)?(광역시|특별시|자치시|자치도|시|도)$/, "");
 const hayOf = r => [r.sprvsnInstCdNm, r.operInstCdNm, r.rgtrInstCdNm].filter(Boolean).join(" | ");
 
+/** 기관명이 **명시적으로 가리키는** 시도들 */
+const sidosIn = hay => SIDO.filter(s => hay.includes(s) || hay.includes(sidoShort(s)));
+/**
+ * 기관명이 다른 시도를 명시했으면 그 시도의 기초만 후보다.
+ *
+ * 「광주시청」(=광주광역시청)이 경기도 **광주시** 로 붙어 광주광역시 정책
+ * 199건이 통째로 경기도 광주시에 귀속됐다(2026-07-30 4단 감사).
+ * 그 200건짜리 가짜 버킷이 「기초 정책이 가장 많은 곳」이라 1:1 대조의 기본
+ * 비교 대상이기도 했다. 동명 검사(dupNames)로는 못 잡는다 — 광주광역시는
+ * 이 데이터셋에서 시도이고 기초 목록에 없어서 「광주시」가 유일 후보가 된다.
+ */
+const sidoConsistent = (hay, full) => {
+  const m = sidosIn(hay);
+  return m.length === 0 || m.includes(full.split(" ")[0]);
+};
+
 /** 기관명으로 기초 지자체를 확실히 특정할 수 있으면 그 이름 */
 function basicByName(r) {
   const hay = hayOf(r);
-  const hit = BASIC.filter(b => hay.includes(b.nm) && (!dupNames.has(b.nm) || hay.includes(sidoShort(b.sido))));
+  const hit = BASIC.filter(b => hay.includes(b.nm) && (!dupNames.has(b.nm) || hay.includes(sidoShort(b.sido))))
+    .filter(b => sidoConsistent(hay, b.full));
   return hit.length === 1 ? hit[0].full : null;
 }
 /** 코드북 구성용 넓은 단서 — 정책명·URL 까지 본다.
@@ -74,6 +91,7 @@ function basicByWide(r) {
   for (const b of BASIC_LONG) {
     if (!hay.includes(b.nm)) continue;
     if (dupNames.has(b.nm) && !hay.includes(sidoShort(b.sido))) continue;   // 동명은 시도명 동반 필수
+    if (!sidoConsistent(hay, b.full)) continue;                             // 다른 시도를 명시했으면 후보 아님
     return b.full;
   }
   return null;
