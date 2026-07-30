@@ -95,6 +95,13 @@ T("첫 카드가 진행 중", c1.length > 0 && !c1[0].className.includes("closed
 T("상태 배지 있음", c1.every(c => c.querySelector(".bdg")));
 T("전화 표시", c1.some(c => /\d{2,3}-\d{3,4}-\d{3,4}/.test(c.querySelector(".tel")?.textContent || "")));
 
+T("등록 신선도 경고", ($("#freshWarn")?.textContent || "").length > 20,
+  ($("#freshWarn")?.textContent || "").slice(0, 42));
+T("상태 문구가 단정형 아님", !($("#statusbar")?.textContent || "").includes("신청 가능"),
+  ($("#statusbar")?.textContent || "").slice(0, 32));
+T("중복 병합 수치 노출", /\d/.test($("#uniqCnt")?.textContent || ""),
+  `원본 ${$("#recCnt")?.textContent} → 실질 ${$("#uniqCnt")?.textContent}`);
+
 console.log("\n── 레벨 필터 ──");
 T("레벨 칩 3개 (중앙 제외)", $$("#levelbar [data-lv]").length === 3, $$("#levelbar [data-lv]").map(b => b.textContent).join(" / "));
 T("우리 시 목록에 중앙 없음", $$("#list1 .pcard .badges").every(e => !e.textContent.includes("중앙")),

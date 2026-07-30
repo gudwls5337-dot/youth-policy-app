@@ -160,6 +160,50 @@ POL.rows.forEach(p => {
   if (unmatchedSample.length < 8) unmatchedSample.push(`${p.sprvsnInstCdNm || "?"} / ${p.plcyNm.slice(0, 24)}`);
 });
 
+/* ── 중복 레코드 병합 ──
+   동일 정책이 여러 레코드로 올라와 있다. 「청년내일저축계좌 지원」은 4건(2025년분 잔존),
+   쌍의 두 레코드가 서로 다른 aplyPrdSeCd 를 갖는 경우도 있다(하나는 마감, 하나는 특정기간).
+   총건수를 근거로 쓰면 정정 대상이 되므로 병합한다.
+
+   키: 정책명 + 귀속 지자체. 최종수정일이 늦은 것을 채택하고,
+   상태 코드가 상충하면 **보수적으로 마감 쪽**을 택한다(열어놓는 오류가 더 위험하다). */
+const ownerOf = i => {
+  for (const [o, ids] of Object.entries(byOrg)) if (ids.includes(i)) return o;
+  for (const [s, ids] of Object.entries(bySido)) if (ids.includes(i)) return s;
+  return central.includes(i) ? "중앙" : "미분류";
+};
+const dupKey = new Map();
+POL.rows.forEach((raw, i) => {
+  const k = `${pol[i].n} ${ownerOf(i)}`;
+  const cur = dupKey.get(k);
+  const mod = String(raw.lastMdfcnDt || "");
+  if (!cur) { dupKey.set(k, { keep: i, mod, all: [i] }); return; }
+  cur.all.push(i);
+  if (mod > cur.mod) { cur.keep = i; cur.mod = mod; }
+});
+let merged = 0, conflictState = 0;
+const dropped = new Set();
+for (const [, g] of dupKey) {
+  if (g.all.length < 2) continue;
+  merged += g.all.length - 1;
+  /* 상태 상충 시 마감 우선 */
+  const codes = new Set(g.all.map(i => pol[i].ac));
+  if (codes.size > 1) {
+    conflictState++;
+    const closed = g.all.find(i => pol[i].ac === "3");
+    if (closed != null) g.keep = closed;
+    pol[g.keep].dupConflict = 1;
+  }
+  pol[g.keep].dup = g.all.length;
+  g.all.filter(i => i !== g.keep).forEach(i => dropped.add(i));
+}
+/* 인덱스에서 중복분 제거 */
+const prune = arr => arr.filter(i => !dropped.has(i));
+for (const o of Object.keys(byOrg)) byOrg[o] = prune(byOrg[o]);
+for (const s of Object.keys(bySido)) bySido[s] = prune(bySido[s]);
+const centralPruned = prune(central);
+central.length = 0; central.push(...centralPruned);
+
 /* ── 등록률 — "없다" 와 "등록이 없다" 를 구분하기 위한 근거 ── */
 const SELF_PORTAL = {
   "서울특별시": "청년몽땅정보통(youth.seoul.go.kr)",
@@ -192,14 +236,16 @@ for (const o of orgs) {
 const outPath = join(ROOT, "docs/data/policies-by-org.json");
 writeFileSync(outPath, JSON.stringify({
   date: POL.snapshotDate, total: POL.rows.length, baseline: true,
-  counts: { central: central.length, unmatched, codebook: Object.keys(book).length },
+  counts: { central: central.length, unmatched, codebook: Object.keys(book).length,
+    records: POL.rows.length, unique: POL.rows.length - merged, merged, conflictState },
   registry, staleness,
   pol, central, bySido, byOrg,
 }), "utf8");
 
 const per = o => (byOrg[o]?.length || 0) + (bySido[o.split(" ")[0]]?.length || 0);
 const ys = "경상남도 양산시";
-console.log(`정책 ${POL.rows.length}건 귀속`);
+console.log(`정책 원본 ${POL.rows.length}건 → 중복 병합 ${merged}건 제거 → 실질 ${POL.rows.length - merged}건`);
+console.log(`  상태코드 상충 중복 ${conflictState}쌍 — 마감 쪽 채택`);
 console.log(`  코드북 ${Object.keys(book).length}개 코드 역추출 (충돌 미채택 ${conflicts.length} · board 불일치 ${badBook.length})`);
 console.log(`  중앙 ${central.length} · 광역 ${Object.values(bySido).flat().length} · 기초 ${Object.values(byOrg).flat().length} · 미분류 ${unmatched}`);
 if (unmatched) console.log(`    미분류 예: ${unmatchedSample.slice(0, 3).join(" | ")}`);

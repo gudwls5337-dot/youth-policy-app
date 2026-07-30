@@ -373,8 +373,8 @@
     </div>
     <div class="stats">
       <div class="stat"><b class="num" id="ageBig">—</b><span id="stAg">청년 연령</span></div>
-      <div class="stat live"><b class="num" id="c1">—</b><span>신청 가능</span></div>
-      <div class="stat closed"><b class="num" id="c3">—</b><span>종료</span></div>
+      <div class="stat live"><b class="num" id="c1">—</b><span>접수중 등록</span></div>
+      <div class="stat closed"><b class="num" id="c3">—</b><span>마감 등록</span></div>
     </div>
   </header>
 
@@ -382,9 +382,11 @@
     <!-- 1. 정책 -->
     <section class="screen" id="sc-policy">
       <div class="shead">
-        <h2>우리 시가 하는 것</h2>
-        <p><b>중앙부처 정책은 여기 없습니다</b> — 전국이 똑같아서 차이를 만들지 않습니다(정보 탭에서 확인).
-          여기 있는 것은 <b>우리 시와 도가 직접 만든 정책</b>이고, 정책단이 바꿀 수 있는 범위입니다.</p>
+        <h2>온통청년에 등록된 것</h2>
+        <p><b>「지금 신청 가능」이 아니라 「등록된 신청기간」입니다.</b>
+          지자체가 몰아서 등록하고 갱신을 안 하는 경우가 많아, 등록 상태와 실제 시행이 다를 수 있습니다.
+          중앙부처 정책은 전국이 같아 정보 탭으로 옮겼습니다.</p>
+        <div class="warnbox" id="freshWarn"></div>
       </div>
       <div class="chips" id="levelbar"></div>
       <div class="chips" id="tabs"></div>
@@ -512,7 +514,11 @@
       </div>
 
       <div class="fine">
-        <div><b>정책</b> 온통청년 API 전수 <span class="num">2,691</span>건 · 수집 <span class="num" id="snapDate">—</span>. 중앙·광역·기초를 이 지역 기준으로 합산.</div>
+        <div><b>정책</b> 온통청년 API 원본 <span class="num" id="recCnt">—</span>건 → 중복 병합 후 실질 <span class="num" id="uniqCnt">—</span>건 · 수집 <span class="num" id="snapDate">—</span>.</div>
+        <div><b>정책 데이터의 한계</b> 지자체가 자발적으로 등록하고 갱신 인센티브가 없습니다.
+          자체 정책이 등록된 곳은 <span class="num" id="regOrgs">—</span>/235곳뿐이고,
+          <span class="num" id="staleOrgs">—</span>곳은 최종 마감일이 작년 이전입니다.
+          <b>「등록이 없다」와 「시행하지 않는다」는 다릅니다.</b></div>
         <div><b>조례</b> 법제처 Open API 전수. 연령 정의·근거 조문·담당부서·전화 <span class="num">235</span>곳.</div>
         <div><b>귀속 한계</b> 기관명 텍스트로 지역을 판정합니다. 단서가 없는 <span class="num">170</span>건은 <b>미분류</b>로 남겼습니다 — 임의 배정하지 않았습니다.</div>
         <div><b>종료 판정</b> 신청 마감과 사업 종료 중 먼저 닫히는 쪽 기준. 상시·수시는 종료로 보지 않습니다.</div>
@@ -607,6 +613,11 @@ function flash(btn, msg) {
 /* ═══════════ 초기화 ═══════════ */
 $("snapDate").textContent = PD.date;
 $("c4").textContent = DB.parsed;
+$("recCnt").textContent = (PD.counts?.records ?? PD.total).toLocaleString();
+$("uniqCnt").textContent = (PD.counts?.unique ?? PD.total).toLocaleString();
+$("regOrgs").textContent = Object.values(PD.byOrg).filter(v => v.length).length;
+$("staleOrgs").textContent = Object.values(PD.staleness || {})
+  .filter(v => v.lastApply && v.lastApply < String(PD.date).slice(0, 4) + "0101").length;
 DB.rows.slice().sort((a, b) => a.o.localeCompare(b.o, "ko")).forEach(r => {
   const o = document.createElement("option");
   o.value = r.o; o.textContent = r.o;
@@ -921,9 +932,19 @@ function renderPolicies() {
     b.addEventListener("click", () => { curLevel = b.dataset.lv; renderPolicies(); }));
 
   $("statusbar").innerHTML =
-    `<button class="chip" aria-pressed="${!showClosed}" data-sc="0">신청 가능 ${live.length}</button>` +
-    `<button class="chip" aria-pressed="${showClosed}" data-sc="1">종료 포함 ${all.length}</button>` +
+    `<button class="chip" aria-pressed="${!showClosed}" data-sc="0">접수중 등록 ${live.length}</button>` +
+    `<button class="chip" aria-pressed="${showClosed}" data-sc="1">마감 포함 ${all.length}</button>` +
     `<span class="note">기준일 ${PD.date}</span>`;
+
+  /* 등록 신선도 경고 — 우리 시 탭 상단 */
+  const st2 = (PD.staleness || {})[curCity];
+  const shortNm = esc(curCity.split(" ").slice(-1)[0]);
+  $("freshWarn").innerHTML = st2
+    ? `${shortNm} 자체 등록 <b>${st2.n}건</b> · 최근 등록 <b>${esc(st2.lastReg || "미상")}</b>` +
+      (st2.live === 0 ? ` · <b>접수중으로 등록된 건 0</b>` : "") +
+      `<br>등록 시점이 오래됐다면 <b>시 홈페이지에서 올해 회차를 확인</b>하십시오.
+       실례: 양산시 청년정책단은 등록상 2024년 3기 모집이 마지막이고 <b>2026년 4기 모집은 등록돼 있지 않습니다.</b>`
+    : `${shortNm} 자체 정책이 온통청년에 등록돼 있지 않습니다. 도·중앙 정책만 표시됩니다.`;
   $$("#statusbar [data-sc]").forEach(b =>
     b.addEventListener("click", () => { showClosed = b.dataset.sc === "1"; renderPolicies(); }));
 
