@@ -165,7 +165,11 @@ T("비교 화면 전환", $("#sc-gap")?.classList.contains("on"));
 T("요약 숫자", /\d/.test($("#gapSummary .gapnum")?.textContent || ""), $("#gapSummary .gapnum")?.textContent);
 const gc = $$("#gapList .pcard");
 T("없는 유형 카드", gc.length > 0, `${gc.length}장`);
-T("채택 지자체 수 표시", gc.every(c => /\d+곳이 운영/.test(c.querySelector(".amt")?.textContent || "")));
+T("채택 지자체 수 표시", gc.every(c => /\d+곳 채택/.test(c.querySelector(".amt")?.textContent || "")),
+  $("#gapList .amt")?.textContent);
+T("진행 중 곳 수 표시", gc.every(c => /신청 가능 \d+곳|전부 마감/.test(c.textContent)));
+T("노후 경고 (양산)", ($("#staleNotice")?.textContent || "").includes("갱신되지 않았"),
+  ($("#staleNotice h3")?.textContent || "경고 없음"));
 T("등록률 안내", ($("#regNotice")?.textContent || "").includes("등록된 것이 없다"),
   ($("#regNotice .regrow.ours .rc")?.textContent || "").trim() + "건");
 T("우리만 하는 것 섹션", !!$("#onlyList") && (($$("#onlyList .pcard").length > 0) || !!$("#onlyList .empty")),

@@ -117,14 +117,20 @@ function validatePolicies(B) {
   /* 신설·종료 플래그가 날짜와 모순되지 않는가 */
   const YEAR = String(P.date).slice(0, 4);
   every("신설 플래그 = 올해 등록", pol.filter(p => p.nw), p => String(p.r).startsWith(YEAR), p => `${p.n}(${p.r})`);
-  every("신설 아님 = 올해 아님", pol.filter(p => !p.nw && p.r), p => !String(p.r).startsWith(YEAR), p => `${p.n}(${p.r})`);
+  /* 신설 = 올해 등록 AND 원본 마감코드 아님. 올해 등록이지만 마감인 건은 신설이 아니다. */
+  every("신설 플래그 = 마감 아님", pol.filter(p => p.nw), p => p.ac !== "3", p => `${p.n}(코드 ${p.ac})`);
+  every("올해 등록·마감 아님 = 신설", pol.filter(p => String(p.r).startsWith(YEAR) && p.ac !== "3"),
+    p => p.nw === 1, p => `${p.n}(${p.r})`);
   /* 종료 판정은 신청마감(ae)과 사업종료(pe) 중 **먼저 닫히는 쪽**(cl)을 본다.
      사업기간만 보던 이전 기준은 신청이 이미 끝난 962건을 진행 중으로 표시했다. */
   const TODAY = String(P.date).replace(/-/g, "");
   every("cl = ae·pe 중 이른 날짜", pol.filter(p => p.cl),
     p => p.cl === [p.ae, p.pe].filter(Boolean).sort()[0], p => `${p.n}(${p.cl})`);
-  every("종료 플래그 = 마감일 지남", pol.filter(p => p.ov === 1),
-    p => p.cl && p.cl < TODAY && !p.al, p => `${p.n}(${p.cl})`);
+  /* 마감 근거는 둘 중 하나여야 한다 — 날짜가 지났거나, 원본이 마감이라고 했거나.
+     원본 마감코드(0057003)는 날짜가 아예 없는 건이 많다(접수기간 미표기). */
+  every("종료 근거 있음", pol.filter(p => p.ov === 1),
+    p => (p.cl && p.cl < TODAY) || p.ac === "3", p => `${p.n}(cl=${p.cl} 코드=${p.ac})`);
+  every("종료는 상시가 아님", pol.filter(p => p.ov === 1), p => !p.al, p => p.n);
   every("임박 플래그 = 아직 안 지남", pol.filter(p => p.ov === 2),
     p => p.cl && p.cl >= TODAY, p => `${p.n}(${p.cl})`);
   /* 진행 중인데 마감일이 과거인 경우가 있으면 안 된다 — 단 상시·수시는 예외 */
@@ -134,6 +140,19 @@ function validatePolicies(B) {
   /* 종료 사유가 실제 날짜와 맞는가 */
   every("종료 사유 정합", pol.filter(p => p.cr === "신청마감"), p => p.ae === p.cl, p => p.n);
   every("사업종료 사유 정합", pol.filter(p => p.cr === "사업종료"), p => p.pe === p.cl, p => p.n);
+
+  /* ── 원본 코드값 회귀 검사 (2026-07-30 3단 감사) ──
+     자유텍스트("연중")를 읽어 516건을 거짓으로 열어놨던 회귀를 다시는 못 내게 막는다.
+     ac 는 aplyPrdSeCd 끝자리: 1=특정기간 2=상시 3=마감 */
+  every("원본 마감(0057003)은 반드시 마감", pol.filter(p => p.ac === "3"), p => p.ov === 1,
+    p => `${p.n}(ov=${p.ov})`);
+  every("원본 상시(0057002)는 마감 아님", pol.filter(p => p.ac === "2"), p => p.ov !== 1,
+    p => `${p.n}(ov=${p.ov})`);
+  every("원본 특정기간(0057001)은 날짜 있음", pol.filter(p => p.ac === "1"), p => !!(p.ae || p.pe), p => p.n);
+  ok("코드값 보존", pol.filter(p => p.ac).length > pol.length * 0.9,
+    `${pol.filter(p => p.ac).length}/${pol.length}`);
+  /* 상시 플래그는 원본 상시 코드와만 일치해야 한다 */
+  every("상시 플래그 = 원본 상시", pol.filter(p => p.al), p => p.ac === "2", p => `${p.n}(코드 ${p.ac})`);
 
   /* 인덱스 무결성 */
   const all = [...P.central, ...Object.values(P.bySido).flat(), ...Object.values(P.byOrg).flat()];

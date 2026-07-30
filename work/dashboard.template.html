@@ -414,6 +414,7 @@
       </div>
 
       <div class="panel" id="gapSummary"></div>
+      <div class="panel" id="staleNotice"></div>
       <div class="panel" id="regNotice"></div>
 
       <div class="subhead"><h3>없는 사업 유형</h3><span id="gapNote"></span></div>
@@ -999,12 +1000,14 @@ function openGap(t) {
 }
 
 function gapCard(t) {
-  const others = t.orgs.filter(o => o !== curCity).slice(0, 3).map(o => o.split(" ").slice(-1)[0]);
+  const others = (t.liveOrgs?.length ? t.liveOrgs : t.orgs).filter(o => o !== curCity)
+    .slice(0, 3).map(o => o.split(" ").slice(-1)[0]);
   return `<li><button class="pcard gap">
-    <span class="top"><span class="nm">${esc(t.label)}</span><span class="go">›</span></span>
-    <span class="amt">${t.n}곳이 운영 중</span>
-    <span class="badges"><span class="bdg soon">우리 시 없음</span><span class="bdg lv">${esc(t.k)}</span></span>
-    <span class="meta"><span><i>예</i>${esc(others.join(", "))}${t.orgs.length > 4 ? " 외" : ""}</span></span>
+    <span class="top"><span class="nm">${esc(t.label || t.k)}</span><span class="go">›</span></span>
+    <span class="amt">${t.n}곳 채택${t.nLive != null ? ` · 지금 신청 가능 ${t.nLive}곳` : ""}</span>
+    <span class="badges"><span class="bdg soon">우리 시 없음</span>${t.dead ? '<span class="bdg end">채택지 전부 마감</span>' : ""}</span>
+    <span class="meta"><span><i>예</i>${esc(others.join(", "))}${t.orgs.length > 4 ? " 외" : ""}</span>
+      <span><i>사례</i>${esc((t.exName || "").slice(0, 26))}</span></span>
   </button></li>`;
 }
 
@@ -1043,7 +1046,28 @@ function renderGap() {
       <br>제안서에 쓸 때는 반드시 이 한계를 함께 적으십시오.
     </div>` : "";
 
-  $("gapNote").textContent = `${CP.minAdopt}곳 이상 채택 기준`;
+  /* ── 등록 노후도 ──
+     양산 자체 9건이 전부 2024~2025년 신청기간이고 2026년 회차가 등록돼 있지 않다.
+     원본 기준 「마감」이 맞지만 시청 공고로는 운영 중이다(청년날개 FIT, 2026-01-19~12-31).
+     이걸 숨기면 앱이 또 거짓을 말한다. */
+  const stl = (PD.staleness || {})[curCity];
+  const asOf = String(PD.date).replace(/-/g, "");
+  const monthsAgo = d => d ? Math.round((+asOf - +d) / 100 * 12 / 12) : null;
+  if (stl && (stl.live === 0 || (stl.lastApply && stl.lastApply < asOf.slice(0, 4) + "0101"))) {
+    $("staleNotice").innerHTML = `
+      <h3>이 지역 등록이 갱신되지 않았습니다</h3>
+      <div class="sub">온통청년 등록 기준 · 기준일 ${PD.date}</div>
+      <div class="warnbox">
+        ${short} 자체 정책 <b>${stl.n}건</b>은 최근 등록이 <b>${esc(stl.lastReg || "미상")}</b>,
+        가장 늦은 마감일이 <b>${dash(stl.lastApply) || "미상"}</b>입니다.
+        ${stl.live === 0 ? `<b>지금 신청 가능한 것으로 등록된 건이 0건</b>입니다.` : ""}<br>
+        <b>실제로 안 하는 것과 등록이 안 된 것은 다릅니다.</b>
+        회의에 쓰기 전 <b>시 홈페이지·업무보고로 대조</b>하십시오 — 예: 양산시 「청년날개 FIT」은
+        온통청년에 마감으로 등록돼 있지만 시청 공고로는 2026년 운영 중입니다.
+      </div>`;
+  } else $("staleNotice").innerHTML = "";
+
+  $("gapNote").textContent = `${CP.minAdopt}곳 이상 채택 · 사전 ${CP.typeCoverage?.dict ?? ""}종 기준`;
   $("gapList").innerHTML = gaps.length
     ? gaps.map(gapCard).join("")
     : `<li class="empty">보편 유형은 모두 하고 있습니다.</li>`;

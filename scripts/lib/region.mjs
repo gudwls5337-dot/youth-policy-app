@@ -39,12 +39,15 @@ export const isNationwide = r => codes(r).length > NATIONWIDE_MIN;
  * @param rows 원본 레코드
  * @param resolve (row) => "경상남도 양산시" | null   기관명 기반 1차 판정 결과
  */
-export function buildCodebook(rows, resolve) {
+export function buildCodebook(rows, resolve, resolveWide) {
   const votes = new Map();                 // code → Map(org → 표수)
   for (const r of rows) {
     const cs = codes(r);
     if (cs.length !== 1) continue;          // 코드가 하나일 때만 신뢰한다
-    const org = resolve(r);
+    /* 1차는 기관명. 그것만으로는 충남 시군(아산·공주·천안·부여)이 코드북에서
+       통째로 빠졌다 — 기관명이 부서명뿐이라 표가 안 잡혔다(2026-07-30 2단 감사).
+       그래서 정책명·URL 까지 본 넓은 단서를 2차로 쓴다. 다수결이라 오탐이 걸러진다. */
+    const org = resolve(r) || (resolveWide ? resolveWide(r) : null);
     if (!org || org.split(" ").length < 2) continue;
     const c = cs[0];
     if (!votes.has(c)) votes.set(c, new Map());

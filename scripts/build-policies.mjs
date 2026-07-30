@@ -26,6 +26,7 @@ import { readFileSync, writeFileSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildCodebook, basicOf, sidoOf, isNationwide, codes } from "./lib/region.mjs";
+import { applyStatus, APLY } from "./lib/normalize.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const POL = JSON.parse(readFileSync(join(ROOT, "data/20260729수집_청년정책_전수.json"), "utf8"));
@@ -47,7 +48,6 @@ const CENTRAL = /고용노동부|한국고용정보원|보건복지부|국토교
 const clip = (s, n) => { const t = String(s ?? "").replace(/\r\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim(); return t.length > n ? t.slice(0, n) + "…" : t; };
 const ymd = s => { const t = String(s ?? "").trim(); return /^\d{8}$/.test(t) ? t : ""; };
 const aplyEnd = s => { const m = String(s ?? "").match(/(\d{8})\s*~\s*(\d{8})/); return m ? m[2] : ""; };
-const isAlways = p => /상시|수시|연중|기간\s*없음/.test(`${p.aplyYmd ?? ""} ${p.bizPrdEtcCn ?? ""}`);
 
 /* ── 지자체 목록 ── */
 const orgs = ORD.rows.map(r => r.o);
@@ -65,6 +65,20 @@ function basicByName(r) {
   const hit = BASIC.filter(b => hay.includes(b.nm) && (!dupNames.has(b.nm) || hay.includes(sidoShort(b.sido))));
   return hit.length === 1 ? hit[0].full : null;
 }
+/** 코드북 구성용 넓은 단서 — 정책명·URL 까지 본다.
+ *  직접 귀속에는 쓰지 않는다(부분문자열 충돌 위험). 코드북은 다수결이라 안전하다. */
+const BASIC_LONG = [...BASIC].sort((a, b) => b.nm.length - a.nm.length);
+function basicByWide(r) {
+  const hay = [r.plcyNm, r.sprvsnInstCdNm, r.operInstCdNm, r.rgtrInstCdNm, r.aplyUrlAddr, r.refUrlAddr1]
+    .filter(Boolean).join(" | ");
+  for (const b of BASIC_LONG) {
+    if (!hay.includes(b.nm)) continue;
+    if (dupNames.has(b.nm) && !hay.includes(sidoShort(b.sido))) continue;   // 동명은 시도명 동반 필수
+    return b.full;
+  }
+  return null;
+}
+
 function sidoByName(r) {
   const hay = hayOf(r);
   const hit = SIDO.filter(s => hay.includes(s) || hay.includes(sidoShort(s)));
@@ -72,7 +86,7 @@ function sidoByName(r) {
 }
 
 /* ── 코드북 역추출 ── */
-const { book, conflicts } = buildCodebook(POL.rows, basicByName);
+const { book, conflicts } = buildCodebook(POL.rows, basicByName, basicByWide);
 const badBook = Object.values(book).filter(o => !orgs.includes(o));
 
 /* ── 정규화 + 귀속 ── */
@@ -88,10 +102,14 @@ POL.rows.forEach(p => {
   const reg = String(p.frstRegDt || "").slice(0, 10);
   const end = ymd(p.bizPrdEndYmd);
   const ae = aplyEnd(p.aplyYmd);
-  const always = isAlways(p);
-  const closes = [ae, end].filter(Boolean).sort()[0] || "";
-  const ov = always ? 0 : (closes && closes < TODAY ? 1 : (closes && closes <= SOON ? 2 : 0));
-  const reason = !closes ? "" : (ae && ae === closes ? "신청마감" : "사업종료");
+
+  /* 상태는 원본 코드(aplyPrdSeCd)로 판정한다. 자유텍스트("연중")를 읽던 이전 판은
+     516건을 거짓으로 「신청 가능」으로 표시했다(2026-07-30 3단 감사). */
+  const S = applyStatus(p, TODAY);
+  const always = S.st === "always";
+  const closes = S.cl;
+  const reason = S.cr;
+  const ov = S.st === "closed" ? 1 : (closes && closes <= SOON ? 2 : 0);
 
   /* 지원 규모 — 이미 받아놓고 안 쓰던 필드 (2026-07-30 반영) */
   const scale = /^\d+$/.test(String(p.sprtSclCnt ?? "").trim()) ? +p.sprtSclCnt : null;
@@ -109,7 +127,12 @@ POL.rows.forEach(p => {
     u: p.aplyUrlAddr || p.refUrlAddr1 || "",
     pic: clip(p.sprvsnInstPicNm || p.operInstPicNm, 24),
     i: clip(p.sprvsnInstCdNm || p.operInstCdNm || p.rgtrInstCdNm, 40),
-    r: reg, nw: reg.startsWith(THIS_YEAR) ? 1 : 0, ov,
+    r: reg,
+    /* 신설 = 올해 등록 AND 원본이 마감이 아님. 스냅샷 차집합이 가능해질 때까지 보수적으로 본다. */
+    nw: (reg.startsWith(THIS_YEAR) && String(p.aplyPrdSeCd ?? "").trim() !== APLY.CLOSED) ? 1 : 0,
+    ov,
+    /* 원본 코드 — 검증에서 회귀를 잡기 위해 보관한다 */
+    ac: String(p.aplyPrdSeCd ?? "").trim().slice(-1),
   });
 
   /* 등록 실태 — 전국 사업은 제외하고 지역 귀속분만 센다 */
@@ -148,11 +171,29 @@ const registry = SIDO.map(s => ({
   portal: SELF_PORTAL[s] || null,
 })).sort((a, b) => b.n - a.n);
 
+/* ── 등록 노후도 ──
+   양산 자체 9건이 전부 2024~2025년 신청기간이고 2026년 회차 등록이 없다.
+   원본 기준으로는 「마감」이 맞지만 시청 공고로는 운영 중이다(청년날개 FIT).
+   즉 "마감"이라 말하는 것도 거짓이 된다 — 갱신 안 됨을 드러내는 수밖에 없다. */
+const staleness = {};
+for (const o of orgs) {
+  const ids = byOrg[o] || [];
+  if (!ids.length) continue;
+  const regs = ids.map(i => pol[i].r).filter(Boolean).sort();
+  const aplys = ids.map(i => pol[i].ae || pol[i].pe).filter(Boolean).sort();
+  const live = ids.filter(i => pol[i].ov !== 1).length;
+  staleness[o] = {
+    n: ids.length, live,
+    lastReg: regs[regs.length - 1] || null,        // 최근 등록일
+    lastApply: aplys[aplys.length - 1] || null,     // 가장 늦은 마감일
+  };
+}
+
 const outPath = join(ROOT, "docs/data/policies-by-org.json");
 writeFileSync(outPath, JSON.stringify({
   date: POL.snapshotDate, total: POL.rows.length, baseline: true,
   counts: { central: central.length, unmatched, codebook: Object.keys(book).length },
-  registry,
+  registry, staleness,
   pol, central, bySido, byOrg,
 }), "utf8");
 

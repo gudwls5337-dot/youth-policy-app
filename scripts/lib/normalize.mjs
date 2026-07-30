@@ -72,3 +72,40 @@ export function parseAge(text) {
   }
   return null;
 }
+
+
+/* ═══════════ 온통청년 코드값 ═══════════
+   원본이 상태를 코드로 알려주는데 앱은 자유텍스트(bizPrdEtcCn "연중")를 읽고 있었다.
+   그 결과 516건을 거짓으로 「신청 가능」으로 표시했다(2026-07-30 3단 감사).
+
+   aplyPrdSeCd  신청기간 구분
+     0057001 특정기간 — aplyYmd 에 날짜범위가 있다
+     0057002 상시     — aplyYmd 공백, 과거 사업종료일 0건으로 검증됨
+     0057003 마감     — aplyYmd 공백, 86%가 이미 과거
+
+   bizPrdSeCd   사업기간 구분
+     0056001 기간확정 — bizPrdEtcCn 전건 공백
+     0056002 기타서술 — 여기만 "연중·상시·계속" 이 들어간다 (사업기간 전용)
+*/
+export const APLY = { PERIOD: "0057001", ALWAYS: "0057002", CLOSED: "0057003" };
+export const BIZ  = { FIXED: "0056001", FREEFORM: "0056002" };
+
+/** 신청 상태 판정 — 자유텍스트를 보지 않는다.
+ *  @returns { st: "always"|"open"|"closed", cl: 마감일|"", cr: 사유 }  */
+export function applyStatus(p, todayYmd) {
+  const cd = String(p?.aplyPrdSeCd ?? "").trim();
+  const ae = (String(p?.aplyYmd ?? "").match(/(\d{8})\s*~\s*(\d{8})/) || [])[2] || "";
+  const pe = /^\d{8}$/.test(String(p?.bizPrdEndYmd ?? "").trim()) ? String(p.bizPrdEndYmd).trim() : "";
+
+  if (cd === APLY.CLOSED) {
+    /* 원본이 마감이라 했으면 사업기간이 미래여도 마감이다 */
+    const cl = ae || pe || "";
+    return { st: "closed", cl, cr: cl ? (ae ? "신청마감" : "사업종료") : "접수마감" };
+  }
+  if (cd === APLY.ALWAYS) return { st: "always", cl: "", cr: "" };
+
+  /* 0057001 또는 코드 미상 — 날짜로 판정 */
+  const closes = [ae, pe].filter(Boolean).sort()[0] || "";
+  if (closes && closes < todayYmd) return { st: "closed", cl: closes, cr: ae === closes ? "신청마감" : "사업종료" };
+  return { st: "open", cl: closes, cr: closes ? (ae === closes ? "신청마감" : "사업종료") : "" };
+}
