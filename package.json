@@ -8,7 +8,7 @@
     "collect:ordinances": "node scripts/snapshot-ordinances.mjs",
     "collect:definitions": "node scripts/extract-definitions.mjs",
     "collect:policies": "node scripts/snapshot-policies.mjs",
-    "build": "node scripts/build-board.mjs && node scripts/build-policies.mjs && node scripts/build-compare.mjs && node scripts/build.mjs",
+    "build": "node scripts/build-board.mjs && node scripts/build-policies.mjs && node scripts/build-compare.mjs && node scripts/build-gov-compare.mjs && node scripts/build.mjs",
     "validate": "node scripts/validate.mjs",
     "validate:deep": "node scripts/validate.mjs --resample=40",
     "validate:loop": "node scripts/validate.mjs --loop=3600 --resample=15",
@@ -18,7 +18,8 @@
     "audit:report": "node scripts/audit-report.mjs",
     "refresh": "npm run collect:policies && npm run build && npm run check",
     "deploy": "node scripts/deploy.mjs",
-    "pwa": "node scripts/make-pwa.mjs"
+    "pwa": "node scripts/make-pwa.mjs",
+    "collect:governance": "node scripts/extract-governance.mjs"
   },
   "dependencies": {
     "jsdom": "^29.1.1"

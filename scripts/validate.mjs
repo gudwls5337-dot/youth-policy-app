@@ -174,6 +174,39 @@ function validatePolicies(B) {
   return P;
 }
 
+/* ═══════════ 2-B. 조례 조문 비교 ═══════════ */
+function validateGovernance() {
+  console.log("── 조례 조문 (gov-compare.json) ──");
+  if (!existsSync(join(ROOT, "docs/data/gov-compare.json"))) { fails.push("gov-compare.json 없음"); return; }
+  const G = J("docs/data/gov-compare.json");
+  const st = Object.entries(G.orgState).map(([o, v]) => ({ o, ...v }));
+
+  ok("지표 5종", G.metrics.length === 5, `${G.metrics.length}종`);
+  ok("지자체 수", st.length > 200, `${st.length}곳`);
+  every("지표 id 중복 없음", [{ x: new Set(G.metrics.map(m => m.id)).size === G.metrics.length }], v => v.x);
+  every("채택 수가 전체 이하", G.metrics, m => m.n <= m.total, m => `${m.label} ${m.n}/${m.total}`);
+  every("채택 수 > 0", G.metrics, m => m.n > 0, m => m.label);
+  every("제안 문구 있음", G.metrics, m => m.ask && m.why, m => m.label);
+
+  /* 판정과 원문 인용이 함께 있어야 검증이 성립한다 */
+  every("참여기구 판정값", st, v => ["의무", "임의", "없음", "미상"].includes(v.net?.kind), v => `${v.o}:${v.net?.kind}`);
+  every("위원회 판정값", st, v => ["의무", "임의", "없음", "미상"].includes(v.cmte?.kind), v => `${v.o}:${v.cmte?.kind}`);
+  every("판정 있으면 인용도 있음", st.filter(v => v.net?.kind === "의무" || v.net?.kind === "임의"),
+    v => !!v.net?.quote, v => v.o);
+  every("정기회 범위", st.filter(v => v.regular?.n != null), v => v.regular.n >= 1 && v.regular.n <= 12, v => `${v.o}:${v.regular.n}`);
+  every("정원 범위", st.filter(v => v.seats?.n != null), v => v.seats.n >= 3 && v.seats.n <= 100, v => `${v.o}:${v.seats.n}`);
+  every("청년비율 범위", st.filter(v => v.youthQuota?.pct != null), v => v.youthQuota.pct > 0 && v.youthQuota.pct <= 100, v => `${v.o}:${v.youthQuota.pct}`);
+  /* 노력조항과 강제조항 구분이 살아 있는가 — 「조례에 있습니다」가 반박당하는 지점 */
+  every("청년비율 강제여부 표기", st.filter(v => v.youthQuota?.pct != null),
+    v => v.youthQuota.binding === 0 || v.youthQuota.binding === 1, v => v.o);
+  ok("노력조항이 별도로 잡힘", st.filter(v => v.youthQuota?.binding === 0).length > 0,
+    "전부 강제로 뭉개졌는지 확인 필요");
+  every("기본계획 판정값", st, v => ["의무", "임의", "없음", "미상"].includes(v.plan?.kind), v => `${v.o}:${v.plan?.kind}`);
+  every("기본계획 주기 범위", st.filter(v => v.plan?.cycle != null), v => v.plan.cycle >= 1 && v.plan.cycle <= 10, v => `${v.o}:${v.plan.cycle}`);
+
+  console.log(`  ${st.length}곳 · 지표 ${G.metrics.length}종 · ${G.metrics.map(m => m.n).join("/")}`);
+}
+
 /* ═══════════ 3. 빌드 산출물 ═══════════ */
 function validateBuild() {
   console.log("── 빌드 (docs/index.html) ──");
@@ -269,6 +302,7 @@ async function run() {
 
   const B = validateOrdinances();
   const P = validatePolicies(B);
+  validateGovernance();
   validateBuild();
 
   let sample = null;

@@ -166,43 +166,41 @@ const l3 = $$("#list3 .pcard");
 T("전부 종료", l3.length > 0 && l3.every(c => c.className.includes("closed")), `${l3.length}장`);
 T("마감일·사유", /(신청마감|사업종료|종료)\s*\d{4}-\d{2}-\d{2}/.test($("#list3 .meta")?.textContent || ""));
 
-console.log("\n── 비교 화면 ──");
-tab("gap"); await wait(200);
+console.log("\n── 비교 화면 (조례 조문) ──");
+tab("gap"); await wait(220);
 T("비교 화면 전환", $("#sc-gap")?.classList.contains("on"));
-T("요약 숫자", /\d/.test($("#gapSummary .gapnum")?.textContent || ""), $("#gapSummary .gapnum")?.textContent);
-const gc = $$("#gapList .pcard");
-T("없는 유형 카드", gc.length > 0, `${gc.length}장`);
-T("채택 지자체 수 표시", gc.every(c => /\d+곳 채택/.test(c.querySelector(".amt")?.textContent || "")),
-  $("#gapList .amt")?.textContent);
-T("진행 중 곳 수 표시", gc.every(c => /신청 가능 \d+곳|전부 마감/.test(c.textContent)));
+T("요약 숫자", /\d/.test($("#govSummary .gapnum")?.textContent || ""), $("#govSummary .gapnum")?.textContent);
+T("권한 한계 명시", ($("#govSummary")?.textContent || "").includes("정책단 권한 밖"));
+const gc = $$("#govGapList .pcard");
+T("없는 조문 카드", gc.length > 0, `${gc.length}장`);
+T("규정 지자체 수 표시", gc.every(c => /\d+ \/ \d+곳 규정/.test(c.querySelector(".amt")?.textContent || "")),
+  $("#govGapList .amt")?.textContent);
+T("우리 현재 상태 표시", gc.every(c => (c.querySelector(".meta")?.textContent || "").includes("우리")));
+T("있는 조문 섹션", $$("#govHaveList .pcard").length > 0 || !!$("#govHaveList .empty"),
+  `${$$("#govHaveList .pcard").length}장`);
 T("노후 경고 (양산)", ($("#staleNotice")?.textContent || "").includes("갱신되지 않았"),
   ($("#staleNotice h3")?.textContent || "경고 없음"));
-T("등록률 안내", ($("#regNotice")?.textContent || "").includes("등록된 것이 없다"),
-  ($("#regNotice .regrow.ours .rc")?.textContent || "").trim() + "건");
-T("우리만 하는 것 섹션", !!$("#onlyList") && (($$("#onlyList .pcard").length > 0) || !!$("#onlyList .empty")),
-  `${$$("#onlyList .pcard").length}장`);
-T("커버리지 표", $$("#coverPanel .covrow").length >= 5, `${$$("#coverPanel .covrow").length}행`);
-T("커버리지 있음/없음 구분", $$("#coverPanel .covrow.miss").length > 0 || $$("#coverPanel .covrow.have").length > 0);
+T("등록 실태 패널", ($("#regNotice")?.textContent || "").includes("등록 관행") ||
+  ($("#regNotice")?.textContent || "").includes("따로 운영"));
 T("1:1 대조 선택지", $("#cmpCity")?.options.length > 200, `${$("#cmpCity")?.options.length}개`);
-T("1:1 대조 표", $$("#cmpBody .cmptab").length === 1 && ($("#cmpBody")?.textContent || "").includes("신청 가능 정책"));
+T("1:1 대조가 조례 축", ($("#cmpBody")?.textContent || "").includes("조례 지표 보유"));
 
-click($("#gapList .pcard")); await wait(200);
-T("제안 근거 시트 열림", $("#drawer")?.hidden === false, $("#dTitle")?.textContent.slice(0, 28));
+click($("#govGapList .pcard")); await wait(220);
+T("개정 제안 시트 열림", $("#drawer")?.hidden === false, $("#dTitle")?.textContent);
 const sheetTxt = $("#dBody")?.textContent || "";
-T("채택 지자체 수", /\d+곳/.test(sheetTxt));
-T("이미 하는 곳 명단", sheetTxt.includes("이미 하는 곳"));
-T("우리 시 근거 조례", sheetTxt.includes("우리 시 근거"));
+T("전국 규정 현황", /\d+곳/.test(sheetTxt));
+T("우리 시 현재", sheetTxt.includes("우리 시 현재"));
+T("무엇을 바꾸는가", sheetTxt.includes("무엇을 바꾸는가"));
+T("경로 안내 — 권한 한계", sheetTxt.includes("정책단 권한 밖"));
 T("담당부서 전화", !!$("#dBody .ptel"), $("#dBody .ptel")?.textContent);
-T("다음 절차", sheetTxt.includes("다음 절차"));
-T("한계 명시", sheetTxt.includes("등록된 것이 없다") || sheetTxt.includes("미등록"));
 click($("#dClose")); await wait(360);
 
 /* 비교 결과가 지자체마다 달라야 한다 */
-const gapOf = () => $$("#gapList .pcard .nm").map(e => e.textContent);
-await pickCity("경상남도 양산시"); tab("gap"); await wait(200); const gA = gapOf();
-await pickCity("전남광주통합특별시 순천시"); tab("gap"); await wait(200); const gB = gapOf();
-T("지자체별 없는 유형이 다름", gA.length !== gB.length || overlap(gA, gB) < Math.max(gA.length, gB.length),
-  `양산 ${gA.length}종 / 순천 ${gB.length}종`);
+const gapOf = () => $$("#govGapList .pcard .nm").map(e => e.textContent);
+await pickCity("경상남도 양산시"); tab("gap"); await wait(220); const gA = gapOf();
+await pickCity("강원특별자치도"); tab("gap"); await wait(220); const gB = gapOf();
+T("지자체별 없는 조문이 다름", gA.length !== gB.length || overlap(gA, gB) < Math.max(gA.length, gB.length),
+  `양산 ${gA.length}종 / 강원 ${gB.length}종`);
 await pickCity("경상남도 양산시");
 
 console.log("\n── 중앙 정책 (정보 탭) ──");
