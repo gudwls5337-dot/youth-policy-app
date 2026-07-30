@@ -58,7 +58,8 @@ console.log("\n── 앱 셸 ──");
 T("하단 탭 5개", $$(".tb").length === 5, $$(".tb").map(b => b.dataset.sc).join(","));
 T("비교 탭 존재", !!$$(".tb").find(b => b.dataset.sc === "gap"));
 T("화면 5개", $$(".screen").length === 5);
-T("기본 화면은 비교", $("#sc-gap")?.classList.contains("on"));
+T("기본 화면은 우리 시", $("#sc-policy")?.classList.contains("on"));
+T("둘러보기 탭 존재", !!$$(".tb").find(b => b.dataset.sc === "browse"));
 T("헤더 고정 요소", !!$(".appbar") && !!$("#stNm") && !!$("#city"));
 T("지자체 선택지", $("#city")?.options.length > 200, `${$("#city")?.options.length}개`);
 
@@ -198,9 +199,9 @@ click($("#dClose")); await wait(360);
 /* 비교 결과가 지자체마다 달라야 한다 */
 const gapOf = () => $$("#govGapList .pcard .nm").map(e => e.textContent);
 await pickCity("경상남도 양산시"); tab("gap"); await wait(220); const gA = gapOf();
-await pickCity("강원특별자치도"); tab("gap"); await wait(220); const gB = gapOf();
+await pickCity("강원특별자치도 양구군"); tab("gap"); await wait(220); const gB = gapOf();
 T("지자체별 없는 조문이 다름", gA.length !== gB.length || overlap(gA, gB) < Math.max(gA.length, gB.length),
-  `양산 ${gA.length}종 / 강원 ${gB.length}종`);
+  `양산 ${gA.length}종 / 양구 ${gB.length}종`);
 await pickCity("경상남도 양산시");
 
 console.log("\n── 중앙 정책 (정보 탭) ──");
@@ -208,8 +209,8 @@ tab("info"); await wait(180);
 T("중앙 목록 렌더", $$("#listCentral .pcard").length > 0, `${$$("#listCentral .pcard").length}장`);
 T("전부 중앙", $$("#listCentral .pcard .badges").every(e => e.textContent.includes("중앙")));
 
-tab("region"); await wait(150);
-T("지역 화면", $("#sc-region")?.classList.contains("on"));
+tab("gap"); await wait(180);
+T("조례비교 탭에 조례 상세", !!$("#quote") && !!$("#dist") && !!$("#govDetail"));
 T("조례 인용문", ($("#quote")?.textContent || "").length > 10, ($("#quote")?.textContent || "").slice(0, 34) + "…");
 T("담당부서", ($("#dept")?.textContent || "").length > 1, $("#dept")?.textContent);
 T("전화 tel: 링크", ($("#tel")?.getAttribute("href") || "").startsWith("tel:"), $("#tel")?.textContent);
@@ -243,7 +244,7 @@ T("종료 상세 경고", ($("#dBody")?.textContent || "").includes("이미 종�
   ($("#dBody .keynote")?.textContent || "").slice(0, 40));
 click($("#dClose")); await wait(360);
 
-tab("region"); await wait(150);
+tab("gap"); await wait(150);
 click($("#desigA .gcard")); await wait(180);
 T("지정지역 조례 상세", $("#drawer")?.hidden === false, $("#dTitle")?.textContent);
 T("조례 인용 블록", !!$("#dBody .pquote"));

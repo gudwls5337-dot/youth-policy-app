@@ -59,7 +59,14 @@ function articles(xml) {
     no: pick(b, "조문번호"),
     title: pick(b, "조제목"),
     body: flat(pick(b, "조내용")),
-  })).map(a => ({ ...a, num: a.no ? parseInt(a.no.slice(0, 4), 10) : null }));
+  /* 조문번호는 6자리다: 앞 4자리 조번호 + 뒤 2자리 가지번호.
+     철원군 `000902` = 제9조의2. 8자리로 가정하면 가지번호를 통째로 놓친다.
+     조문번호를 인용하는 자료이므로 「제9조」와 「제9조의2」를 섞으면 안 된다. */
+  })).map(a => {
+    const main = a.no ? parseInt(a.no.slice(0, 4), 10) : null;
+    const sub = a.no && a.no.length >= 6 ? parseInt(a.no.slice(4, 6), 10) : 0;
+    return { ...a, num: main, sub, label: main ? `제${main}조${sub ? `의${sub}` : ""}` : null };
+  });
 }
 
 /** 인용문 — 근거 문장만 잘라낸다. 판정과 함께 저장해야 검증이 된다. */
@@ -82,26 +89,48 @@ function extract(xml) {
   const byTitle = re => arts.filter(a => re.test(a.title));
   const first = re => byTitle(re)[0] || null;
 
-  /* ① 참여기구 — 심의기구(위원회) 와 참여기구(네트워크·협의체) 를 나눠 본다 */
-  const cmte = first(/위원회|심의|조정/);
-  const net = first(/네트워크|협의체|참여기구|정책단|청년참여/);
+  /* ① 참여기구 — 심의기구(위원회) 와 참여기구(네트워크·협의체) 를 나눠 본다
+     함정: 삼척시는 「청년지원협의체」가 심의기구다(「심의하기 위하여 … 둔다」).
+     조제목만 보면 참여기구로 오인해 의무/임의가 뒤집힌다(2026-07-30 4단 감사).
+     → 본문 목적어로 갈라낸다. 「심의·의결」이면 위원회다. */
+  const isDeliberative = a => a && /심의|의결|자문에 응하기|조정하기/.test(a.body);
+  const cmteCands = [...byTitle(/위원회|심의|조정/), ...arts.filter(isDeliberative)];
+  const cmte = cmteCands[0] || null;
+  const netCands = byTitle(/네트워크|협의체|참여기구|정책단|청년참여/).filter(a => !isDeliberative(a));
+  const net = netCands[0] || null;
+  /* 어미가 「있다」로만 끝나지 않는다. 춘천시는 「운영할 수 있으며」로 이어 쓴다.
+     이걸 놓치면 임의가 의무로 뒤집힌다(2026-07-30 4단 감사).
+     그리고 임의 판정은 **제1항**을 우선한다 — 뒤 항의 「분과를 둘 수 있다」에 끌려가면 안 된다. */
+  const MAY = /(둘|설치할|구성할|운영할)\s*수\s*있(다|으며|으나|고)/;
+  const MUST = /(둔다|설치한다|구성한다|운영한다|두어야\s*한다|설치하여야\s*한다|구성하여\s*운영한다)/;
   const kindOf = b => {
     if (!b) return "없음";
-    if (/둘\s*수\s*있다|설치할\s*수\s*있다|구성할\s*수\s*있다|운영할\s*수\s*있다/.test(b)) return "임의";
-    if (/둔다|설치한다|구성한다|운영한다|두어야\s*한다|설치하여야\s*한다/.test(b)) return "의무";
+    const head = b.split(/[②③④⑤⑥⑦⑧⑨]/)[0] || b;   // 제1항
+    if (MAY.test(head)) return "임의";
+    if (MUST.test(head)) return "의무";
+    if (MAY.test(b)) return "임의";
+    if (MUST.test(b)) return "의무";
     return "미상";
   };
   const pack = (a, kind) => a ? {
-    kind, article: a.num ? `제${a.num}조` : null, title: a.title || null,
-    quote: quoteAround(a.body, /(둔다|둘\s*수\s*있다|설치한다|설치할\s*수\s*있다|구성한다|구성할\s*수\s*있다|운영한다|운영할\s*수\s*있다)/) || a.body.slice(0, 140),
+    kind, article: a.label, title: a.title || null,
+    /* 인용은 제1항에서 뽑는다. 뒤 항을 인용하면 판정과 근거가 어긋난다(춘천 실측). */
+    quote: quoteAround(a.body.split(/[②③④⑤⑥⑦⑧⑨]/)[0] || a.body,
+      /(둔다|둘\s*수\s*있|설치한다|설치할\s*수\s*있|구성한다|구성할\s*수\s*있|운영한다|운영할\s*수\s*있)/, 170)
+      || (a.body.split(/[②③④⑤⑥⑦⑧⑨]/)[0] || a.body).slice(0, 170),
   } : { kind: "없음", article: null, title: null, quote: null };
 
   out.cmte = pack(cmte, kindOf(cmte?.body));
   out.net = pack(net, kindOf(net?.body));
 
-  /* ② 정기회 · ③ 정원 · ④ 청년 비율 — 위원회 관련 조문 안에서만 찾는다 */
-  const scope = byTitle(/위원회|심의|조정|구성|회의|운영/).map(a => a.body).join(" ") ||
-                arts.map(a => a.body).join(" ");
+  /* ② 정기회 · ③ 정원 · ④ 청년 비율 — 위원회 관련 조문 안에서 찾는다.
+     삼척시는 「청년지원협의체의 설치」 한 조에 구성·회의를 몰아 써서, 조제목 필터만으로는
+     통째로 놓쳤다(2026-07-30 4단 감사). 그래서 위원회로 판정된 조문을 범위에 반드시 넣는다. */
+  const scopeArts = [...new Set([
+    ...byTitle(/위원회|심의|조정|구성|회의|운영/),
+    ...(cmte ? [cmte] : []),
+  ])];
+  const scope = scopeArts.map(a => a.body).join(" ") || arts.map(a => a.body).join(" ");
   const RG_MAP = { 일: 1, 이: 2, 삼: 3, 사: 4, 반기: 2, 분기: 4 };
   const RG_RE = /정기회(?:의)?[^.]{0,50}?(?:연|매년)\s*(\d+|[일이삼사]|반기|분기)\s*회|(?:연|매년)\s*(\d+|[일이삼사]|반기|분기)\s*회[^.]{0,20}?정기/;
   const rg = scope.match(RG_RE);
@@ -113,21 +142,36 @@ function extract(xml) {
   const cap = scope.match(CAP_RE);
   out.seats = { n: cap ? +cap[1] : null, quote: cap ? quoteAround(scope, CAP_RE) : null };
 
-  /* 청년 위원 하한 — 비율(%) 또는 분수(N분의 M) 모두 본다 */
-  const PCT_RE = /청년[^.]{0,60}?(\d{1,3})\s*(?:퍼센트|%)\s*이상|위원[^.]{0,50}?(\d{1,3})\s*(?:퍼센트|%)\s*이상[^.]{0,30}?청년/;
-  const FRAC_RE = /청년[^.]{0,60}?(\d{1,2})\s*분의\s*(\d{1,2})\s*이상|위원[^.]{0,50}?(\d{1,2})\s*분의\s*(\d{1,2})\s*이상[^.]{0,30}?청년/;
-  const pm = scope.match(PCT_RE), fm = scope.match(FRAC_RE);
-  let pct = null, q = null;
-  if (pm) { pct = +(pm[1] ?? pm[2]); q = quoteAround(scope, PCT_RE, 180); }
-  else if (fm) {
-    const den = +(fm[1] ?? fm[3]), num = +(fm[2] ?? fm[4]);
-    if (den > 0) pct = Math.round(num / den * 100);
-    q = quoteAround(scope, FRAC_RE, 180);
+  /* 청년 위원 하한 — 표기가 네 갈래다. 하나라도 빠지면 「없다」로 오표시된다.
+     실측 누락 사례(2026-07-30 4단 감사):
+       춘천 「1/2 이상」        아라비아 분수
+       평창 「100분의 30 이상」  큰 분모
+       홍천·양산 「5명 이상」    비율이 아니라 절대 인원  ← 양산 본인 조례를 놓쳤다 */
+  const PCT_RE  = /청년[^.]{0,60}?(\d{1,3})\s*(?:퍼센트|%)\s*이상|위원[^.]{0,50}?(\d{1,3})\s*(?:퍼센트|%)\s*이상[^.]{0,30}?청년/;
+  /* 「100분의 30의 범위 이상으로」처럼 분수와 「이상」 사이에 말이 끼는 경우가 있다(평창군). */
+  const FRAC_RE = /청년[^.]{0,60}?(\d{1,3})\s*분의\s*(\d{1,3})[^.]{0,12}?이상|위원[^.]{0,50}?(\d{1,3})\s*분의\s*(\d{1,3})[^.]{0,12}?이상[^.]{0,30}?청년/;
+  const SLASH_RE= /청년[^.]{0,60}?(\d{1,3})\s*\/\s*(\d{1,3})\s*이상|위원[^.]{0,50}?(\d{1,3})\s*\/\s*(\d{1,3})\s*이상[^.]{0,30}?청년/;
+  const HEAD_RE = /청년[^.]{0,40}?(\d{1,3})\s*명\s*이상[^.]{0,20}?(?:포함|위촉|되도록)|청년\s*위원[^.]{0,30}?(\d{1,3})\s*명\s*이상/;
+
+  let pct = null, heads = null, q = null;
+  const pm = scope.match(PCT_RE), fm = scope.match(FRAC_RE), sm = scope.match(SLASH_RE), hm = scope.match(HEAD_RE);
+  if (pm)      { pct = +(pm[1] ?? pm[2]); q = quoteAround(scope, PCT_RE, 190); }
+  else if (fm) { const d = +(fm[1] ?? fm[3]), n = +(fm[2] ?? fm[4]); if (d > 0) pct = Math.round(n / d * 100); q = quoteAround(scope, FRAC_RE, 190); }
+  else if (sm) { const n = +(sm[1] ?? sm[3]), d = +(sm[2] ?? sm[4]); if (d > 0) pct = Math.round(n / d * 100); q = quoteAround(scope, SLASH_RE, 190); }
+  else if (hm) { heads = +(hm[1] ?? hm[2]); q = quoteAround(scope, HEAD_RE, 190);
+                 /* 정원이 있으면 실질 비율로 환산해 비교 가능하게 한다 */
+                 if (out.seats?.n) pct = Math.round(heads / out.seats.n * 100); }
+
+  /* 문언 강도 3등급 — 「포함하여야 한다」(강제) / 「되도록 한다」(지향) / 「노력하여야 한다」(노력)
+     회의에서 "조례에 있습니다" 라고 말했다가 "노력 조항입니다" 로 반박당하는 지점이다.
+     철원군 「되도록 한다」는 둘 중 어느 쪽도 아니어서 별도 등급으로 뺀다. */
+  let binding = null;
+  if (q) {
+    if (/노력(하여야|해야|한다)/.test(q)) binding = 0;            // 노력조항
+    else if (/되도록\s*한다/.test(q)) binding = 2;                 // 지향 문구
+    else binding = 1;                                              // 강제
   }
-  /* 「노력하여야 한다」(권고) 와 「포함하여야 한다」(강제) 는 논거 강도가 완전히 다르다.
-     회의에서 "조례에 있습니다" 라고 말했다가 "노력 조항입니다" 로 반박당하는 지점이다. */
-  const binding = q ? !/노력(하여야|해야|한다)/.test(q) : null;
-  out.youthQuota = { pct, binding: pct == null ? null : (binding ? 1 : 0), quote: q };
+  out.youthQuota = { pct, heads, binding: (pct == null && heads == null) ? null : binding, quote: q };
 
   /* ⑤ 기본계획 — 의무 표현이 다양하다: 수립하여야/수립해야/수립하고 … 시행하여야 */
   const plan = first(/기본\s*계획/);
@@ -137,12 +181,17 @@ function extract(xml) {
        의무 조항이 임의로 떨어진다(고성군 실측, 2026-07-30). */
     const head = (b.split(/[②③④⑤⑥]/)[0] || b);
     const cyc = head.match(/(\d+)\s*년\s*마다/) || b.match(/(\d+)\s*년\s*마다/);
-    const may = /수립할\s*수\s*있다|수립·?\s*시행할\s*수\s*있다/.test(head);
-    const must = !may && /수립하여야|수립해야|수립·?\s*시행하여야|수립·?\s*시행해야|수립한다|수립하고[^.]{0,20}시행하여야|시행하여야\s*한다/.test(head);
+    /* 의무 어미가 매우 다양하다. 아래는 실측으로 확인한 변형(2026-07-30 4단 감사).
+         「수립하여야 한다」 「수립해야 한다」 「수립·시행하여야 한다」 「수립·시행해야 한다」
+         「수립하고 이를 시행하여야 한다」 「수립하고 이를 시행한다」
+         「수립·시행하도록 하여야 한다」 「수립하고 시행하여야 한다」
+       공통점은 「할 수 있다」가 아니라는 것이다. 그래서 임의를 먼저 배제하고 나머지를 의무로 본다. */
+    const may = /수립할\s*수\s*있다|수립·?\s*시행할\s*수\s*있다|수립하거나/.test(head);
+    const must = !may && /수립(하여야|해야|한다|하고|·?\s*시행)/.test(head);
     out.plan = {
       cycle: cyc ? +cyc[1] : null,
       kind: must ? "의무" : may ? "임의" : "미상",
-      article: plan.num ? `제${plan.num}조` : null,
+      article: plan.label,
       quote: quoteAround(head, /(\d+\s*년\s*마다|수립하여야|수립해야|수립할\s*수\s*있다|수립한다)/, 170) || head.slice(0, 170),
     };
   } else out.plan = { cycle: null, kind: "없음", article: null, quote: null };

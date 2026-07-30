@@ -31,3 +31,6 @@
 {"at":"2026-07-30T04:04:57.198Z","passed":true,"checks":74,"fails":[],"warns":[],"sample":null}
 {"at":"2026-07-30T04:07:24.169Z","passed":true,"checks":74,"fails":[],"warns":[],"sample":null}
 {"at":"2026-07-30T04:07:49.510Z","passed":true,"checks":74,"fails":[],"warns":[],"sample":null}
+{"at":"2026-07-30T04:31:49.481Z","passed":false,"checks":74,"fails":["청년비율 강제여부 표기 — 3건: 강원특별자치도 철원군, 경상남도 거창군, 전남광주통합특별시 영암군"],"warns":[],"sample":null}
+{"at":"2026-07-30T04:32:29.367Z","passed":true,"checks":76,"fails":[],"warns":[],"sample":null}
+{"at":"2026-07-30T04:32:30.809Z","passed":true,"checks":76,"fails":[],"warns":[],"sample":null}

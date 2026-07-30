@@ -196,11 +196,17 @@ function validateGovernance() {
   every("정기회 범위", st.filter(v => v.regular?.n != null), v => v.regular.n >= 1 && v.regular.n <= 12, v => `${v.o}:${v.regular.n}`);
   every("정원 범위", st.filter(v => v.seats?.n != null), v => v.seats.n >= 3 && v.seats.n <= 100, v => `${v.o}:${v.seats.n}`);
   every("청년비율 범위", st.filter(v => v.youthQuota?.pct != null), v => v.youthQuota.pct > 0 && v.youthQuota.pct <= 100, v => `${v.o}:${v.youthQuota.pct}`);
-  /* 노력조항과 강제조항 구분이 살아 있는가 — 「조례에 있습니다」가 반박당하는 지점 */
+  /* 문언 강도 3등급 — 0 노력조항 · 1 강제 · 2 지향(「되도록 한다」)
+     「조례에 있습니다」가 반박당하는 지점이라 뭉개면 안 된다. */
   every("청년비율 강제여부 표기", st.filter(v => v.youthQuota?.pct != null),
-    v => v.youthQuota.binding === 0 || v.youthQuota.binding === 1, v => v.o);
+    v => [0, 1, 2].includes(v.youthQuota.binding), v => `${v.o}:${v.youthQuota.binding}`);
   ok("노력조항이 별도로 잡힘", st.filter(v => v.youthQuota?.binding === 0).length > 0,
     "전부 강제로 뭉개졌는지 확인 필요");
+  ok("지향 문구가 별도로 잡힘", st.filter(v => v.youthQuota?.binding === 2).length > 0,
+    "「되도록 한다」를 강제로 뭉개면 반박당한다");
+  /* 절대 인원 하한도 잡혔는가 — 양산 「청년을 5명 이상」을 놓쳐 오탐을 냈던 지점 */
+  ok("절대 인원 하한 인식", st.filter(v => v.youthQuota?.heads != null).length > 0,
+    "비율(%)만 찾고 「N명 이상」을 놓치면 우리 시 조례에서 반박당한다");
   every("기본계획 판정값", st, v => ["의무", "임의", "없음", "미상"].includes(v.plan?.kind), v => `${v.o}:${v.plan?.kind}`);
   every("기본계획 주기 범위", st.filter(v => v.plan?.cycle != null), v => v.plan.cycle >= 1 && v.plan.cycle <= 10, v => `${v.o}:${v.plan.cycle}`);
 

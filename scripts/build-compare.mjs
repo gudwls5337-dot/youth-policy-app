@@ -78,6 +78,9 @@ writeFileSync(outPath, JSON.stringify({
   basicTotal: Object.values(D.byOrg).flat().length,
   orgsWithBasic: Object.values(D.byOrg).filter(v => v.length).length,
   typeCoverage: { signed, unsigned, dict: CORE_TYPES.length },
+  /* 화면이 같은 규칙으로 유형을 판정하도록 정규식 소스를 함께 싣는다.
+     사본을 따로 두면 사전을 고칠 때 화면이 어긋난다. */
+  dict: CORE_TYPES.map(([k, re]) => [k, re.source]),
   types, cover,
   orgTypes: Object.fromEntries(Object.entries(orgTypes).map(([o, s]) => [o, [...s]])),
   orgCover: Object.fromEntries(Object.entries(orgCover).map(([o, s]) => [o, [...s]])),
