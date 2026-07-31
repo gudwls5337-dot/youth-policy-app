@@ -266,6 +266,47 @@ const ourShort = "양산";
 T("다른 시 목록에 우리 시 없음",
   bc.every(c => !(c.querySelector(".badges")?.textContent || "").includes(ourShort)),
   `${bc.filter(c => (c.querySelector(".badges")?.textContent || "").includes(ourShort)).length}장 섞임`);
+/* ── 요구 6 — 같은 도 → 전국 2단계 ── */
+const scopeChips = $$("#browseScope [data-bs]");
+T("범위 칩 2개", scopeChips.length === 2, scopeChips.map(b => b.textContent.trim()).join(" / "));
+T("칩에 건수가 미리 보임", scopeChips.every(b => /\d+$/.test(b.textContent.trim())),
+  scopeChips.map(b => b.textContent.trim()).join(" / "));
+/* 도 사례가 얇다 — 유형당 0~4건, 5/20 유형은 0건. 0이면 눌러도 빈 화면이므로 막는다. */
+T("0건 범위는 비활성", scopeChips.every(b => /\s0$/.test(b.textContent.trim()) === b.disabled),
+  scopeChips.map(b => `${b.textContent.trim()}${b.disabled ? "(off)" : ""}`).join(" / "));
+
+/** 같은 도 사례가 있는 유형과 없는 유형을 각각 찾는다 */
+async function pickByScope(wantSido) {
+  for (const b of $$("#browseTypes [data-bt]")) {
+    click(b); await wait(150);
+    const sc = $$("#browseScope [data-bs]").find(x => x.dataset.bs === "sido");
+    if (!sc) continue;
+    if ((!sc.disabled) === wantSido) return b.dataset.bt;
+  }
+  return null;
+}
+const tSido = await pickByScope(true);
+T("도 사례가 있는 유형 존재", !!tSido, tSido || "못 찾음");
+T("도가 기본 선택", $$("#browseScope [data-bs]").find(x => x.dataset.bs === "sido")?.getAttribute("aria-pressed") === "true");
+T("도 목록에 다른 도가 안 섞임",
+  $$("#browseList .pcard .badges").length > 0 &&
+  $$("#browseList .pcard").every(c => !/광역시|특별시|특별자치/.test(c.querySelector(".badges")?.textContent || "")),
+  `${$$("#browseList .pcard").length}장`);
+const nSido = $$("#browseList .pcard").length;
+click($$("#browseScope [data-bs]").find(x => x.dataset.bs === "all")); await wait(180);
+T("전국으로 바뀌면 목록이 달라짐", $$("#browseList .pcard").length !== nSido,
+  `도 ${nSido}장 → 전국 ${$$("#browseList .pcard").length}장`);
+T("전국 목록에 우리 도가 빠짐",
+  $$("#browseList .pcard").every(c => !(c.querySelector(".badges")?.textContent || "").includes("양산")));
+
+const tNoSido = await pickByScope(false);
+if (tNoSido) {
+  T("도 사례 0건인 유형 존재", true, tNoSido);
+  T("0건이면 전국이 자동 선택", $$("#browseScope [data-bs]").find(x => x.dataset.bs === "all")?.getAttribute("aria-pressed") === "true");
+  T("빈 화면 대신 카드가 보임", $$("#browseList .pcard").length > 0, `${$$("#browseList .pcard").length}장`);
+}
+if (tSido) { click($$("#browseTypes [data-bt]").find(b => b.dataset.bt === tSido)); await wait(180); }
+
 const mineCards = $$("#browseMine .pcard");
 if (mineCards.length) {
   T("우리 시 것은 별도 구역", ($("#browseMine")?.textContent || "").includes("제안 대상 아님"),
@@ -310,6 +351,10 @@ T("분모가 235 아님 (등록된 곳 기준)", /등록된 \d+곳이 이 유형
   (ps.match(/\/ 자체 정책이 등록된 \d+곳/) || ["없음"])[0]);
 T("「등록이 없다」 구분 명시", ps.includes("「등록이 없다」와 「시행하지 않는다」는 다릅니다"));
 T("우수 판정 안 함 명시", ps.includes("우수 여부는 판정하지 않았습니다"));
+/* 요구 6 — 「전국 32곳」보다 「경남 4곳」이 회의에서 세다. 도 단위 절이 있어야 한다. */
+T("제안서에 도 단위 절", $$("#dBody .pfield dt").some(e => e.textContent.includes("경남 안에서는")),
+  $$("#dBody .pfield dt").map(e => e.textContent).slice(0, 3).join(" / "));
+T("도 0건이면 「최초 도입」으로 전환", /경남 최초 도입|경남 안에서는/.test(ps));
 const cases = $$("#dBody .case");
 T("사례 2건 이상", cases.length >= 2, `${cases.length}건`);
 T("사례에 지자체명·기간·주관", cases.every(c => /기간/.test(c.textContent) && /주관/.test(c.textContent)));

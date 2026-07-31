@@ -461,7 +461,10 @@
       <!-- 우리 시가 하는 것은 여기 따로. 「다른 시」 목록에 섞으면
            이미 하는 사업을 보며 「제안하기」를 누르게 된다. -->
       <div id="browseMine"></div>
-      <div class="subhead"><h3>다른 시가 하는 것</h3><span id="browseOtherNote"></span></div>
+      <!-- 범위 2단계 (요구 6). 같은 도 사례가 전국 사례보다 세다 — 도비 매칭 구조가
+           같고 「거긴 사정이 다르잖아요」를 덜 듣는다. 그래서 도를 먼저 놓는다. -->
+      <div class="chips" id="browseScope"></div>
+      <div class="subhead"><h3 id="browseOtherHead">다른 시가 하는 것</h3><span id="browseOtherNote"></span></div>
       <ul class="cards" id="browseList"></ul>
     </section>
 
@@ -1011,12 +1014,21 @@ function typeItems(k) {
  *  3건만 실리고 접수 임박한 서산시 사례가 빠졌다(2026-07-31 실측). */
 const rankOv = p => (p.ov === 2 ? 0 : p.ov === 0 ? 1 : 2);
 
-/** 사례 뽑기 — 임박·접수중 우선 · 최근 등록순 · 지자체 중복 제거 · 우리 시 제외.
- *  보고 있던 정책이 있으면 그것을 1번으로 올린다. */
+/** 사례 뽑기 — **같은 도 우선** · 임박·접수중 우선 · 최근 등록순 · 지자체 중복 제거
+ *  · 우리 시 제외. 보고 있던 정책이 있으면 그것을 1번으로 올린다.
+ *
+ *  같은 도 사례가 전국 사례보다 세다. 도비 매칭 구조가 같아서 예산 얘기가 통하고,
+ *  「거긴 사정이 다르잖아요」를 덜 듣는다(요구 6). 다만 경남 사례는 유형당 0~4건으로
+ *  얇아서, 도 안에서 채우지 못하면 전국에서 이어 채운다. */
 function pickCases(items, seedIdx, n = 3) {
+  const sido = curCity.split(" ")[0];
   const pool = items.filter(x => x.org !== curCity);
-  const sorted = pool.slice().sort((a, b) =>
-    (rankOv(a.p) - rankOv(b.p)) || (b.p.r || "").localeCompare(a.p.r || ""));
+  const byRank = (a, b) =>
+    (rankOv(a.p) - rankOv(b.p)) || (b.p.r || "").localeCompare(a.p.r || "");
+  const sorted = [
+    ...pool.filter(x => x.org.startsWith(sido)).sort(byRank),
+    ...pool.filter(x => !x.org.startsWith(sido)).sort(byRank),
+  ];
   const out = [], seen = new Set();
   const push = x => { if (x && !seen.has(x.org)) { seen.add(x.org); out.push(x); } };
   if (seedIdx != null) push(pool.find(x => x.i === seedIdx));
@@ -1070,6 +1082,13 @@ function openProposal(k, seedIdx) {
   /* 우리 시가 이 유형을 하는지는 **청년가까e** 로 판단한다(양산 한정).
      온통청년 등록분으로 「신규 도입」이라고 썼다가 담당부서가 「저희 하고 있는데요」
      하면 제안서가 통째로 무너진다 — 실제로 양산 자격증 응시료가 그 경우다. */
+  /* 같은 도 채택 현황 (요구 6). 「전국 32곳」보다 「경남 4곳」이 회의에서 더 세다. */
+  const sido = curCity.split(" ")[0];
+  const sidoNm = sidoShortNm(sido);
+  const inSido = items.filter(x => x.org !== curCity && x.org.startsWith(sido));
+  const sidoOrgs = new Set(inSido.map(x => x.org));
+  const sidoLive = new Set(inSido.filter(x => x.p.ov !== 1).map(x => x.org));
+
   const ysHit = isYS() ? ysSelf().filter(p => typeSigOf(p.nm) === k) : null;
   const ysLive = ysHit ? ysHit.filter(p => p.st === "진행" || p.st === "예정") : null;
   const isNew = ysHit ? ysHit.length === 0 : ours.length === 0;
@@ -1086,6 +1105,14 @@ function openProposal(k, seedIdx) {
             ? ' — 다만 <b>시행중인 건이 0건</b>입니다.'
             : ' (그중 <b>' + ourLive + '건 시행중·예정</b>). 지원 수준·규모를 사례와 대조하십시오.')) +
       ' <span class="note2">우리 시 기준: ' + srcNm + '</span></span>', "") +
+    /* 요구 6 — 같은 도 안의 현황을 따로 세운다. 이게 회의에서 가장 먼저 나오는 질문이다. */
+    F(sidoNm + " 안에서는", (sidoOrgs.size
+      ? '<span class="adopt">' + sidoOrgs.size + '곳</span>이 이 유형을 등록' +
+        '<span class="sub">' + (sidoLive.size ? '그중 <b>' + sidoLive.size + '곳</b>이 접수중입니다. ' : '다만 <b>접수중인 곳은 없습니다</b>. ') +
+        '같은 도라 <b>도비 매칭 구조가 같아</b> 예산 협의에서 통합니다. 아래 사례를 ' + sidoNm + ' 것부터 실었습니다.</span>'
+      : '<b>' + sidoNm + '에는 등록한 곳이 없습니다</b>' +
+        '<span class="sub">제안서에 <b>「' + sidoNm + ' 최초 도입」</b>으로 쓸 수 있습니다. ' +
+        '다만 등록이 없는 것과 시행하지 않는 것은 다르니 <b>인근 시군 담당부서 확인이 먼저</b>입니다.</span>'), "") +
     F("먼저 확인할 것", '<div class="keynote">온통청년은 <b>지자체 자발 등록</b>이고 갱신 인센티브가 없습니다. ' +
       '<b>「등록이 없다」와 「시행하지 않는다」는 다릅니다.</b> ' +
       (isNew ? '담당부서에 <b>이미 하고 있는지 먼저 확인</b>하십시오 — 확인 없이 「없다」고 말하면 회의에서 한 번에 반박당합니다.'
@@ -1130,6 +1157,9 @@ function openProposal(k, seedIdx) {
     isNew
       ? `${curCity}는 이 유형으로 ${ysHit ? "시행하는 사업이 없습니다" : "등록된 정책이 없습니다"}. (기준: ${srcNm})`
       : `${curCity}도 ${ourN}건 ${ysHit ? "하고 있습니다" : "등록돼 있습니다"}${ourLive === 0 ? " (다만 시행중인 건은 0건)" : ` (그중 ${ourLive}건 시행중·예정)`}. (기준: ${srcNm})`,
+    sidoOrgs.size
+      ? `${sidoNm} 안에서는 ${sidoOrgs.size}곳이 등록${sidoLive.size ? ` (그중 ${sidoLive.size}곳 접수중)` : " (접수중인 곳은 없음)"}. 같은 도라 도비 매칭 구조가 같습니다.`
+      : `${sidoNm} 안에는 등록한 곳이 없습니다 — 「${sidoNm} 최초 도입」으로 제안할 수 있습니다. 단, 인근 시군 담당부서 확인이 먼저입니다.`,
     `  ※ 온통청년은 지자체 자발 등록이고 갱신 인센티브가 없습니다. 「등록이 없다」와 「시행하지 않는다」는 다릅니다.`,
     `  ※ ${isNew ? "담당부서에 이미 하고 있는지 먼저 확인하십시오." : "우리 시 등록분이 낡았을 수 있으니 올해 회차를 시 홈페이지에서 확인하십시오."}`, "",
     `■ 다른 시 사례 ${cases.length}건 (등록된 사실만 · 우수 판정 아님)`,
@@ -1167,6 +1197,13 @@ function openProposal(k, seedIdx) {
    「우리는 없다」는 등록 편차 때문에 주장할 수 없지만,
    「저기 이런 게 있다」는 등록된 사실이라 오탐이 없다. */
 let curBrowseType = null;
+/* 요구 6 — 사례를 「같은 도 → 전국」 2단계로 본다. 도가 0건이면 전국으로 자동 전환. */
+let browseScope = "sido";
+/** 「경상남도」→「경남」. 칩과 문장에 긴 이름을 그대로 쓰면 줄이 넘친다. */
+const sidoShortNm = s => String(s || "")
+  .replace(/^(강원|전북|제주|세종)특별자치(도|시)$/, "$1")
+  .replace(/^(충청|전라|경상)(남|북)도$/, (_, a, b) => a[0] + b)
+  .replace(/(특별시|광역시|특별자치시|특별자치도|도)$/, "");
 function renderBrowse() {
   const types = (CP.types || []).slice();
   if (!curBrowseType && types.length) curBrowseType = types[0].k;
@@ -1182,9 +1219,25 @@ function renderBrowse() {
   /* 이 화면은 「**다른 시**는 이런 걸 합니다」다. 우리 시 정책을 목록에 섞으면
      우리가 이미 하는 사업을 보면서 「제안하기」를 누르게 된다. 빼고 따로 알린다. */
   const mine = new Set(CP.orgTypes[curCity] || []);
-  const ours = typeItems(curBrowseType).filter(x => x.org === curCity);
-  const list = typeItems(curBrowseType).filter(x => x.org !== curCity);
-  list.sort((a, b) => (rankOv(a.p) - rankOv(b.p)) || (b.p.r || "").localeCompare(a.p.r || ""));
+  const all = typeItems(curBrowseType);
+  const ours = all.filter(x => x.org === curCity);
+  const others = all.filter(x => x.org !== curCity);
+  const sido = curCity.split(" ")[0];
+  const inSido = others.filter(x => x.org.startsWith(sido));
+  const outSido = others.filter(x => !x.org.startsWith(sido));
+
+  /* 범위 세그먼트 (요구 6). 같은 도 사례가 얇아서 — 유형당 0~4건, 5/20 유형은 0건 —
+     칩에 **건수를 미리 박아** 눌러보기 전에 있는지 알게 한다. 도가 0건이면 전국으로 연다. */
+  if (browseScope === "sido" && !inSido.length) browseScope = "all";
+  const SCOPES = [["sido", sidoShortNm(sido), inSido], ["all", "전국", outSido]];
+  $("browseScope").innerHTML = SCOPES.map(([k, label, arr]) =>
+    '<button class="chip" aria-pressed="' + (browseScope === k) + '" data-bs="' + k + '"' +
+    (arr.length ? "" : " disabled") + '>' + esc(label) + ' ' + arr.length + '</button>').join("");
+  $$("#browseScope [data-bs]").forEach(b =>
+    b.addEventListener("click", () => { browseScope = b.dataset.bs; renderBrowse(); }));
+
+  const list = (browseScope === "sido" ? inSido : outSido).slice()
+    .sort((a, b) => (rankOv(a.p) - rankOv(b.p)) || (b.p.r || "").localeCompare(a.p.r || ""));
 
   $("browseNote").innerHTML =
     '<span class="note">' + esc(t2.label || t2.k) + ' · ' + t2.n + '곳 채택 · 접수중 ' + t2.nLive + '곳 · ' +
@@ -1229,6 +1282,18 @@ function renderBrowse() {
       y ? openYS(y) : openPolicy(x.p, x.org, x.i);
     }));
 
+  /* 도 안에 사례가 0건인 것도 정보다 — 「우리 도에선 아무도 안 한다」는
+     제안서에서 「경남 최초」로 쓸 수 있고, 반대로 등록 관행 문제일 수도 있다.
+     그냥 빈 목록으로 두면 앱이 고장 난 것처럼 보인다. */
+  const shortSido = sidoShortNm(sido);
+  $("browseOtherHead").textContent = browseScope === "sido"
+    ? `${shortSido} 안에서 하는 곳` : "전국에서 하는 곳";
+  const scopeMsg = browseScope === "sido"
+    ? (inSido.length
+      ? `<b>${shortSido} ${new Set(inSido.map(x => x.org)).size}곳</b>이 이 유형을 등록했습니다. 같은 도라 예산 구조가 비슷해 제안서에서 가장 센 근거입니다.`
+      : `${shortSido}에는 이 유형을 등록한 곳이 <b>없습니다</b>.`)
+    : `전국 <b>${new Set(outSido.map(x => x.org)).size}곳</b>입니다 (${shortSido} 제외).`;
+
   const shown = list.slice(0, 40);
   $("browseList").innerHTML = shown.length
     /* 전화는 그 정책의 지자체 것을 보여준다. forOrg 를 안 넘기면
@@ -1236,10 +1301,13 @@ function renderBrowse() {
     ? shown.map(({ p, org }) =>
         polCard(p, '<span class="bdg lv">' + esc(org.split(" ").slice(-1)[0]) + '</span>', org)).join("") +
       (list.length > 40 ? '<li class="more">' + shown.length + '건 표시 · 전체 ' + list.length + '건</li>' : "")
-    : '<li class="empty">이 유형으로 등록된 정책이 없습니다.</li>';
+    : `<li class="empty">${shortSido}에는 이 유형을 등록한 곳이 <b>없습니다.</b>
+       <span class="esub">전국에는 <b>${new Set(outSido.map(x => x.org)).size}곳</b>이 있습니다 — 위 「전국」을 누르십시오.<br>
+       제안서에는 <b>「${shortSido} 최초 도입」</b>으로 쓸 수 있습니다. 다만 등록이 없는 것과
+       시행하지 않는 것은 다르니, 인근 시군 담당부서에 확인이 먼저입니다.</span></li>`;
   [...$("browseList").querySelectorAll(".pcard")].forEach((b, i) =>
     b.addEventListener("click", () => openPolicy(shown[i].p, shown[i].org, shown[i].i)));
-  $("browseOtherNote").textContent = `${list.length}건 · 우리 시 제외`;
+  $("browseOtherNote").innerHTML = `${list.length}건 · ${scopeMsg}`;
   $("tc6").textContent = types.length;
 }
 
