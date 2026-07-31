@@ -114,8 +114,17 @@ self.addEventListener("activate", e => {
 });
 self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;
+  /* 문서(HTML)는 **반드시 서버에 물어본다.** GitHub Pages 가 max-age=600 을 주므로
+     그냥 fetch 하면 브라우저 HTTP 캐시가 최대 10분치 옛 화면을 돌려준다.
+     network-first 로 짜 놓고도 옛 빌드가 계속 보이던 원인이다(2026-07-31). */
+  /* 정규식을 쓰면 템플릿 리터럴에서 백슬래시가 먹힌다(원칙 6). 문자열 검사로 한다. */
+  const path = new URL(e.request.url).pathname;
+  const isDoc = e.request.mode === "navigate" ||
+    e.request.destination === "document" ||
+    path.endsWith("/") || path.endsWith("/index.html");
+  const req = isDoc ? new Request(e.request, { cache: "no-cache" }) : e.request;
   e.respondWith(
-    fetch(e.request)
+    fetch(req)
       .then(res => {
         const copy = res.clone();
         caches.open(V).then(c => c.put(e.request, copy)).catch(() => {});

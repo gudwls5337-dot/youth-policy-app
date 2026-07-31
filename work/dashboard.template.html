@@ -595,6 +595,10 @@
         <div><b>귀속 한계</b> 기관명 텍스트로 지역을 판정합니다. 단서가 없는 <span class="num">170</span>건은 <b>미분류</b>로 남겼습니다 — 임의 배정하지 않았습니다.</div>
         <div><b>종료 판정</b> 신청 마감과 사업 종료 중 먼저 닫히는 쪽 기준. 상시·수시는 종료로 보지 않습니다.</div>
         <div><b>말하지 않는 것</b> 정책이 있다고 예산이 충분한 건 아닙니다. 여기 있는 건 목록이지 성과가 아닙니다.</div>
+        <!-- 어느 빌드를 보고 있는지 화면에서 바로 알 수 있어야 한다. 캐시된 옛 화면을
+             보면서 「데이터가 이상하다」고 판단하는 일을 막는다(2026-07-31). -->
+        <div><b>이 화면의 빌드</b> <span class="num" id="buildAt">—</span>
+          · 최신인지 확인하려면 새로고침(Ctrl+Shift+R) 후 이 값이 바뀌는지 보십시오.</div>
         <div>youth-ordinance-map · CC BY</div>
       </div>
     </section>
@@ -655,6 +659,8 @@ const GV = /*__GOVCOMPARE__*/null;
 const YS = /*__YANGSAN__*/null;
 /* 지난 제안 처리결과 — 양산시 공문 2년치. 사유는 원문 그대로다. */
 const PR = /*__PROPOSALS__*/null;
+/* 빌드 시각 — 캐시된 옛 화면을 판별하는 유일한 표식이다 */
+const BUILT = "/*__BUILT__*/";
 const YS_CITY = YS?.city || "경상남도 양산시";
 const isYS = () => curCity === YS_CITY && !!YS;
 
@@ -700,6 +706,7 @@ function flash(btn, msg) {
 
 /* ═══════════ 초기화 ═══════════ */
 $("snapDate").textContent = PD.date;
+$("buildAt").textContent = BUILT;
 $("c4").textContent = DB.parsed;
 $("recCnt").textContent = (PD.counts?.records ?? PD.total).toLocaleString();
 $("uniqCnt").textContent = (PD.counts?.unique ?? PD.total).toLocaleString();

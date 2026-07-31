@@ -521,6 +521,9 @@ tab("info"); await wait(150);
 T("정보 화면", $("#sc-info")?.classList.contains("on"));
 T("제안 창구 6", $$("#doors .rowlink").length === 6);
 T("출처 표", $$("table.src tbody tr").length >= 6);
+/* 캐시된 옛 화면을 보면서 「데이터가 이상하다」고 판단하는 일을 막는 표식 */
+T("빌드 시각 표시", /\d{4}-\d{2}-\d{2} \d{2}:\d{2} UTC/.test($("#buildAt")?.textContent || ""),
+  $("#buildAt")?.textContent);
 click($("#dlCsv")); await wait(120);
 T("CSV 버튼", true);
 click($("#dlCity")); await wait(120);
