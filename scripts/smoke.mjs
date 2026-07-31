@@ -57,9 +57,11 @@ T("최소 글자 12px", tiny.length === 0, tiny.join(", ") || "OK");
 
 console.log("\n── 앱 셸 ──");
 T("하단 탭 5개", $$(".tb").length === 5, $$(".tb").map(b => b.dataset.sc).join(","));
+/* 제안서가 종착지다. 그 재료는 「다른 시가 하는 것」에서 나오므로 둘러보기가 첫 탭이다. */
+T("첫 탭이 둘러보기", $$(".tb")[0]?.dataset.sc === "browse", $$(".tb").map(b => b.dataset.sc).join(","));
 T("비교 탭 존재", !!$$(".tb").find(b => b.dataset.sc === "gap"));
 T("화면 5개", $$(".screen").length === 5);
-T("기본 화면은 우리 시", $("#sc-policy")?.classList.contains("on"));
+T("기본 화면은 둘러보기", $("#sc-browse")?.classList.contains("on"));
 T("둘러보기 탭 존재", !!$$(".tb").find(b => b.dataset.sc === "browse"));
 T("헤더 고정 요소", !!$(".appbar") && !!$("#stNm") && !!$("#city"));
 T("지자체 선택지", $("#city")?.options.length > 200, `${$("#city")?.options.length}개`);

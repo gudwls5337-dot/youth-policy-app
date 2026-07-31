@@ -411,7 +411,7 @@
 
   <main>
     <!-- 1. 정책 -->
-    <section class="screen on" id="sc-policy">
+    <section class="screen" id="sc-policy">
       <div class="shead">
         <h2 id="pTitle">온통청년에 등록된 것</h2>
         <p id="pLede"><b>「지금 신청 가능」이 아니라 「등록된 신청기간」입니다.</b>
@@ -445,7 +445,7 @@
     </section>
 
 
-    <section class="screen" id="sc-browse">
+    <section class="screen on" id="sc-browse">
       <div class="shead">
         <h2>다른 시는 이런 걸 합니다</h2>
         <p>사업 유형을 고르면 <b>그 유형을 하는 모든 지자체의 정책</b>이 나옵니다.
@@ -602,9 +602,11 @@
 
 <nav class="tabbar" role="tablist" aria-label="주요 화면">
   <div class="tabbar-in">
-    <button class="tb" role="tab" aria-selected="true" data-sc="policy"><span class="ic">◎</span>우리 시<span class="cnt num" id="tc1">—</span></button>
+    <!-- 둘러보기가 첫 탭이다. 정책단의 존속 이유는 제안서이고, 제안서 재료는
+         「다른 시가 하는 것」에서 나온다. 우리 시 현황은 그다음이다. -->
+    <button class="tb" role="tab" aria-selected="true" data-sc="browse"><span class="ic">◇</span>둘러보기<span class="cnt num" id="tc6">—</span></button>
+    <button class="tb" role="tab" aria-selected="false" data-sc="policy"><span class="ic">◎</span>우리 시<span class="cnt num" id="tc1">—</span></button>
     <button class="tb" role="tab" aria-selected="false" data-sc="end"><span class="ic">⊘</span>마감<span class="cnt num" id="tc3">—</span></button>
-    <button class="tb" role="tab" aria-selected="false" data-sc="browse"><span class="ic">◇</span>둘러보기<span class="cnt num" id="tc6">—</span></button>
     <button class="tb" role="tab" aria-selected="false" data-sc="gap"><span class="ic">§</span>조례비교<span class="cnt num" id="tc5">—</span></button>
     <button class="tb" role="tab" aria-selected="false" data-sc="info"><span class="ic">≡</span>정보<span class="cnt num">·</span></button>
   </div>
@@ -682,7 +684,7 @@ const dash = s => s ? String(s).replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3") : "
 const CORE_RE = (CP.dict || []).map(([k, src]) => [k, new RegExp(src)]);
 const typeSigOf = n => { const h = CORE_RE.filter(([, re]) => re.test(String(n || ""))).map(([k]) => k); return h.length ? h.sort().join("+") : ""; };
 const lawUrl = m => `https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=${m}&type=HTML`;
-let curField = "전체", curCity = "경상남도 양산시", showClosed = false, curTab = "policy", curLevel = "전체";
+let curField = "전체", curCity = "경상남도 양산시", showClosed = false, curTab = "browse", curLevel = "전체";
 
 function download(name, text) {
   const b = new Blob(["﻿" + text], { type: "text/plain;charset=utf-8" });
