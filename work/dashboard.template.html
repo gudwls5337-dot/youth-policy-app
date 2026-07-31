@@ -154,6 +154,14 @@
   /* 신청기간이 없어 사업기간으로 판정했음을 카드에서 밝힌다 — 판정과 선언은 다르다 */
   .note2 { color:var(--ink-3); font-size:12px; }
 
+  /* 「우리 시도 한다」 한 줄 — 카드 목록 대신. 우리 시 탭과 경계를 지킨다 */
+  .minerow { display:flex; align-items:center; gap:12px; margin:0 14px 14px;
+    padding:13px 14px; background:var(--in-wk); border:1px solid var(--in); border-radius:10px; }
+  .minetx { flex:1; font-size:var(--t-sm); line-height:1.6; color:var(--ink); }
+  .minesub { display:block; font-size:12px; color:var(--ink-3); margin-top:5px; line-height:1.6; }
+  .gotab { flex:none; background:none; border:0; padding:6px 0 6px 8px; cursor:pointer;
+    color:var(--in-ink); font-family:inherit; font-size:12.5px; font-weight:800; }
+
   /* 상세 맨 위 「신청하러 가기」 — 다 읽고 나서야 링크를 만나면 늦다 */
   .gowrap { margin:0 0 16px; }
   .golink { display:block; width:100%; margin:0; text-align:center; text-decoration:none; }
@@ -1363,25 +1371,20 @@ function renderBrowse() {
       : short + '는 이 유형으로 <b>등록된 정책이 없습니다</b> — 실제 시행 여부는 담당부서 확인이 먼저입니다. ' +
         '제안서에 사례 3건 · 우리 조례 근거 · 담당부서 · 창구가 한 장으로 들어갑니다.');
 
-  /* 우리 시 것은 목록에서 뺐으니 여기서 따로 보여준다 — 「제안하기」가 안 붙는다.
-     **양산은 청년가까e 로 그린다.** 온통청년으로 그리면 우리 시 탭은 「시행중」인데
-     여기선 같은 사업이 「마감」으로 떠서, 한 앱이 두 말을 한다(2026-07-31 신고). */
-  const mineList = ysHit
-    ? ysHit.slice().sort((a, b) => (a.st === "종료") - (b.st === "종료") ||
-        (b.from || b.bizFrom || "").localeCompare(a.from || a.bizFrom || ""))
-    : ours;
+  /* 우리 시 것은 **카드로 늘어놓지 않는다.** 「우리 시」 탭이 따로 있는데 여기에
+     같은 목록을 또 깔면 두 탭의 경계가 흐려진다(2026-07-31 지적). 유형별로
+     「우리도 하나?」만 알면 제안 형태(신규 도입 / 확대·개선)가 정해지므로,
+     한 줄 요약과 그 탭으로 가는 길만 둔다. 상세는 우리 시 탭이 맡는다. */
+  const mineN = ysHit ? ysHit.length : ours.length;
   const mineLive = ysHit ? ysHit.filter(p => p.st !== "종료").length : ours.filter(x => x.p.ov !== 1).length;
-  $("browseMine").innerHTML = mineList.length
-    ? '<div class="subhead"><h3>' + short + '가 하는 것</h3><span>' + mineList.length + '건' +
-      (ysHit ? ' · 시행중·예정 ' + mineLive : '') + ' · 제안 대상 아님</span></div>' +
-      '<ul class="cards">' + mineList.slice(0, 5).map(x => ysHit ? ysCard(x) : polCard(x.p, null, x.org)).join("") + '</ul>' +
-      (ysHit ? '<p class="ctanote">출처 <b>청년가까e</b> — 「우리 시」 탭과 같은 기준입니다.</p>' : "")
+  $("browseMine").innerHTML = mineN
+    ? '<div class="minerow"><span class="minetx"><b>' + short + '도 이 유형을 합니다</b> — ' +
+      mineN + '건' + (ysHit ? ' · 시행중·예정 ' + mineLive + '건' : ' 등록') +
+      '<span class="minesub">' + (ysHit ? '청년가까e 기준' : '온통청년 등록 기준') +
+      ' · 제안 대상이 아니라 <b>비교 대상</b>입니다</span></span>' +
+      '<button class="gotab" type="button" id="goMine">우리 시 탭에서 보기 ›</button></div>'
     : "";
-  [...$("browseMine").querySelectorAll(".pcard")].forEach((b, i) =>
-    b.addEventListener("click", () => {
-      const x = mineList[i];
-      ysHit ? openYS(x) : openPolicy(x.p, x.org, x.i);
-    }));
+  if ($("goMine")) $("goMine").addEventListener("click", () => selectTab("policy"));
 
   /* 도 안에 사례가 0건인 것도 정보다 — 「우리 도에선 아무도 안 한다」는
      제안서에서 「경남 최초」로 쓸 수 있고, 반대로 등록 관행 문제일 수도 있다.

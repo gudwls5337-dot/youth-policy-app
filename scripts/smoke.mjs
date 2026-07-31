@@ -319,24 +319,22 @@ click(liveChips[1]); await wait(180);
 T("마감 포함하면 늘어남", $$("#browseList .pcard").length >= bc.length, `${$$("#browseList .pcard").length}장`);
 click(liveChips[0]); await wait(180);
 
-const mineCards = $$("#browseMine .pcard");
-if (mineCards.length) {
-  T("우리 시 것은 별도 구역", ($("#browseMine")?.textContent || "").includes("제안 대상 아님"),
-    `${mineCards.length}장`);
-  /* 우리 시 탭은 청년가까e 인데 여기만 온통청년이면 같은 사업이 한쪽은 시행중,
-     한쪽은 마감으로 떠서 한 앱이 두 말을 한다(2026-07-31 신고). */
-  T("우리 시 구역도 청년가까e 기준", ($("#browseMine")?.textContent || "").includes("청년가까e"),
-    ($("#browseMine .subhead")?.textContent || "").replace(/\s+/g, " ").slice(0, 40));
-  T("시행 상태 배지를 씀", $$("#browseMine .bdg").some(e => /시행(중|예정|종료)/.test(e.textContent)),
-    $$("#browseMine .bdg").map(e => e.textContent.trim()).slice(0, 3).join(" / "));
-  click(mineCards[0]); await wait(220);
-  T("우리 시 카드엔 제안 버튼 없음", $("#dPropose")?.hidden === true, $("#dTitle")?.textContent?.slice(0, 26));
-  T("상세가 청년가까e 상세", ($("#dBody")?.textContent || "").includes("판정 근거"));
-  click($("#dClose")); await wait(360);
-}
+/* 우리 시 것을 카드로 늘어놓으면 「우리 시」 탭과 경계가 흐려진다(2026-07-31 지적).
+   한 줄 요약과 그 탭으로 가는 길만 둔다 — 상세는 우리 시 탭이 맡는다. */
+T("우리 시 것은 카드로 늘어놓지 않음", $$("#browseMine .pcard").length === 0,
+  `${$$("#browseMine .pcard").length}장`);
+const mineRow = $("#browseMine .minerow");
+T("우리 시도 한다 한 줄 요약", !!mineRow, (mineRow?.textContent || "").replace(/\s+/g, " ").slice(0, 52));
+T("요약이 청년가까e 기준", (mineRow?.textContent || "").includes("청년가까e"));
+T("비교 대상임을 밝힘", (mineRow?.textContent || "").includes("비교 대상"));
+/* 눌러서 우리 시 탭으로 건너갈 수 있어야 한 줄 요약이 막다른 길이 아니다 */
+click($("#goMine")); await wait(220);
+T("우리 시 탭으로 이동", $("#sc-policy")?.classList.contains("on"));
+tab("browse"); await wait(220);
+
 /* 다른 시 정책 카드에 우리 시 전화가 붙으면 전화를 잘못 걸게 된다 */
 const ourTel = $("#tel")?.textContent.replace(/\D/g, "");
-const telsOnCards = [...new Set(bc.map(c => (c.querySelector(".tel")?.textContent || "").replace(/\D/g, "")).filter(Boolean))];
+const telsOnCards = [...new Set($$("#browseList .pcard").map(c => (c.querySelector(".tel")?.textContent || "").replace(/\D/g, "")).filter(Boolean))];
 T("카드 전화가 해당 지자체 것", telsOnCards.filter(t2 => t2 !== ourTel).length > 0,
   `${telsOnCards.length}종 · 우리(${ourTel}) 외 ${telsOnCards.filter(t2 => t2 !== ourTel).length}종`);
 
