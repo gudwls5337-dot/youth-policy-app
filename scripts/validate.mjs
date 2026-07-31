@@ -265,6 +265,17 @@ function validateYangsan() {
 
   /* 공고문 게시판은 robots.txt 차단이라 본문을 담으면 안 된다. URL 만 있어야 정상. */
   every("공고문은 링크만", P.filter(x => x.link), x => /^https?:\/\/[^\s]+$/.test(x.link), x => x.id);
+
+  /* 「신청하러 가기」가 갈 곳. 공고문 링크가 없는 사업이 대부분이라, 신청 직링크가
+     없으면 홈으로만 보내게 된다 — 그러면 버튼이 사실상 죽는다. */
+  every("신청 직링크 형식", P.filter(x => x.applyUrl),
+    x => /^https:\/\/www\.yangsan\.go\.kr\/youth\/plcyPrgrm\/\w+\/view\.do\?mngSn=\d+$/.test(x.applyUrl),
+    x => `${x.id}:${x.applyUrl}`);
+  every("신청 직링크는 신청현황이 있을 때만", P,
+    x => !x.applyUrl || x.capacity != null, x => x.id);
+  const liveNow = P.filter(x => x.origin === "self" && (x.st === "진행" || x.st === "예정"));
+  warn("시행중·예정에 나갈 링크가 있음", liveNow.every(x => x.applyUrl || x.link),
+    `${liveNow.filter(x => !x.applyUrl && !x.link).length}건은 청년가까e 홈으로만 간다`);
 }
 
 function validateBuild() {

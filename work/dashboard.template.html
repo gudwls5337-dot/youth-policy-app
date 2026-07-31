@@ -153,6 +153,11 @@
   .bdg.new  { background:var(--in-wk); color:var(--in-ink); }
   /* 신청기간이 없어 사업기간으로 판정했음을 카드에서 밝힌다 — 판정과 선언은 다르다 */
   .note2 { color:var(--ink-3); font-size:12px; }
+
+  /* 상세 맨 위 「신청하러 가기」 — 다 읽고 나서야 링크를 만나면 늦다 */
+  .gowrap { margin:0 0 16px; }
+  .golink { display:block; width:100%; margin:0; text-align:center; text-decoration:none; }
+  .gonote { display:block; font-size:12px; color:var(--ink-3); line-height:1.65; margin-top:8px; }
   .bdg.lv   { background:var(--line-2); color:var(--ink-3); }
 
   /* 비교 화면 */
@@ -453,6 +458,10 @@
         <button class="btn" id="btnPropose" type="button">우리 시에 제안하기</button>
         <p class="ctanote" id="proposeNote"></p>
       </div>
+      <!-- 우리 시가 하는 것은 여기 따로. 「다른 시」 목록에 섞으면
+           이미 하는 사업을 보며 「제안하기」를 누르게 된다. -->
+      <div id="browseMine"></div>
+      <div class="subhead"><h3>다른 시가 하는 것</h3><span id="browseOtherNote"></span></div>
       <ul class="cards" id="browseList"></ul>
     </section>
 
@@ -997,12 +1006,17 @@ function typeItems(k) {
     for (const i of ids) if (typeSigOf(PD.pol[i].n) === k) out.push({ p: PD.pol[i], org, i });
   return out;
 }
-/** 사례 뽑기 — 접수중 등록 우선 · 최근 등록순 · 지자체 중복 제거 · 우리 시 제외.
+/** 상태 정렬 순위. `ov` 는 0=접수중 1=마감 2=임박 이라 **그대로 오름차순 정렬하면
+ *  마감 임박이 마감보다 아래로 간다.** 실제로 「대학생아르바이트」 제안서에 마감
+ *  3건만 실리고 접수 임박한 서산시 사례가 빠졌다(2026-07-31 실측). */
+const rankOv = p => (p.ov === 2 ? 0 : p.ov === 0 ? 1 : 2);
+
+/** 사례 뽑기 — 임박·접수중 우선 · 최근 등록순 · 지자체 중복 제거 · 우리 시 제외.
  *  보고 있던 정책이 있으면 그것을 1번으로 올린다. */
 function pickCases(items, seedIdx, n = 3) {
   const pool = items.filter(x => x.org !== curCity);
   const sorted = pool.slice().sort((a, b) =>
-    (a.p.ov - b.p.ov) || (b.p.r || "").localeCompare(a.p.r || ""));
+    (rankOv(a.p) - rankOv(b.p)) || (b.p.r || "").localeCompare(a.p.r || ""));
   const out = [], seen = new Set();
   const push = x => { if (x && !seen.has(x.org)) { seen.add(x.org); out.push(x); } };
   if (seedIdx != null) push(pool.find(x => x.i === seedIdx));
@@ -1045,23 +1059,33 @@ function openProposal(k, seedIdx) {
   const label = (t && (t.label || t.k)) || k;
   const cases = pickCases(items, seedIdx);
   const ours = items.filter(x => x.org === curCity)
-    .sort((a, b) => (a.p.ov - b.p.ov) || (b.p.r || "").localeCompare(a.p.r || ""));
+    .sort((a, b) => (rankOv(a.p) - rankOv(b.p)) || (b.p.r || "").localeCompare(a.p.r || ""));
   const r = orgOf(curCity);
   const short = curCity.split(" ").slice(-1)[0];
   const denom = CP.orgsWithBasic;
   const nAdopt = t ? t.n : new Set(items.map(x => x.org)).size;
   const nLive = t ? t.nLive : new Set(items.filter(x => x.p.ov !== 1).map(x => x.org)).size;
-  const isNew = ours.length === 0;
   const tel = r.t ? `<a class="ptel" href="tel:${r.t.replace(/\D/g, "")}">${esc(r.t)}</a>` : "—";
-  const ourLive = ours.filter(x => x.p.ov !== 1).length;
+
+  /* 우리 시가 이 유형을 하는지는 **청년가까e** 로 판단한다(양산 한정).
+     온통청년 등록분으로 「신규 도입」이라고 썼다가 담당부서가 「저희 하고 있는데요」
+     하면 제안서가 통째로 무너진다 — 실제로 양산 자격증 응시료가 그 경우다. */
+  const ysHit = isYS() ? ysSelf().filter(p => typeSigOf(p.nm) === k) : null;
+  const ysLive = ysHit ? ysHit.filter(p => p.st === "진행" || p.st === "예정") : null;
+  const isNew = ysHit ? ysHit.length === 0 : ours.length === 0;
+  const ourN = ysHit ? ysHit.length : ours.length;
+  const ourLive = ysHit ? ysLive.length : ours.filter(x => x.p.ov !== 1).length;
+  const srcNm = ysHit ? "청년가까e" : "온통청년 등록";
 
   const html =
     F("제안 요지", '<span class="adopt">' + nAdopt + '곳</span> / 자체 정책이 등록된 ' + denom + '곳이 이 유형을 운영' +
       '<span class="sub">그중 <b>' + nLive + '곳</b>이 접수중으로 등록돼 있습니다. ' + (isNew
-        ? esc(short) + '는 이 유형으로 <b>등록된 정책이 없습니다.</b>'
-        : esc(short) + '도 <b>' + ours.length + '건</b> 등록돼 있습니다' +
-          (ourLive === 0 ? ' — 다만 <b>접수중으로 등록된 건이 0건</b>입니다.' : '. 지원 수준·규모를 사례와 대조하십시오.')) +
-      '</span>', "") +
+        ? esc(short) + '는 이 유형으로 <b>' + (ysHit ? '시행하는 사업이 없습니다' : '등록된 정책이 없습니다') + '.</b>'
+        : esc(short) + '도 <b>' + ourN + '건</b> ' + (ysHit ? '하고 있습니다' : '등록돼 있습니다') +
+          (ourLive === 0
+            ? ' — 다만 <b>시행중인 건이 0건</b>입니다.'
+            : ' (그중 <b>' + ourLive + '건 시행중·예정</b>). 지원 수준·규모를 사례와 대조하십시오.')) +
+      ' <span class="note2">우리 시 기준: ' + srcNm + '</span></span>', "") +
     F("먼저 확인할 것", '<div class="keynote">온통청년은 <b>지자체 자발 등록</b>이고 갱신 인센티브가 없습니다. ' +
       '<b>「등록이 없다」와 「시행하지 않는다」는 다릅니다.</b> ' +
       (isNew ? '담당부서에 <b>이미 하고 있는지 먼저 확인</b>하십시오 — 확인 없이 「없다」고 말하면 회의에서 한 번에 반박당합니다.'
@@ -1104,8 +1128,8 @@ function openProposal(k, seedIdx) {
     "■ 제안 요지",
     `자체 청년정책이 온통청년에 등록된 ${denom}곳 중 ${nAdopt}곳이 이 유형을 운영하고 있고, 그중 ${nLive}곳이 접수중으로 등록돼 있습니다.`,
     isNew
-      ? `${curCity}는 이 유형으로 등록된 정책이 없습니다.`
-      : `${curCity}도 ${ours.length}건 등록돼 있습니다${ourLive === 0 ? " (다만 접수중으로 등록된 건은 0건)" : ""}.`,
+      ? `${curCity}는 이 유형으로 ${ysHit ? "시행하는 사업이 없습니다" : "등록된 정책이 없습니다"}. (기준: ${srcNm})`
+      : `${curCity}도 ${ourN}건 ${ysHit ? "하고 있습니다" : "등록돼 있습니다"}${ourLive === 0 ? " (다만 시행중인 건은 0건)" : ` (그중 ${ourLive}건 시행중·예정)`}. (기준: ${srcNm})`,
     `  ※ 온통청년은 지자체 자발 등록이고 갱신 인센티브가 없습니다. 「등록이 없다」와 「시행하지 않는다」는 다릅니다.`,
     `  ※ ${isNew ? "담당부서에 이미 하고 있는지 먼저 확인하십시오." : "우리 시 등록분이 낡았을 수 있으니 올해 회차를 시 홈페이지에서 확인하십시오."}`, "",
     `■ 다른 시 사례 ${cases.length}건 (등록된 사실만 · 우수 판정 아님)`,
@@ -1155,28 +1179,55 @@ function renderBrowse() {
   const t2 = types.find(x => x.k === curBrowseType);
   if (!t2) { $("browseList").innerHTML = '<li class="empty">유형 데이터가 없습니다.</li>'; return; }
 
-  /* 그 유형을 하는 모든 지자체의 정책 카드 */
+  /* 이 화면은 「**다른 시**는 이런 걸 합니다」다. 우리 시 정책을 목록에 섞으면
+     우리가 이미 하는 사업을 보면서 「제안하기」를 누르게 된다. 빼고 따로 알린다. */
   const mine = new Set(CP.orgTypes[curCity] || []);
-  const list = typeItems(curBrowseType);
-  list.sort((a, b) => (a.p.ov - b.p.ov) || (b.p.r || "").localeCompare(a.p.r || ""));
+  const ours = typeItems(curBrowseType).filter(x => x.org === curCity);
+  const list = typeItems(curBrowseType).filter(x => x.org !== curCity);
+  list.sort((a, b) => (rankOv(a.p) - rankOv(b.p)) || (b.p.r || "").localeCompare(a.p.r || ""));
 
   $("browseNote").innerHTML =
-    '<span class="note">' + esc(t2.label || t2.k) + ' · ' + t2.n + '곳 채택 · ' +
-    (mine.has(curBrowseType) ? '<b style="color:var(--in)">우리 시도 함</b>' : '우리 시 등록 없음') +
-    ' · 접수중 ' + t2.nLive + '곳</span>';
+    '<span class="note">' + esc(t2.label || t2.k) + ' · ' + t2.n + '곳 채택 · 접수중 ' + t2.nLive + '곳 · ' +
+    '<b>아래는 우리 시를 뺀 목록</b>입니다</span>';
 
-  /* 제안서로 넘어가는 경로 — 사례를 봐도 제안으로 이어지지 않던 빈 곳(§8-1) */
+  /* 제안서로 넘어가는 경로 — 사례를 봐도 제안으로 이어지지 않던 빈 곳(§8-1)
+     「우리 시가 이미 하는가」는 **가장 좋은 소스로** 판단한다. 버튼은 온통청년,
+     안내문은 청년가까e 를 보던 판은 버튼이 「제안하기」인데 안내가 「이미 하고
+     있습니다」라고 말했다 — 한 화면이 두 말을 했다(2026-07-31). */
   const short = esc(curCity.split(" ").slice(-1)[0]);
-  const has = mine.has(curBrowseType);
+  const ysHit = isYS() ? ysSelf().filter(p => typeSigOf(p.nm) === curBrowseType) : null;
+  const ysLive = ysHit ? ysHit.filter(p => p.st === "진행" || p.st === "예정") : null;
+  const has = ysHit ? ysHit.length > 0 : mine.has(curBrowseType);
   const btn = $("btnPropose");
   btn.textContent = has
     ? '「' + (t2.label || t2.k) + '」 확대·개선 제안서 만들기'
     : '「' + (t2.label || t2.k) + '」 ' + curCity.split(" ").slice(-1)[0] + '에 제안하기';
   btn.onclick = () => openProposal(curBrowseType);
-  $("proposeNote").innerHTML = has
-    ? short + '도 이 유형을 등록하고 있습니다. 제안서에서 <b>지원 수준·규모를 다른 시와 나란히</b> 놓고 봅니다.'
-    : short + '는 이 유형으로 <b>등록된 정책이 없습니다</b> — 실제 시행 여부는 담당부서 확인이 먼저입니다. ' +
-      '제안서에 사례 3건 · 우리 조례 근거 · 담당부서 · 창구가 한 장으로 들어갑니다.';
+  /* 양산은 청년가까e(시 공식 채널)라 「등록」이 아니라 「시행」을 말할 수 있다. */
+  $("proposeNote").innerHTML = ysHit
+    ? (ysHit.length
+      ? '<b>' + short + '는 이 유형을 이미 하고 있습니다</b> — 청년가까e 기준 ' + ysHit.length + '건' +
+        (ysLive.length ? ', 그중 <b>' + ysLive.length + '건이 시행중·예정</b>' : ', <b>다만 시행중인 건은 없습니다</b>') +
+        '.<span class="sub">그래서 이 유형은 신규 도입이 아니라 <b>확대·개선</b>이 제안 형태입니다. 아래 다른 시 사례와 지원 수준을 나란히 보십시오.</span>'
+      : '<b>' + short + '는 이 유형을 하지 않습니다</b> — 청년가까e 에 없습니다.' +
+        '<span class="sub">시 공식 채널이라 <b>「등록이 없다」가 아니라 「없다」</b>고 말할 수 있습니다. 제안서에 사례 3건 · 우리 조례 근거 · 담당부서 · 창구가 한 장으로 들어갑니다.</span>')
+    : (has
+      ? short + '도 이 유형을 <b>등록</b>하고 있습니다. 제안서에서 <b>지원 수준·규모를 다른 시와 나란히</b> 놓고 봅니다.'
+      : short + '는 이 유형으로 <b>등록된 정책이 없습니다</b> — 실제 시행 여부는 담당부서 확인이 먼저입니다. ' +
+        '제안서에 사례 3건 · 우리 조례 근거 · 담당부서 · 창구가 한 장으로 들어갑니다.');
+
+  /* 우리 시 것은 목록에서 뺐으니 여기서 따로 보여준다 — 「제안하기」가 안 붙는다 */
+  $("browseMine").innerHTML = ours.length
+    ? '<div class="subhead"><h3>' + short + '가 하는 것</h3><span>' + ours.length + '건 · 제안 대상 아님</span></div>' +
+      '<ul class="cards">' + ours.slice(0, 5).map(({ p, org }) => polCard(p, null, org)).join("") + '</ul>'
+    : "";
+  [...$("browseMine").querySelectorAll(".pcard")].forEach((b, i) =>
+    b.addEventListener("click", () => {
+      const x = ours[i];
+      /* 양산이면 청년가까e 상세로 — 시행 상태·조례·공고문이 거기 있다 */
+      const y = isYS() && ysSelf().find(q => q.nm === x.p.n);
+      y ? openYS(y) : openPolicy(x.p, x.org, x.i);
+    }));
 
   const shown = list.slice(0, 40);
   $("browseList").innerHTML = shown.length
@@ -1188,6 +1239,7 @@ function renderBrowse() {
     : '<li class="empty">이 유형으로 등록된 정책이 없습니다.</li>';
   [...$("browseList").querySelectorAll(".pcard")].forEach((b, i) =>
     b.addEventListener("click", () => openPolicy(shown[i].p, shown[i].org, shown[i].i)));
+  $("browseOtherNote").textContent = `${list.length}건 · 우리 시 제외`;
   $("tc6").textContent = types.length;
 }
 
@@ -1230,7 +1282,7 @@ function ysCard(p) {
     <div class="badges">
       <span class="bdg ${p.st === "종료" ? "end" : p.st === "예정" ? "soon" : "live"}">${esc(YS_ST.find(s => s[0] === (p.kind === "상시" && p.st === "진행" ? "상시" : p.st))?.[1] || p.st)}</span>
       ${p.field ? `<span class="bdg lv">${esc(p.field)}</span>` : ""}
-      ${p.capacity != null ? `<span class="bdg ${full ? "end" : "new"}">신청 ${p.applied}/${p.capacity}${full ? " 초과" : ""}</span>` : ""}
+      ${p.capacity != null ? `<span class="bdg ${full ? "end" : "new"}">신청 ${p.applied} / 한도 ${p.capacity}${full ? " 도달" : ""}</span>` : ""}
     </div>
     <span class="meta">
       <span><i>신청</i>${ysPeriod(p)}</span>
@@ -1313,7 +1365,25 @@ function openYS(p) {
         q.nm.replace(/^\[[^\]]*\]\s*/, "").startsWith(base.slice(0, Math.min(base.length, 14))))
     : null;
 
+  /* 나가는 곳은 셋 중 하나. 공고문 링크가 없는 정책이 68/94 라서 폴백이 필요하다.
+       ① 온라인 신청을 받는 사업(진행·예정) → **그 사업의 신청 페이지 직링크**
+       ② 공고문 링크가 있으면            → 공고문 (첨부·서식이 거기 있다)
+       ③ 둘 다 없으면                    → 청년가까e 홈 (이름으로 찾게)         */
+  const HOME = YS.source?.home || "https://www.yangsan.go.kr/youth/main.do";
+  const canApply = p.applyUrl && p.st !== "종료";
+  const goUrl = canApply ? p.applyUrl : (p.link || HOME);
+  const goLabel = canApply
+    ? (p.st === "진행" ? "신청하러 가기" : "신청 페이지 보기 (접수 예정)")
+    : p.link ? (p.st === "종료" ? "공고문 보기 (종료된 회차)" : "공고문 보기")
+    : "청년가까e 에서 찾기";
+
   const html =
+    /* 상세를 다 읽고 나서야 나가는 링크를 만나면 늦다. 맨 위에 올린다. */
+    `<div class="gowrap"><a class="btn golink" href="${esc(goUrl)}" target="_blank" rel="noopener">${esc(goLabel)} ↗</a>` +
+    (canApply ? `<span class="gonote">양산시 청년가까e 온라인 신청 화면으로 이동합니다.</span>`
+      : p.link ? ""
+      : `<span class="gonote">이 정책은 공고문 링크가 등록돼 있지 않습니다. 청년가까e 에서 <b>정책 이름으로</b> 찾으십시오.</span>`) +
+    `</div>` +
     (p.st === "종료" ? F("", `<div class="warnbox">이 사업은 <b>종료</b>로 판정됐습니다 (근거: ${esc(p.stSrc || "없음")}).` +
       (next ? ` 같은 사업의 <b>다음 회차가 있습니다</b> — 「${esc(next.nm)}」.`
             : ` 후속 회차 여부는 <b>양산시 청년가까e</b> 또는 담당부서에 확인하십시오.`) + `</div>`) : "") +
@@ -1321,9 +1391,15 @@ function openYS(p) {
       `<span class="sub">판정 근거: <b>${esc(p.stSrc || "없음")}</b>` +
       (p.raw ? ` · 사이트 표시 「${esc(p.raw)}」` : "") + "</span>") +
     F("신청기간", ysPeriod(p) + (p.bizFrom && p.from ? `<span class="sub">사업기간 ${p.bizFrom} ~ ${p.bizTo || "미정"}</span>` : "")) +
+    /* 분모를 「정원」이라 부르면 안 된다. 청년가까e 가 말하는 건 「신청현황 N/M」뿐이고,
+       M 은 온라인 접수 한도다 — 배수 모집을 하는 사업이 있어 실제 지원인원과 다르다.
+       「지원인원 100명의 1.5배수인 150명까지 신청을 받아」(2025 면접비),
+       「지원인원의 2배수를 모집」(2025 자격증 6회차)이 원문 근거다. */
     (p.capacity != null ? F("신청 현황",
-      `<b>${p.applied} / ${p.capacity}명</b>${full ? ' <b style="color:var(--out)">정원 초과</b>' : ""}` +
-      '<span class="sub">신청자가 정원을 넘었다면 <b>증원 제안의 근거</b>가 됩니다.</span>') : "") +
+      `<b>신청 ${p.applied}건 / 접수 한도 ${p.capacity}</b>${full ? ' <b style="color:var(--out)">한도 도달</b>' : ""}` +
+      '<span class="sub">청년가까e 온라인 접수 기준입니다. <b>분모는 정원이 아니라 접수 한도</b>이고, ' +
+      '지원인원의 1.5~2배수까지 받는 사업이 있어 <b>실제 지원인원은 이보다 적을 수 있습니다.</b><br>' +
+      '수요 근거로 쓰려면 아래 공고문에서 <b>「지원인원」을 확인</b>하고 담당부서에 실제 선정 인원을 물어보십시오.</span>') : "") +
     (p.body ? F("지원 내용 — 원문 그대로", nl2br(p.body)) : "") +
     (p.howto ? F("신청 안내 — 원문 그대로", nl2br(p.howto)) : "") +
     F("담당부서", esc(p.dept || p.ord?.dept || "미상") +
@@ -1334,14 +1410,18 @@ function openYS(p) {
       `<span class="sub">${p.exact ? "이 주제 전담 조례입니다." : "이 주제 전담 조례가 없어 <b>기본 조례</b>를 답니다."}
        · <a class="lnk" href="${lawUrl(p.ord.mst)}" target="_blank" rel="noopener">법제처 원문</a></span>`) : "") +
     (p.link ? F("공고문 원문", `<a class="lnk" href="${esc(p.link)}" target="_blank" rel="noopener">${esc(p.link.slice(0, 52))}…</a>
-      <span class="sub">양산시 공고문입니다. 첨부파일·서식은 여기에 있습니다.</span>`) : "") +
+      <span class="sub">양산시 공고문입니다. 첨부파일·서식은 여기에 있습니다.</span>`)
+      : F("공고문", `<a class="lnk" href="${esc(goUrl)}" target="_blank" rel="noopener">양산시 청년가까e ↗</a>
+      <span class="sub">이 정책에는 공고문 링크가 등록돼 있지 않습니다. 목록에서 이름으로 찾으십시오.</span>`)) +
     F("출처", `양산시 청년가까e (수집 ${YS.date}) · 조례는 법제처 국가법령정보센터 (수집 ${YS.ordDate})`);
 
   const plain = [
     `[양산시 청년정책] ${p.nm}`,
     `시행 상태: ${YS_ST.find(s => s[0] === (p.kind === "상시" && p.st === "진행" ? "상시" : p.st))?.[1] || p.st} (판정 근거: ${p.stSrc || "없음"}${p.raw ? `, 사이트 표시 「${p.raw}」` : ""})`,
     `신청기간: ${p.from ? `${p.from} ~ ${p.to || "미정"}` : p.bizFrom ? `${p.bizFrom} ~ ${p.bizTo || "미정"} (사업기간)` : "정보 없음"}`,
-    ...(p.capacity != null ? [`신청 현황: ${p.applied} / ${p.capacity}명${full ? " (정원 초과)" : ""}`] : []),
+    ...(p.capacity != null ? [
+      `신청 현황: 신청 ${p.applied}건 / 접수 한도 ${p.capacity}${full ? " (한도 도달)" : ""}`,
+      `  ※ 분모는 정원이 아니라 온라인 접수 한도입니다. 지원인원의 1.5~2배수까지 받는 사업이 있어 실제 지원인원은 이보다 적을 수 있습니다.`] : []),
     "", "■ 지원 내용", p.body || "-",
     ...(p.howto ? ["", "■ 신청 안내", p.howto] : []),
     "", "■ 담당부서", `${p.dept || p.ord?.dept || "미상"}  ${tel || ""}`,
@@ -1349,7 +1429,8 @@ function openYS(p) {
     ...(p.ord ? ["", "■ 근거 조례", `「${p.ord.name}」`,
       p.art ? `${p.art.label} ${p.art.title || ""}\n${p.art.body || ""}` : "직접 대응 조문 미확인",
       `법제처 원문: ${lawUrl(p.ord.mst)}`] : []),
-    ...(p.link ? ["", "■ 공고문", p.link] : []),
+    ...(p.link ? ["", "■ 공고문", p.link]
+      : ["", "■ 공고문", "등록된 링크 없음 — 양산시 청년가까e 에서 이름으로 찾으십시오", goUrl]),
     "", `출처: 양산시 청년가까e (수집 ${YS.date}) · 조례 법제처 (수집 ${YS.ordDate})`,
   ].join("\n");
 

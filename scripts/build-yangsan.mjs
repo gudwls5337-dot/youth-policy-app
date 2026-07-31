@@ -151,6 +151,10 @@ const out = POL.policies.map(p => {
     from: a?.from || null, to: a?.to || null,
     bizFrom: b?.from || null, bizTo: b?.to || null,
     applied: p.apply?.applied ?? null, capacity: p.apply?.capacity ?? null,
+    /* 그 사업의 신청 페이지 직링크. 공고문 링크가 없는 사업이 68/94 라서,
+       이게 있으면 「신청하러 가기」가 진짜 신청 화면으로 간다. */
+    applyUrl: p.apply?.tbl && p.apply?.id
+      ? `https://www.yangsan.go.kr/youth/plcyPrgrm/${p.apply.tbl}/view.do?mngSn=${p.apply.id}` : null,
     body: p.detail?.["지원내용"] || null,
     howto: p.detail?.["신청안내"] || null,
     link: p.detail?.["신청사이트"] || null,

@@ -148,13 +148,19 @@ async function fetchApply() {
     /* 신청 목록은 컨테이너가 .bod_cardThumb 다 (정책 목록은 .bod_cardList).
        자식 li 로 한정하지 않으면 카드 안 .info li 까지 잡혀 3배로 부푼다. */
     for (const li of doc.querySelectorAll(".bod_cardThumb > ul > li")) {
-      const id = (li.getAttribute("onclick") || "").match(/view\((\d+)/)?.[1] || null;
+      const oc = li.getAttribute("onclick") || "";
+      const id = oc.match(/view\((\d+)/)?.[1] || null;
+      /* `prgrm.view(188,'ap0188')` 의 둘째 인자가 신청 테이블명이다.
+         이게 있어야 그 사업의 **신청 페이지 직링크**를 만들 수 있다:
+           /youth/plcyPrgrm/{tbl}/view.do?mngSn={id}   (독립 페이지로 열린다)
+         공고문 링크가 없는 사업이 68/94 라서, 이게 없으면 홈으로만 보내게 된다. */
+      const tbl = oc.match(/view\(\d+\s*,\s*'([^']+)'/)?.[1] || null;
       const info = {};
       for (const x of li.querySelectorAll(".info li")) info[txt(x.querySelector("strong"))] = txt(x.querySelector("span"));
       const cap = (info["신청현황"] || "").match(/(\d+)\s*\/\s*(\d+)/);
       const per = (info["접수기간"] || "").match(/(\d{4}-\d{2}-\d{2})\s*~\s*(\d{4}-\d{2}-\d{2})/);
       rows.push({
-        id,
+        id, tbl,
         nm: txt(li.querySelector(".subj")) || null,
         state: li.querySelector(".state")?.getAttribute("data-state") || null,
         from: per?.[1] || null,

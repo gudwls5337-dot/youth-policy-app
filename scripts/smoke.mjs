@@ -107,8 +107,11 @@ T("상태 배지 있음", c1.every(c => c.querySelector(".bdg")));
 /* 온통청년으로 그렸다면 여기가 0건이었다. 이 검사가 회귀의 핵심이다. */
 T("온통청년이 못 보여주는 진행 건이 보인다", c1.length > 0,
   c1[0]?.querySelector(".nm")?.textContent.slice(0, 30));
-T("정원 대비 신청자 노출", $$("#list1 .badges").some(e => /신청 \d+\/\d+/.test(e.textContent)),
-  ($$("#list1 .badges").map(e => (e.textContent.match(/신청 \d+\/\d+/) || [])[0]).filter(Boolean)[0]) || "없음");
+/* 분모는 정원이 아니라 접수 한도다. 「정원」이라 쓰면 회의에서 반박당한다 —
+   지원인원의 1.5~2배수까지 받는 사업이 있다(2025 면접비·자격증 원문). */
+T("신청 현황 노출", $$("#list1 .badges").some(e => /신청 \d+ \/ 한도 \d+/.test(e.textContent)),
+  ($$("#list1 .badges").map(e => (e.textContent.match(/신청 \d+ \/ 한도 \d+/) || [])[0]).filter(Boolean)[0]) || "없음");
+T("분모를 정원이라 부르지 않음", !$$("#list1 .badges").some(e => e.textContent.includes("정원")));
 T("판정 근거 안내", ($("#freshWarn")?.textContent || "").includes("판정"),
   ($("#freshWarn")?.textContent || "").slice(0, 40));
 T("미러 분리 명시", ($("#freshWarn")?.textContent || "").includes("현황에서 뺐습니다"));
@@ -136,6 +139,16 @@ T("조문 인용 블록", !!$("#dBody .pquote"), ($("#dBody .pquote")?.textConte
 T("법제처 원문 링크", ($("#dBody")?.innerHTML || "").includes("law.go.kr/DRF"));
 T("담당부서 전화", !!$("#dBody .ptel"), $("#dBody .ptel")?.textContent);
 T("공고문 원문 링크", ($("#dBody")?.innerHTML || "").includes("yangsan.go.kr"));
+/* 다 읽고 나서야 링크를 만나면 늦다 — 맨 위에 나가는 버튼이 있어야 한다 */
+const goA = $("#dBody .golink");
+T("맨 위 「신청하러 가기」", !!goA, goA?.textContent?.trim());
+T("나가는 링크가 실제 URL", /^https?:\/\/.+yangsan\.go\.kr/.test(goA?.getAttribute("href") || ""),
+  (goA?.getAttribute("href") || "").slice(0, 60));
+T("나가는 버튼이 본문보다 위", ($("#dBody")?.innerHTML || "").indexOf("golink") < ($("#dBody")?.innerHTML || "").indexOf("pfield"));
+/* 접수중인 사업은 홈이 아니라 **그 사업의 신청 화면**으로 가야 한다 */
+T("접수중이면 신청 페이지 직링크", /plcyPrgrm\/\w+\/view\.do\?mngSn=\d+/.test(goA?.getAttribute("href") || ""),
+  (goA?.getAttribute("href") || "").replace("https://www.yangsan.go.kr", ""));
+T("라벨이 「신청하러 가기」", (goA?.textContent || "").includes("신청하러 가기"), goA?.textContent?.trim());
 click($("#dCopy")); await wait(120);
 const ycp = window.__copied || "";
 T("복사 텍스트", ycp.startsWith("[양산시 청년정책]"), ycp.split("\n")[0]?.slice(0, 40));
@@ -247,6 +260,20 @@ T("유형 칩", bt.length >= 10, `${bt.length}종`);
 const bc = $$("#browseList .pcard");
 T("다른 시 카드 렌더", bc.length > 0, `${bc.length}장`);
 T("지역 배지", bc.every(c => (c.querySelector(".badges")?.textContent || "").trim().length > 0));
+/* 「다른 시는 이런 걸 합니다」인데 우리 시가 섞이면, 이미 하는 사업을 보며
+   「제안하기」를 누르게 된다. 우리 것은 별도 구역으로 뺀다. */
+const ourShort = "양산";
+T("다른 시 목록에 우리 시 없음",
+  bc.every(c => !(c.querySelector(".badges")?.textContent || "").includes(ourShort)),
+  `${bc.filter(c => (c.querySelector(".badges")?.textContent || "").includes(ourShort)).length}장 섞임`);
+const mineCards = $$("#browseMine .pcard");
+if (mineCards.length) {
+  T("우리 시 것은 별도 구역", ($("#browseMine")?.textContent || "").includes("제안 대상 아님"),
+    `${mineCards.length}장`);
+  click(mineCards[0]); await wait(220);
+  T("우리 시 카드엔 제안 버튼 없음", $("#dPropose")?.hidden === true, $("#dTitle")?.textContent?.slice(0, 26));
+  click($("#dClose")); await wait(360);
+}
 /* 다른 시 정책 카드에 우리 시 전화가 붙으면 전화를 잘못 걸게 된다 */
 const ourTel = $("#tel")?.textContent.replace(/\D/g, "");
 const telsOnCards = [...new Set(bc.map(c => (c.querySelector(".tel")?.textContent || "").replace(/\D/g, "")).filter(Boolean))];
@@ -267,8 +294,12 @@ const tGap = await pickType(false);
 T("등록 없는 유형 존재", !!tGap, tGap || "못 찾음");
 T("CTA 라벨에 유형명", ($("#btnPropose")?.textContent || "").includes(tGap || " "),
   $("#btnPropose")?.textContent);
-T("CTA 안내가 「등록이 없다」 표현", ($("#proposeNote")?.textContent || "").includes("등록된 정책이 없습니다"),
-  ($("#proposeNote")?.textContent || "").slice(0, 46));
+/* 양산은 시 공식 채널(청년가까e)이 소스라 「등록이 없다」가 아니라 **「없다」**고
+   말할 수 있다. 원칙 1의 유일한 예외다. 대신 무슨 근거로 그렇게 말하는지 밝혀야 한다. */
+const gapNote = $("#proposeNote")?.textContent || "";
+T("CTA 안내가 「없다」를 단정", /하지 않습니다|없습니다/.test(gapNote), gapNote.slice(0, 46));
+T("단정의 근거를 밝힘", gapNote.includes("청년가까e") && gapNote.includes("시 공식 채널"),
+  gapNote.slice(0, 60));
 
 click($("#btnPropose")); await wait(240);
 T("제안서 시트 열림", $("#drawer")?.hidden === false, $("#dTitle")?.textContent);
