@@ -529,7 +529,19 @@
 
     <!-- 5. 정보 -->
     <section class="screen" id="sc-info">
+      <!-- 지난 제안 처리결과 — 정책단만 가진 데이터다. 온통청년·법제처는 누구나
+           받지만 「양산시가 왜 반려했는가」는 여기밖에 없고, 기수가 바뀌면 사라진다. -->
       <div class="shead">
+        <h2>지난 제안은 어떻게 됐나</h2>
+        <p id="pastLede"></p>
+        <div class="warnbox" id="pastWarn"></div>
+      </div>
+      <div class="chips" id="pastYear"></div>
+      <div class="chips" id="pastGroup"></div>
+      <div class="segbar" id="pastNote"></div>
+      <ul class="cards" id="pastList"></ul>
+
+      <div class="shead" style="padding-top:24px">
         <h2>제안 창구</h2>
         <p>찾은 사례를 실제로 밀어 넣는 곳. <b>어디에 넣느냐에 따라 도달하는 사람이 다릅니다.</b></p>
       </div>
@@ -638,6 +650,8 @@ const GV = /*__GOVCOMPARE__*/null;
 /* 양산시 청년가까e — 시 공식 채널. 양산에 한해 「현황」을 주장할 수 있다.
    온통청년은 양산 9건을 전부 마감으로 말하지만 여기엔 9건이 살아 있다. */
 const YS = /*__YANGSAN__*/null;
+/* 지난 제안 처리결과 — 양산시 공문 2년치. 사유는 원문 그대로다. */
+const PR = /*__PROPOSALS__*/null;
 const YS_CITY = YS?.city || "경상남도 양산시";
 const isYS = () => curCity === YS_CITY && !!YS;
 
@@ -1065,6 +1079,43 @@ function casePlain(x, no) {
   ].join("\n");
 }
 
+/** 제안서에 끼울 「과거에 어떻게 됐나」 블록.
+ *  ① 같은 유형으로 낸 제안이 있으면 그 결과와 사유를 그대로
+ *  ② 없으면 그 분과에서 가장 많이 나온 반려 사유 갈래
+ *  둘 다 없으면 빈 문자열 — 억지로 채우지 않는다(원칙 5). */
+function pastBlock(k) {
+  if (!PR) return "";
+  const hit = PR.proposals.filter(r => r.ks && r.ks.includes(k));
+  if (hit.length) {
+    const bad = hit.filter(r => r.group !== "통과");
+    return F("과거에 낸 적이 있습니다 — " + hit.length + "건",
+      hit.slice(0, 3).map(r =>
+        /* 클래스를 `case` 로 쓰면 「다른 시 사례」 검사(.case)가 과거 제안까지 센다.
+           성격이 다른 카드이므로 pcase 로 나눈다. */
+        '<div class="case pcase' + (r.group === "반려" ? " closed2" : "") + '">' +
+        '<div class="cw">' + esc(r.year) + '년 · ' + esc(r.dept || "부서 미상") + ' · <b>' + esc(r.result || "") + '</b></div>' +
+        '<div class="cn2">' + esc(r.name || "") + '</div>' +
+        (r.reason ? '<div class="cv">' + esc(r.reason.replace(/\n/g, " ").slice(0, 180)) + '…</div>' : "") +
+        (r.cause ? '<div class="cm2"><b>사유 갈래</b> ' + esc(r.cause) + '</div>' : "") +
+        '</div>').join("") +
+      (bad.length
+        ? '<span class="sub"><b>같은 사유가 또 나오지 않게</b> 제안서에서 먼저 막으십시오. 전문은 「정보」 탭 맨 위에 있습니다.</span>'
+        : '<span class="sub">과거에 통과한 유형입니다. 확대·개선으로 접근하십시오.</span>'), "");
+  }
+  /* 유형이 안 붙으면 분과 단위 경향이라도 알려준다 */
+  const div = "일자리";
+  const same = PR.proposals.filter(r => r.div === div && r.group !== "통과" && r.cause);
+  if (!same.length) return "";
+  const top = Object.entries(same.reduce((a, r) => (a[r.cause] = (a[r.cause] || 0) + 1, a), {}))
+    .sort((a, b) => b[1] - a[1]).slice(0, 3);
+  const pr = PR.byDiv[div];
+  return F("이 분과가 반려당해 온 이유", top.map(([c, n]) =>
+      '<div class="cm2"><b>' + esc(c) + '</b> ' + n + '건</div>').join("") +
+    '<span class="sub">' + esc(div) + ' 분과 통과 <b>' + pr.통과 + '/' + pr.n + '건</b>. ' +
+    '이 유형으로 낸 제안은 없지만, <b>같은 부서가 자주 쓰는 반려 논리</b>입니다 — 제안서에서 먼저 막으십시오. ' +
+    '전문은 「정보」 탭 맨 위 「지난 제안은 어떻게 됐나」에 있습니다.</span>', "");
+}
+
 function openProposal(k, seedIdx) {
   const t = (CP.types || []).find(x => x.k === k);
   const items = typeItems(k);
@@ -1113,6 +1164,11 @@ function openProposal(k, seedIdx) {
       : '<b>' + sidoNm + '에는 등록한 곳이 없습니다</b>' +
         '<span class="sub">제안서에 <b>「' + sidoNm + ' 최초 도입」</b>으로 쓸 수 있습니다. ' +
         '다만 등록이 없는 것과 시행하지 않는 것은 다르니 <b>인근 시군 담당부서 확인이 먼저</b>입니다.</span>'), "") +
+    /* 같은 제안을 같은 이유로 또 반려당하지 않게 한다. 유형이 붙은 과거 제안이
+       있으면 그것을, 없으면 그 부서가 주로 쓰는 반려 사유를 보여준다.
+       유형 사전은 온통청년 정책명에 맞춰져 있어 제안명에는 잘 안 붙는다(4/83) —
+       그래서 부서 기준 폴백이 실제로 더 자주 뜬다. */
+    pastBlock(k) +
     F("먼저 확인할 것", '<div class="keynote">온통청년은 <b>지자체 자발 등록</b>이고 갱신 인센티브가 없습니다. ' +
       '<b>「등록이 없다」와 「시행하지 않는다」는 다릅니다.</b> ' +
       (isNew ? '담당부서에 <b>이미 하고 있는지 먼저 확인</b>하십시오 — 확인 없이 「없다」고 말하면 회의에서 한 번에 반박당합니다.'
@@ -1160,6 +1216,20 @@ function openProposal(k, seedIdx) {
     sidoOrgs.size
       ? `${sidoNm} 안에서는 ${sidoOrgs.size}곳이 등록${sidoLive.size ? ` (그중 ${sidoLive.size}곳 접수중)` : " (접수중인 곳은 없음)"}. 같은 도라 도비 매칭 구조가 같습니다.`
       : `${sidoNm} 안에는 등록한 곳이 없습니다 — 「${sidoNm} 최초 도입」으로 제안할 수 있습니다. 단, 인근 시군 담당부서 확인이 먼저입니다.`,
+    ...(() => {
+      if (!PR) return [];
+      const hit = PR.proposals.filter(r => r.ks && r.ks.includes(k));
+      if (hit.length) return ["", `■ 과거에 낸 적이 있습니다 (${hit.length}건)`,
+        ...hit.slice(0, 3).map(r =>
+          `${r.year}년 · ${r.dept || "부서 미상"} · ${r.result}  「${r.name}」\n   사유: ${(r.reason || "-").replace(/\n/g, " ").slice(0, 200)}`)];
+      const same = PR.proposals.filter(r => r.div === "일자리" && r.group !== "통과" && r.cause);
+      if (!same.length) return [];
+      const top = Object.entries(same.reduce((a, r) => (a[r.cause] = (a[r.cause] || 0) + 1, a), {}))
+        .sort((a, b) => b[1] - a[1]).slice(0, 3);
+      return ["", "■ 이 분과가 반려당해 온 이유",
+        ...top.map(([c, n]) => `  ${c} ${n}건`),
+        `  ※ 일자리 분과 통과 ${PR.byDiv["일자리"].통과}/${PR.byDiv["일자리"].n}건. 제안서에서 이 논리를 먼저 막으십시오.`];
+    })(),
     `  ※ 온통청년은 지자체 자발 등록이고 갱신 인센티브가 없습니다. 「등록이 없다」와 「시행하지 않는다」는 다릅니다.`,
     `  ※ ${isNew ? "담당부서에 이미 하고 있는지 먼저 확인하십시오." : "우리 시 등록분이 낡았을 수 있으니 올해 회차를 시 홈페이지에서 확인하십시오."}`, "",
     `■ 다른 시 사례 ${cases.length}건 (등록된 사실만 · 우수 판정 아님)`,
@@ -1923,6 +1993,117 @@ $("dlCity").addEventListener("click", () => {
 
 /* ── 중앙 정책 (참고용) ── */
 let showAllCentral = false;
+/* ═══════════ 지난 제안 처리결과 ═══════════
+   온통청년·법제처는 누구나 받는다. 「양산시가 이 제안을 왜 반려했는가」는
+   정책단만 가진 정보이고 **기수가 바뀌면 사라진다.** 4기가 3기의 반려 사유를
+   모르면 같은 제안을 같은 이유로 또 반려당한다 — 실제로 2-1「취(창)업청년
+   웰컴페이」가 2년 연속 죽었고, 그때마다 **부서도 사유도 달랐다.**
+
+   결과 라벨은 공문 표기를 그대로 쓴다. 「시행불가」를 「반려」로 고쳐 부르지 않는다. */
+const PG = ["전체", "통과", "기시행", "보류", "반려"];
+const PG_CLS = { "통과": "live", "기시행": "lv", "보류": "soon", "반려": "end" };
+let pastYear = "전체", pastGroup = "전체";
+
+function pastCard(r) {
+  const cls = r.group === "반려" ? " closed" : r.group === "보류" ? " soon" : "";
+  return `<li><button class="pcard${cls}">
+    <span class="top"><span class="nm">${esc(r.name || "(제안명 미상)")}</span><span class="go">›</span></span>
+    <span class="amt">${esc((r.reason || "").replace(/^[○□▹\-\s]+/, "").slice(0, 52) || "사유 없음")}</span>
+    <div class="badges">
+      <span class="bdg ${PG_CLS[r.group] || "lv"}">${esc(r.result || r.group)}</span>
+      <span class="bdg lv">${esc(r.year)}년</span>
+      ${r.div ? `<span class="bdg lv">${esc(r.div)}</span>` : ""}
+      ${r.cause ? `<span class="bdg ${r.group === "반려" ? "end" : "new"}">${esc(r.cause)}</span>` : ""}
+    </div>
+    <span class="meta">
+      <span><i>연번</i>${esc(r.no)}</span>
+      <span><i>검토</i>${esc(r.dept || "미상")}</span>
+    </span></button></li>`;
+}
+
+function openPast(r) {
+  const html =
+    F("처리 결과", `<b>${esc(r.result || "미상")}</b>` +
+      (r.rawResult && r.rawResult !== r.result ? `<span class="sub">공문 원표기 「${esc(r.rawResult)}」</span>` : "") +
+      /* 공문 안에서 총괄표와 상세가 다른 건이 3건 있다. 숨기면 나중에 들킨다. */
+      (r.tableResult ? `<span class="sub"><b>공문 총괄표에는 「${esc(r.tableResult)}」로 적혀 있습니다.</b>
+        상세 검토의견을 따랐습니다 — 사유가 붙어 있는 쪽입니다.</span>` : "")) +
+    F("검토 부서", esc(r.dept || "미상") +
+      `<span class="sub">${esc(r.year)}년 · ${esc(r.div || "분과 미상")} 분과 · 연번 ${esc(r.no)}</span>`) +
+    (r.cause ? F("사유 갈래", esc(r.cause) +
+      '<span class="sub">아래 원문에서 뽑은 분류입니다. <b>제안서를 다시 쓸 때 이 갈래를 먼저 막으십시오.</b></span>') : "") +
+    F("검토의견 — 원문 그대로", `<div class="pquote">${nl2br(r.reason || "사유가 기재되지 않았습니다.")}</div>`) +
+    F("출처", `양산시 「${esc(r.year)}년 정책제안 검토 및 처리의견」 공문` +
+      '<span class="sub">정책단이 받은 공식 회신입니다. 요약하지 않고 원문을 그대로 실었습니다.</span>');
+
+  const plain = [
+    `[지난 제안] ${r.year}년 ${r.no} ${r.name || ""}`,
+    `처리 결과: ${r.result || "미상"}${r.rawResult && r.rawResult !== r.result ? ` (공문 원표기 「${r.rawResult}」)` : ""}`,
+    ...(r.tableResult ? [`  ※ 공문 총괄표에는 「${r.tableResult}」로 적혀 있습니다.`] : []),
+    `검토 부서: ${r.dept || "미상"} · ${r.div || "분과 미상"} 분과`,
+    ...(r.cause ? [`사유 갈래: ${r.cause}`] : []), "",
+    "■ 검토의견 (원문)", r.reason || "-", "",
+    `출처: 양산시 「${r.year}년 정책제안 검토 및 처리의견」 공문`,
+  ].join("\n");
+
+  openDrawer(`${r.year}년 · ${r.div || ""} ${r.no}`, r.name || "(제안명 미상)", html, plain, null);
+}
+
+function renderPast() {
+  if (!PR) { $("pastLede").textContent = "처리결과 데이터가 없습니다."; return; }
+  const years = [...new Set(PR.proposals.map(r => r.year))].sort();
+  const all = PR.proposals;
+
+  const pass = y => { const t = PR.byYear[y]; return t ? `${t.통과}/${t.n}건 (${(t.통과 / t.n * 100).toFixed(1)}%)` : "—"; };
+  $("pastLede").innerHTML =
+    `정책단이 낸 제안에 양산시가 <b>공문으로 회신한 결과</b>입니다. 사유는 <b>원문 그대로</b> 실었습니다.
+     <span class="sub">${years.map(y => `<b>${y}년</b> ${pass(y)}`).join(" · ")}
+     — 같은 제안을 다시 내기 전에 <b>왜 안 됐는지부터</b> 보십시오.</span>`;
+
+  /* 2년 연속 같은 제안이 죽은 건은 따로 짚는다. 부서가 바뀌면 사유도 바뀐다 —
+     그건 제안이 나빠서가 아니라 답변이 일관되지 않다는 뜻이고, 그 자체가 재제안 근거다. */
+  const rep = PR.repeats || [];
+  $("pastWarn").innerHTML = rep.length
+    ? `<b>2년 연속 안 된 제안 ${rep.length}건</b>이 있습니다.<br>` +
+      rep.map(x => `「${esc(x.a.name || "")}」 — ${esc(x.a.year)} ${esc(x.a.dept || "?")} <b>${esc(x.a.result)}</b>
+        → ${esc(x.b.year)} ${esc(x.b.dept || "?")} <b>${esc(x.b.result)}</b>` +
+        (x.a.dept && x.b.dept && x.a.dept !== x.b.dept
+          ? `<br><b>검토 부서가 바뀌었고 사유도 달랐습니다.</b> 답변이 일관되지 않다는 뜻이라, 재제안 때 이 점을 짚을 수 있습니다.` : "")).join("<br>")
+    : `2년 연속 같은 제안이 반복된 건은 없습니다.`;
+
+  $("pastYear").innerHTML = ["전체", ...years].map(y =>
+    `<button class="chip" aria-pressed="${pastYear === y}" data-py="${esc(y)}">${esc(y)}${y === "전체" ? " " + all.length : "년 " + PR.byYear[y].n}</button>`).join("");
+  $$("#pastYear [data-py]").forEach(b =>
+    b.addEventListener("click", () => { pastYear = b.dataset.py; renderPast(); }));
+
+  const byYear = pastYear === "전체" ? all : all.filter(r => r.year === pastYear);
+  $("pastGroup").innerHTML = PG.map(g => {
+    const n = g === "전체" ? byYear.length : byYear.filter(r => r.group === g).length;
+    return `<button class="chip" aria-pressed="${pastGroup === g}" data-pg="${g}"${n === 0 && g !== "전체" ? " disabled" : ""}>${g} ${n}</button>`;
+  }).join("");
+  $$("#pastGroup [data-pg]").forEach(b =>
+    b.addEventListener("click", () => { pastGroup = b.dataset.pg; renderPast(); }));
+
+  const list = byYear.filter(r => pastGroup === "전체" || r.group === pastGroup)
+    .sort((a, b) => (b.year || "").localeCompare(a.year || "") ||
+      (+a.no.split("-")[0] - +b.no.split("-")[0]) || (+a.no.split("-")[1] - +b.no.split("-")[1]));
+
+  /* 사유 갈래 분포 — 「우리 시 반려의 절반이 유사사업 중복」 같은 게 여기서 나온다 */
+  const causes = Object.entries(list.filter(r => r.cause)
+    .reduce((a, r) => (a[r.cause] = (a[r.cause] || 0) + 1, a), {}))
+    .sort((a, b) => b[1] - a[1]).slice(0, 4);
+  $("pastNote").innerHTML = `<span class="note">${list.length}건` +
+    (causes.length ? ` · 주된 사유 ${causes.map(([c, n]) => `${esc(c)} ${n}`).join(" · ")}` : "") +
+    `<br>분과별 통과 ${Object.entries(PR.byDiv).map(([d, t]) => `${esc(d)} ${t.통과}/${t.n}`).join(" · ")}</span>`;
+
+  $("pastList").innerHTML = list.length
+    ? list.slice(0, 60).map(pastCard).join("") +
+      (list.length > 60 ? `<li class="more">60건 표시 · 전체 ${list.length}건</li>` : "")
+    : `<li class="empty">해당하는 제안이 없습니다.</li>`;
+  [...$("pastList").querySelectorAll(".pcard")].forEach((b, i) =>
+    b.addEventListener("click", () => openPast(list[i])));
+}
+
 function renderCentral() {
   const C = centralPolicies();
   const live = C.filter(p => p.ov !== 1);
@@ -1936,7 +2117,7 @@ function renderCentral() {
   if (m) m.addEventListener("click", () => { showAllCentral = !showAllCentral; renderCentral(); });
 }
 
-function render() { renderCard(); renderDist(); renderPolicies(); renderBrowse(); renderGap(); renderDesig(); renderCentral(); }
+function render() { renderCard(); renderDist(); renderPolicies(); renderBrowse(); renderGap(); renderDesig(); renderCentral(); renderPast(); }
 
 /* URL 로 들어온 상태를 먼저 반영하고, 히스토리 시작점을 남긴다 */
 readUrl();

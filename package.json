@@ -22,7 +22,9 @@
     "collect:governance": "node scripts/extract-governance.mjs",
     "collect:yangsan": "node scripts/collect-yangsan.mjs",
     "collect:yangsan-ord": "node scripts/collect-yangsan-ordinances.mjs",
-    "build:yangsan": "node scripts/build-yangsan.mjs"
+    "build:yangsan": "node scripts/build-yangsan.mjs",
+    "collect:proposals": "node scripts/collect-proposals.mjs",
+    "build:proposals": "node scripts/build-proposals.mjs"
   },
   "dependencies": {
     "jsdom": "^29.1.1"

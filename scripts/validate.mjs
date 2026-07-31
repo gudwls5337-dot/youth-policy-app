@@ -278,6 +278,48 @@ function validateYangsan() {
     `${liveNow.filter(x => !x.applyUrl && !x.link).length}건은 청년가까e 홈으로만 간다`);
 }
 
+/** 지난 제안 처리결과 — 공문에서 뽑은 것이라 **원문 대조가 곧 검증**이다. */
+function validateProposals() {
+  console.log("── 지난 제안 (처리의견 공문) ──");
+  const p = "docs/data/proposals.json";
+  ok("proposals.json 존재", existsSync(join(ROOT, p)));
+  if (!existsSync(join(ROOT, p))) return;
+  const P = J(p);
+  const R = P.proposals;
+  console.log(`  ${R.length}건 · ${Object.entries(P.byYear).map(([y, t]) => `${y} ${t.n}`).join(" · ")}`);
+
+  /* 공문 총괄표가 밝힌 건수다. 파싱이 흔들리면 여기서 걸린다. */
+  ok("2024년 17건", P.byYear["2024"]?.n === 17, `${P.byYear["2024"]?.n}`);
+  ok("2025년 66건", P.byYear["2025"]?.n === 66, `${P.byYear["2025"]?.n}`);
+  ok("연번 중복 없음", new Set(R.map(r => `${r.year}|${r.no}`)).size === R.length);
+  every("결과 라벨이 공문 표기", R,
+    r => ["수용", "수정보완 후 시행", "기시행중", "장기검토", "시행불가"].includes(r.result),
+    r => `${r.year} ${r.no}:${r.result}`);
+  every("묶음이 결과와 맞음", R,
+    r => (r.group === "통과") === ["수용", "수정보완 후 시행"].includes(r.result), r => `${r.no}:${r.group}`);
+  /* 원칙 4 — 사유 원문이 없으면 이 데이터는 쓸모가 없다 */
+  every("사유 원문 있음", R, r => !!r.reason && r.reason.length > 15, r => `${r.year} ${r.no}`);
+  every("검토 부서 있음", R, r => !!r.dept, r => `${r.year} ${r.no}`);
+  every("분과가 연번과 맞음", R,
+    r => r.div === ({ "1": "일자리", "2": "생활안정", "3": "문화예술" })[r.no.split("-")[0]], r => `${r.no}:${r.div}`);
+  /* 요약하지 않는다 — 원문을 잘라 넣으면 인용이 아니게 된다 */
+  every("사유를 요약하지 않음", R, r => !/^\s*(요약|정리)/.test(r.reason), r => r.no);
+  every("유형은 배열", R, r => Array.isArray(r.ks), r => r.no);
+  ok("유형 붙은 제안 있음", R.filter(r => r.ks.length).length > 10, `${R.filter(r => r.ks.length).length}건`);
+  /* 통과 건에 반려 사유를 달면 화면이 거짓말을 한다 */
+  every("통과 건엔 사유 갈래 없음", R.filter(r => r.group === "통과"), r => !r.cause, r => r.no);
+  warn("사유 미분류 절반 미만",
+    R.filter(r => r.group !== "통과" && !r.cause).length < R.filter(r => r.group !== "통과").length / 2,
+    `${R.filter(r => r.group !== "통과" && !r.cause).length}건`);
+  /* 공문 총괄표와 상세가 다른 3건. 숨기면 나중에 들킨다 */
+  ok("총괄표 불일치 건 표시됨", R.filter(r => r.tableResult).length === 3,
+    R.filter(r => r.tableResult).map(r => r.no).join(",") || "없음");
+  every("2년 연속 짝이 서로 다른 해", P.repeats || [],
+    x => x.a.year !== x.b.year, x => `${x.a.no}/${x.b.no}`);
+  every("2년 연속 짝은 둘 다 미통과", P.repeats || [],
+    x => x.a.group !== "통과" && x.b.group !== "통과", x => `${x.a.no}/${x.b.no}`);
+}
+
 function validateBuild() {
   console.log("── 빌드 (docs/index.html) ──");
   const p = join(ROOT, "docs/index.html");
@@ -374,6 +416,7 @@ async function run() {
   const P = validatePolicies(B);
   validateGovernance();
   validateYangsan();
+  validateProposals();
   validateBuild();
 
   let sample = null;

@@ -355,7 +355,10 @@ T("우수 판정 안 함 명시", ps.includes("우수 여부는 판정하지 않
 T("제안서에 도 단위 절", $$("#dBody .pfield dt").some(e => e.textContent.includes("경남 안에서는")),
   $$("#dBody .pfield dt").map(e => e.textContent).slice(0, 3).join(" / "));
 T("도 0건이면 「최초 도입」으로 전환", /경남 최초 도입|경남 안에서는/.test(ps));
-const cases = $$("#dBody .case");
+/* 같은 제안을 같은 이유로 또 반려당하지 않게 — 과거 이력이 제안서에 끼어야 한다 */
+T("제안서에 과거 이력 절", $$("#dBody .pfield dt").some(e => /과거에 낸|반려당해 온/.test(e.textContent)),
+  $$("#dBody .pfield dt").map(e => e.textContent).find(x => /과거|반려당해/.test(x)) || "없음");
+const cases = $$("#dBody .case:not(.pcase)");   // 과거 제안 카드(.pcase)는 성격이 다르다
 T("사례 2건 이상", cases.length >= 2, `${cases.length}건`);
 T("사례에 지자체명·기간·주관", cases.every(c => /기간/.test(c.textContent) && /주관/.test(c.textContent)));
 T("사례 지자체가 서로 다름",
@@ -372,6 +375,7 @@ const cp = window.__copied || "";
 T("복사 텍스트 생성", cp.length > 600, `${cp.length}자`);
 T("복사본 제목", cp.startsWith("[정책 제안]"), cp.split("\n")[0]);
 const SECTS = ["■ 제안 요지", "■ 다른 시 사례", "■ 우리 시 근거", "■ 난이도", "■ 어디에 넣는가", "■ 출처와 한계"];
+T("복사본에도 과거 이력", /■ (과거에 낸|이 분과가 반려당해)/.test(cp));
 T("복사본 6절 구성", SECTS.every(h => cp.includes(h)),
   SECTS.filter(h => !cp.includes(h)).join(", ") || "전부 있음");
 T("복사본에 조례 근거", /조례: 「.+」/.test(cp), (cp.match(/조례: 「.+」.*/) || [""])[0].slice(0, 44));
@@ -390,8 +394,8 @@ click($("#browseList .pcard")); await wait(200);
 T("다른 시 상세에 제안 버튼", $("#dPropose")?.hidden === false);
 click($("#dPropose")); await wait(240);
 T("상세 → 제안서 전환", ($("#dTitle")?.textContent || "").includes("제안서"), $("#dTitle")?.textContent);
-T("본 정책의 지자체가 사례 1번", ($("#dBody .case .cw")?.textContent || "").includes(seedOrg),
-  `${$("#dBody .case .cw")?.textContent} vs 배지 ${seedOrg}`);
+T("본 정책의 지자체가 사례 1번", ($("#dBody .case:not(.pcase) .cw")?.textContent || "").includes(seedOrg),
+  `${$("#dBody .case:not(.pcase) .cw")?.textContent} vs 배지 ${seedOrg}`);
 click($("#dClose")); await wait(360);
 T("한 번 눌러 닫힘 (히스토리 중복 없음)", $("#drawer")?.hidden === true);
 
@@ -449,6 +453,36 @@ await pickCity("강원특별자치도 양구군"); tab("gap"); await wait(220); 
 T("지자체별 없는 조문이 다름", gA.length !== gB.length || overlap(gA, gB) < Math.max(gA.length, gB.length),
   `양산 ${gA.length}종 / 양구 ${gB.length}종`);
 await pickCity("경상남도 양산시");
+
+console.log("\n── 지난 제안 (정보 탭) ──");
+tab("info"); await wait(240);
+T("머리말에 연도별 통과율", /\d+\/\d+건 \(\d+\.\d%\)/.test($("#pastLede")?.textContent || ""),
+  ($("#pastLede")?.textContent || "").replace(/\s+/g, " ").slice(30, 90));
+T("연도 칩", $$("#pastYear .chip").length >= 3, $$("#pastYear .chip").map(b => b.textContent.trim()).join(" / "));
+T("결과 칩 5개", $$("#pastGroup .chip").length === 5, $$("#pastGroup .chip").map(b => b.textContent.trim()).join(" / "));
+T("카드 렌더", $$("#pastList .pcard").length > 0, `${$$("#pastList .pcard").length}장`);
+T("사유 갈래 분포 표시", ($("#pastNote")?.textContent || "").includes("주된 사유"));
+/* 2년 연속 같은 제안이 죽은 건 — 이 데이터의 가장 뾰족한 산출물이다 */
+T("2년 연속 반복 경고", ($("#pastWarn")?.textContent || "").includes("2년 연속"),
+  ($("#pastWarn")?.textContent || "").replace(/\s+/g, " ").slice(0, 40));
+
+click($$("#pastGroup [data-pg]").find(b => b.dataset.pg === "반려")); await wait(180);
+const rej = $$("#pastList .pcard");
+T("반려만 걸러짐", rej.length > 0 && rej.every(c => /시행불가/.test(c.querySelector(".badges")?.textContent || "")),
+  `${rej.length}장`);
+click(rej[0]); await wait(240);
+const pd = $("#dBody")?.textContent || "";
+T("상세 열림", $("#drawer")?.hidden === false, $("#dTitle")?.textContent?.slice(0, 26));
+/* 원칙 4 — 사유는 요약이 아니라 원문이어야 검증이 된다 */
+T("검토의견 원문 인용", !!$("#dBody .pquote") && ($("#dBody .pquote")?.textContent || "").length > 40,
+  ($("#dBody .pquote")?.textContent || "").slice(0, 40));
+T("공문 출처 명시", pd.includes("처리의견"));
+T("검토 부서 표시", pd.includes("검토 부서"));
+click($("#dCopy")); await wait(120);
+T("복사본이 지난 제안", (window.__copied || "").startsWith("[지난 제안]"), (window.__copied || "").split("\n")[0]);
+T("복사본에 원문 절", (window.__copied || "").includes("■ 검토의견 (원문)"));
+click($("#dClose")); await wait(340);
+click($$("#pastGroup [data-pg]").find(b => b.dataset.pg === "전체")); await wait(180);
 
 console.log("\n── 중앙 정책 (정보 탭) ──");
 tab("info"); await wait(180);
