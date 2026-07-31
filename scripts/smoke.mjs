@@ -115,9 +115,12 @@ T("온통청년이 못 보여주는 진행 건이 보인다", c1.length > 0,
   c1[0]?.querySelector(".nm")?.textContent.slice(0, 30));
 /* 분모는 정원이 아니라 접수 한도다. 「정원」이라 쓰면 회의에서 반박당한다 —
    지원인원의 1.5~2배수까지 받는 사업이 있다(2025 면접비·자격증 원문). */
-T("신청 현황 노출", $$("#list1 .badges").some(e => /신청 \d+ \/ 한도 \d+/.test(e.textContent)),
-  ($$("#list1 .badges").map(e => (e.textContent.match(/신청 \d+ \/ 한도 \d+/) || [])[0]).filter(Boolean)[0]) || "없음");
-T("분모를 정원이라 부르지 않음", !$$("#list1 .badges").some(e => e.textContent.includes("정원")));
+T("신청 현황 노출", $$("#list1 .badges").some(e => /신청현황 \d+ \/ \d+/.test(e.textContent)),
+  ($$("#list1 .badges").map(e => (e.textContent.match(/신청현황 \d+ \/ \d+/) || [])[0]).filter(Boolean)[0]) || "없음");
+/* 분모 M 의 뜻이 사업마다 다르다 — 지원인원 / 1.5배 / 2배 / 모집+대기 / 지원인원 미만.
+   21건 중 9건은 신청자가 M 을 넘는다. 「정원」도 「한도」도 틀린 말이다(2026-07-31 감사). */
+T("분모를 정원·한도로 부르지 않음",
+  !$$("#list1 .badges").some(e => /정원|한도/.test(e.textContent)));
 T("판정 근거 안내", ($("#freshWarn")?.textContent || "").includes("판정"),
   ($("#freshWarn")?.textContent || "").slice(0, 40));
 T("미러 분리 명시", ($("#freshWarn")?.textContent || "").includes("현황에서 뺐습니다"));

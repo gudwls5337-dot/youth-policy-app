@@ -39,7 +39,11 @@ export function articles(xml) {
   return [...xml.matchAll(/<조\s[^>]*>([\s\S]*?)<\/조>/g)].map(([, b]) => ({
     no: pick(b, "조문번호"),
     title: pick(b, "조제목"),
+    /* body 는 **매칭용**이다 — 가운뎃점을 `·` 로 모아 정규식이 한쪽만 보고 놓치는 걸 막는다.
+       raw 는 **인용용**이다. 원문 인용이라고 화면에 띄우면서 문자를 바꾸면 인용이 아니다
+       (2026-07-31 감사 지적: 원문 「수립ㆍ시행」을 「수립·시행」으로 저장했다). */
     body: flat(pick(b, "조내용")),
+    raw: pick(b, "조내용").replace(/\s+/g, " ").trim(),
   })).map(a => {
     const main = a.no ? parseInt(a.no.slice(0, 4), 10) : null;
     const sub = a.no && a.no.length >= 6 ? parseInt(a.no.slice(4, 6), 10) : 0;

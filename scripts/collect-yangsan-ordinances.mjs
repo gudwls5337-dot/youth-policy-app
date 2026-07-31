@@ -41,7 +41,7 @@ for (const r of mine) {
     dept: pick(xml, "담당부서명") || null,
     tel: pick(xml, "전화번호") || null,
     /* 조문은 번호·제목·본문을 전부 남긴다. 인용 없는 판정은 검증이 안 된다(원칙 4). */
-    arts: arts.map(a => ({ label: a.label, title: a.title || null, body: a.body || null })),
+    arts: arts.map(a => ({ label: a.label, title: a.title || null, body: a.body || null, raw: a.raw || null })),
   });
   console.log(`  ${r.name} — 조문 ${arts.length}개 · ${pick(xml, "담당부서명") || "부서 미상"}`);
 }

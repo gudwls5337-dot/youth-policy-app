@@ -248,15 +248,30 @@ function validateYangsan() {
 
   every("기간 형식", P.filter(x => x.from), x => /^\d{4}-\d{2}-\d{2}$/.test(x.from), x => `${x.id}:${x.from}`);
   every("종료일이 시작일 이후", P.filter(x => x.from && x.to), x => x.to >= x.from, x => `${x.id}:${x.from}~${x.to}`);
-  every("정원은 양수", P.filter(x => x.capacity != null), x => x.capacity > 0 && x.applied >= 0,
+  every("신청현황은 양수", P.filter(x => x.capacity != null), x => x.capacity > 0 && x.applied >= 0,
     x => `${x.id}:${x.applied}/${x.capacity}`);
+  /* `456 / 50,000` 을 콤마 못 넘어 `50` 으로 읽어 화면에 「한도 도달」 거짓이 떴다.
+     분모가 신청자보다 터무니없이 작으면 파싱 사고다(2026-07-31 감사). */
+  every("분모가 콤마로 잘리지 않음", P.filter(x => x.capacity != null),
+    x => x.applied <= x.capacity * 3, x => `${x.id}:${x.applied}/${x.capacity}`);
   every("전화 형식", P.filter(x => x.tel), x => TEL_RE.test(x.tel), x => `${x.id}:${x.tel}`);
 
   /* 요구 4 — 조문을 붙였으면 인용이 있어야 한다. 번호만 있으면 검증이 안 된다. */
   every("조문에 인용문 동반", P.filter(x => x.art), x => !!x.art.body && x.art.body.length > 10,
     x => `${x.id}:${x.art?.label}`);
-  every("조문이 목적·정의가 아님", P.filter(x => x.art),
-    x => !/^(목적|정의|적용\s*범위|기본이념)/.test((x.art.title || "").trim()), x => `${x.id}:${x.art?.title}`);
+  /* 2026-07-31 감사: 계획수립 조항이 116건 중 67건을 차지했고 그중 하나(기본 제7조)는
+     전문이 한 문장뿐이라 어떤 사업의 근거도 될 수 없었다. 계획·책무 조항은 근거가 아니다. */
+  every("조문이 계획·책무·정의 조항이 아님", P.filter(x => x.art),
+    x => !/(목적|정의|적용\s*범위|기본이념|책무|기본계획|시행계획|계획의?\s*수립|실태조사|위원회)/.test((x.art.title || "").trim()),
+    x => `${x.id}:${x.art?.title}`);
+  /* 조례마다 「지원사업」 계열 조가 사업의 지출 근거다. 그게 다수여야 정상이다. */
+  const basis = P.filter(x => x.art && /지원사업|추진.{0,2}지원\s*사업|청년정책사업지원|^지원$|가입대상|보험계약|교육기관|청년센터|청년시설|청년정책단|참여\s*확대|제대군인/.test(x.art.title || "")).length;
+  ok("조문이 지출 근거 계열", basis >= P.filter(x => x.art).length * 0.9,
+    `${basis}/${P.filter(x => x.art).length}`);
+  /* 조문 전문은 「…필요하다고 인정하는 사업」처럼 호 열거로 끝날 수 있다 — 정상이다.
+     문제는 **잘린 것**이 어절 중간에서 끊기는 경우다. 잘린 것만 본다. */
+  every("잘린 인용문이 어절 중간에서 안 끊김", P.filter(x => x.art && /…$/.test(x.art.body || "")),
+    x => /(다\.|다|음|함|임)\s*…$/.test((x.art.body || "").trim()), x => `${x.id}:…${(x.art.body||"").slice(-16)}`);
   every("조례 연결에 mst 있음", P.filter(x => x.ord), x => !!x.ord.mst, x => x.id);
   const names = new Set(Y.ordinances.map(o => o.name));
   every("연결된 조례가 수집 목록 안에 있음", P.filter(x => x.ord), x => names.has(x.ord.name), x => x.ord?.name);

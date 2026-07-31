@@ -115,10 +115,16 @@ const clean = t => t
   .replace(/\f/g, "")
   .split(/\r?\n/)
   .filter(l => !/^\s*-\s*\d+\s*-\s*$/.test(l))
-  .filter(l => !/^\s*(붙임\s*\d|\d\s+(추진개요|검토결과 총괄|제안별 검토의견))/.test(l))
+  /* 「3 제안별 검토의견  양산시 반려견순찰대」처럼 **제목이 이 줄에 붙어 있다.**
+     통째로 지우면 2024 1-1 의 제안명이 사라지고 파서가 검토결과 칸을 제목으로
+     집는다(2026-07-31 감사). 접두만 떼고 남은 글자는 살린다. */
+  .map(l => l.replace(/^\s*\d\s+(추진개요|검토결과 총괄|제안별 검토의견)\s*/, ""))
+  .filter(l => !/^\s*붙임\s*\d/.test(l))
   .join("\n");
 
 const HEAD = /^[ \t]*(일자리|생활안정|문화예술)[ \t]+(\d+-\d+)[ \t]*(.*)$/;
+/** 제안서 상자의 칸 이름. 제목이 여기까지 흘러오면 안 된다. */
+const FIELD = /^\s*(사업대상|사업내용|기대효과|검토부서|검토의견|검토결과)/;
 
 function parse(txt, year) {
   const lines = clean(txt).split(/\r?\n/);
@@ -128,17 +134,41 @@ function parse(txt, year) {
 
   const recs = [];
   let cur = null;
-  for (const raw of lines.slice(start)) {
+  const L = lines.slice(start);
+  for (let i = 0; i < L.length; i++) {
+    const raw = L[i];
     const m = raw.match(HEAD);
     if (m) {
       /* 쪽이 넘어가면 같은 머리줄이 한 번 더 찍힌다(3-3·3-30). 새 레코드로 세면
-         66건이 68건이 된다. 같은 연번이 이어지면 이어붙인다. */
-      if (cur && cur.no === m[2]) { cur.name ||= (m[3] || "").trim() || null; continue; }
+         66건이 68건이 된다. 같은 연번이 이어지면 **본문을 잇지 않고 버린다** —
+         이어붙이면 두 번째 사본의 사업대상·검토결과 상자가 검토의견 한가운데
+         끼어든다(2026-07-31 감사: 3-30 은 803자 중 절반이 중복이었다). */
+      if (cur && cur.no === m[2]) { cur.dup = true; cur.name ||= (m[3] || "").trim() || null; continue; }
       if (cur) recs.push(cur);
-      cur = { year, no: m[2], div: DIV[m[2].split("-")[0]] || null, name: (m[3] || "").trim() || null, body: [] };
+      /* 제목이 연번 **윗줄**에 오는 판이 있다(2024 형식):
+           `3 제안별 검토의견  양산시 반려견순찰대`
+           ` 일자리 1-1`
+         머리줄 뒤만 보면 제목이 비고, 파서가 아래로 흘러 **검토결과 칸을
+         제안명으로 집어삼킨다**(2026-07-31 감사: 2024 1-1). 앞줄에서 건져 온다. */
+      let nm = (m[3] || "").trim();
+      if (!nm) {
+        const prev = ([...L.slice(0, i)].reverse().find(l => l.trim()) || "").trim();
+        if (prev && !FIELD.test(prev) && !HEAD.test(prev) && prev.length < 60)
+          nm = prev.replace(/^\d+\s*제안별\s*검토의견\s*/, "").trim();
+      }
+      cur = { year, no: m[2], div: DIV[m[2].split("-")[0]] || null, name: nm || null, body: [], titleOpen: true };
       continue;
     }
-    if (cur) cur.body.push(raw);
+    if (!cur) continue;
+    /* 제목이 두 줄로 갈린다(15건). 칸 이름이 나오기 전까지는 아직 제목이다.
+       「지원 시범사업」처럼 앞 절반이 잘리면 유형 매칭·반복 판정이 같이 무너진다. */
+    if (cur.titleOpen) {
+      const t = raw.trim();
+      if (!t) { cur.body.push(raw); continue; }
+      if (FIELD.test(t) || /^[○□▹\-]/.test(t) || t.length >= 60) cur.titleOpen = false;
+      else { cur.name = ((cur.name || "") + " " + t).trim(); continue; }
+    }
+    cur.body.push(raw);
   }
   if (cur) recs.push(cur);
 
@@ -156,7 +186,11 @@ function parse(txt, year) {
     const cont = after.match(/^\s*\n\s{6,}([가-힣]+과)\s*$/m);
     if (cont && dept) { dept += "·" + cont[1]; after = after.replace(cont[0], "\n"); }
 
+    /* 쪽이 중복 인쇄되면 검토의견 한가운데에 두 번째 사본의 상자가 통째로 낀다
+       (3-3·3-30). 「사업대상 … 검토결과 X」 덩어리를 걷어낸다 — 그 뒤에만 있는
+       결론 문단은 살아남는다. */
     const reason = after
+      .replace(/사업대상[\s\S]*?검토결과[^\r\n]*/g, " ")
       .replace(/검토의견/g, "")
       .split(/\r?\n/).map(l => l.trim()).filter(Boolean)
       .join("\n")

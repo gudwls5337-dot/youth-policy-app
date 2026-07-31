@@ -157,7 +157,9 @@ async function fetchApply() {
       const tbl = oc.match(/view\(\d+\s*,\s*'([^']+)'/)?.[1] || null;
       const info = {};
       for (const x of li.querySelectorAll(".info li")) info[txt(x.querySelector("strong"))] = txt(x.querySelector("span"));
-      const cap = (info["신청현황"] || "").match(/(\d+)\s*\/\s*(\d+)/);
+      /* 콤마를 넘겨야 한다. `456 / 50,000` 을 `\d+` 로 읽어 분모가 **50** 이 됐고,
+         화면에 「신청 456 / 한도 50 도달」이라는 거짓이 떴다(2026-07-31 감사). */
+      const cap = (info["신청현황"] || "").match(/([\d,]+)\s*\/\s*([\d,]+)/);
       const per = (info["접수기간"] || "").match(/(\d{4}-\d{2}-\d{2})\s*~\s*(\d{4}-\d{2}-\d{2})/);
       rows.push({
         id, tbl,
@@ -165,8 +167,8 @@ async function fetchApply() {
         state: li.querySelector(".state")?.getAttribute("data-state") || null,
         from: per?.[1] || null,
         to: per?.[2] || null,
-        applied: cap ? +cap[1] : null,
-        capacity: cap ? +cap[2] : null,
+        applied: cap ? +cap[1].replace(/,/g, "") : null,
+        capacity: cap ? +cap[2].replace(/,/g, "") : null,
       });
     }
     page++;
