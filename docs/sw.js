@@ -1,5 +1,5 @@
 /* 청년정책 상황판 — 오프라인 캐시 */
-const V = "yom-20260729";
+const V = "yom-20260731";
 const ASSETS = ["./", "./index.html", "./manifest.webmanifest",
   "./icons/icon-192.png", "./icons/icon-512.png", "./icons/apple-touch-icon.png"];
 
