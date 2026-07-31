@@ -56,11 +56,13 @@ const tiny = [...new Set(css.match(/font-size:\s*(?:[0-9]|1[01])(?:\.\d+)?px/g) 
 T("최소 글자 12px", tiny.length === 0, tiny.join(", ") || "OK");
 
 console.log("\n── 앱 셸 ──");
-T("하단 탭 5개", $$(".tb").length === 5, $$(".tb").map(b => b.dataset.sc).join(","));
+/* 「마감」 탭은 없앴다 — 우리 시 탭의 「시행종료」 칩·「마감 포함」 토글과 같은 걸 보여줬다 */
+T("하단 탭 4개", $$(".tb").length === 4, $$(".tb").map(b => b.dataset.sc).join(","));
+T("마감 탭 없음", !$$(".tb").find(b => b.dataset.sc === "end"));
 /* 제안서가 종착지다. 그 재료는 「다른 시가 하는 것」에서 나오므로 둘러보기가 첫 탭이다. */
 T("첫 탭이 둘러보기", $$(".tb")[0]?.dataset.sc === "browse", $$(".tb").map(b => b.dataset.sc).join(","));
 T("비교 탭 존재", !!$$(".tb").find(b => b.dataset.sc === "gap"));
-T("화면 5개", $$(".screen").length === 5);
+T("화면 4개", $$(".screen").length === 4);
 T("기본 화면은 둘러보기", $("#sc-browse")?.classList.contains("on"));
 T("둘러보기 탭 존재", !!$$(".tb").find(b => b.dataset.sc === "browse"));
 T("헤더 고정 요소", !!$(".appbar") && !!$("#stNm") && !!$("#city"));
@@ -71,7 +73,9 @@ T("도시명", ($("#stNm")?.textContent || "").length > 3, $("#stNm")?.textConte
 T("연령", /\d+–\d+/.test($("#ageBig")?.textContent || ""), $("#ageBig")?.textContent.trim());
 T("신청 가능 수", +$("#c1")?.textContent > 0, $("#c1")?.textContent);
 T("종료 수", +$("#c3")?.textContent > 0, $("#c3")?.textContent);
-T("탭 배지 채워짐", $$(".tb .cnt").slice(0, 4).every(c => /\d/.test(c.textContent)),
+T("갱신 표기", /청년가까e|온통청년/.test($("#updatedAt")?.textContent || "") && /화면 갱신/.test($("#updatedAt")?.textContent || ""),
+  ($("#updatedAt")?.textContent || "").replace(/\s+/g, " ").slice(0, 60));
+T("탭 배지 채워짐", $$(".tb .cnt").slice(0, 3).every(c => /\d/.test(c.textContent)),
   $$(".tb .cnt").map(c => c.textContent).join("/"));
 
 console.log("\n── 지자체 검색 ──");
@@ -216,12 +220,13 @@ click($$("#statusbar [data-sc]").find(b => b.dataset.sc === "0"));
 await wait(180);
 T("다시 숨김", $$("#list1 .pcard").every(c => !c.className.includes("closed")));
 
-console.log("\n── 마감 탭 (관악구 · 온통청년) ──");
-tab("end"); await wait(160);
-T("종료 화면", $("#sc-end")?.classList.contains("on"));
-const l3 = $$("#list3 .pcard");
-T("전부 종료", l3.length > 0 && l3.every(c => c.className.includes("closed")), `${l3.length}장`);
-T("마감일·사유", /(신청마감|사업종료|종료)\s*\d{4}-\d{2}-\d{2}/.test($("#list3 .meta")?.textContent || ""));
+console.log("\n── 마감 정책 (관악구 · 우리 시 탭 토글) ──");
+/* 「마감」 탭은 없앴다. 마감 정책은 우리 시 탭의 「마감 포함」 토글에서만 본다. */
+click($$("#statusbar [data-sc]").find(x => x.dataset.sc === "1")); await wait(200);
+T("마감 포함하면 종료가 보임", $$("#list1 .pcard").some(c => c.className.includes("closed")),
+  `${$$("#list1 .pcard").filter(c => c.className.includes("closed")).length}장`);
+T("마감일·사유", /(신청마감|사업종료|종료)\s*\d{4}-\d{2}-\d{2}/.test($$("#list1 .pcard.closed .meta")[0]?.textContent || ""));
+click($$("#statusbar [data-sc]").find(x => x.dataset.sc === "0")); await wait(200);
 
 console.log("\n── 지자체별 목록이 실제로 다른가 ──");
 const top10 = () => $$("#list1 .pcard .nm").slice(0, 10).map(e => e.textContent);
@@ -247,11 +252,10 @@ T("시 전환 시 분야 칩 재구성", $$("#list1 .pcard").length > 0,
 T("남은 분야 선택은 전체로 복귀", $("#tabs .chip")?.getAttribute("aria-pressed") === "true",
   $$("#tabs .chip").map(b => b.textContent.trim()).slice(0, 3).join(" / "));
 
-/* 마감 탭도 소스를 따라가야 한다 — 안 그러면 한 화면에 두 소스가 섞인다 */
-await pickCity("경상남도 양산시"); await wait(160);
-tab("end"); await wait(160);
-T("양산 마감 탭도 청년가까e", $$("#list3 .pcard").length > 0 &&
-  !/신청마감\s*\d{4}/.test($("#list3 .meta")?.textContent || ""), `${$$("#list3 .pcard").length}장`);
+/* 양산의 종료 정책은 우리 시 탭 「시행종료」 칩에서 본다 */
+await pickCity("경상남도 양산시"); await wait(200);
+click($$("#ysState [data-ys]").find(x => x.dataset.ys === "종료")); await wait(220);
+T("양산 시행종료 목록", $$("#list1 .pcard").length > 0, `${$$("#list1 .pcard").length}장`);
 tab("policy"); await wait(160);
 
 console.log("\n── 둘러보기 ──");
@@ -538,8 +542,8 @@ click($("#dSave")); await wait(60);
 click($("#dClose")); await wait(360);
 T("닫힘", $("#drawer")?.hidden === true);
 
-tab("end"); await wait(150);
-click($("#list3 .pcard")); await wait(180);
+click($$("#ysState [data-ys]").find(x => x.dataset.ys === "종료")); await wait(220);
+click($("#list1 .pcard")); await wait(200);
 T("종료 상세 경고", /이미 종료|<b>종료<\/b>로 판정/.test($("#dBody")?.innerHTML || ""),
   ($("#dBody .keynote")?.textContent || "").slice(0, 40));
 click($("#dClose")); await wait(360);

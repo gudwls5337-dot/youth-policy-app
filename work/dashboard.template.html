@@ -154,6 +154,11 @@
   /* 신청기간이 없어 사업기간으로 판정했음을 카드에서 밝힌다 — 판정과 선언은 다르다 */
   .note2 { color:var(--ink-3); font-size:12px; }
 
+  /* 헤더 갱신 표기 — 어느 시점 데이터인지 늘 보인다 */
+  .updated { padding:8px 14px 10px; font-size:12px; color:var(--ink-3); line-height:1.5;
+    border-top:1px solid var(--line); background:var(--card-2); }
+  .updated b { color:var(--ink-2); font-weight:700; font-family:var(--num); }
+
   /* 「우리 시도 한다」 한 줄 — 카드 목록 대신. 우리 시 탭과 경계를 지킨다 */
   .minerow { display:flex; align-items:center; gap:12px; margin:0 14px 14px;
     padding:13px 14px; background:var(--in-wk); border:1px solid var(--in); border-radius:10px; }
@@ -413,8 +418,10 @@
     <div class="stats">
       <div class="stat"><b class="num" id="ageBig">—</b><span id="stAg">청년 연령</span></div>
       <div class="stat live"><b class="num" id="c1">—</b><span>접수중 등록</span></div>
-      <div class="stat closed"><b class="num" id="c3">—</b><span>마감 등록</span></div>
+      <div class="stat closed"><b class="num" id="c3">—</b><span>마감·종료</span></div>
     </div>
+    <!-- 언제 기준 데이터인지 늘 보이게. 캐시된 옛 화면을 모르고 보는 일이 있었다. -->
+    <div class="updated" id="updatedAt">—</div>
   </header>
 
   <main>
@@ -442,15 +449,8 @@
     <!-- 2. 신설 -->
     
 
-    <!-- 3. 종료 -->
-    <section class="screen" id="sc-end">
-      <div class="shead">
-        <h2>언제 끝나는가</h2>
-        <p><b>기준일에 이미 신청이 마감됐거나 사업이 끝난 것</b>입니다. 통합 플랫폼은 이런 걸 조용히 지웁니다.
-          <b>왜 없어졌는지는 담당부서만 압니다.</b></p>
-      </div>
-      <ul class="cards gone" id="list3"></ul>
-    </section>
+    <!-- 「마감」 탭은 없앴다(2026-07-31). 우리 시 탭의 「시행종료」 칩·「마감 포함」
+         토글과 같은 것을 보여주고 있었다 — 한 앱에 같은 화면이 두 벌 있으면 안 된다. -->
 
 
     <section class="screen on" id="sc-browse">
@@ -619,7 +619,6 @@
          「다른 시가 하는 것」에서 나온다. 우리 시 현황은 그다음이다. -->
     <button class="tb" role="tab" aria-selected="true" data-sc="browse"><span class="ic">◇</span>둘러보기<span class="cnt num" id="tc6">—</span></button>
     <button class="tb" role="tab" aria-selected="false" data-sc="policy"><span class="ic">◎</span>우리 시<span class="cnt num" id="tc1">—</span></button>
-    <button class="tb" role="tab" aria-selected="false" data-sc="end"><span class="ic">⊘</span>마감<span class="cnt num" id="tc3">—</span></button>
     <button class="tb" role="tab" aria-selected="false" data-sc="gap"><span class="ic">§</span>조례비교<span class="cnt num" id="tc5">—</span></button>
     <button class="tb" role="tab" aria-selected="false" data-sc="info"><span class="ic">≡</span>정보<span class="cnt num">·</span></button>
   </div>
@@ -715,6 +714,12 @@ function flash(btn, msg) {
 /* ═══════════ 초기화 ═══════════ */
 $("snapDate").textContent = PD.date;
 $("buildAt").textContent = BUILT;
+/* 언제 기준 데이터인지 헤더에 늘 띄운다. 화면 빌드 시각까지 같이 보여야
+   「캐시된 옛 화면인가」를 사용자가 스스로 판별할 수 있다(2026-07-31). */
+$("updatedAt").innerHTML = (isYS()
+  ? `청년가까e <b>${YS.date}</b>`
+  : `온통청년 <b>${PD.date}</b>`) +
+  ` · 조례 <b>${DB.date}</b> · 화면 갱신 <b>${BUILT.slice(5, 16)}</b>`;
 $("c4").textContent = DB.parsed;
 $("recCnt").textContent = (PD.counts?.records ?? PD.total).toLocaleString();
 $("uniqCnt").textContent = (PD.counts?.unique ?? PD.total).toLocaleString();
@@ -753,7 +758,9 @@ function readUrl() {
     if (exact) curCity = exact;
   }
   const tb = q.get("tab");
-  if (tb && ["policy", "end", "browse", "gap", "info"].includes(tb)) curTab = tb;
+  /* 「마감」 탭을 없앴다. 옛 링크가 죽지 않게 우리 시로 보낸다 — 거기 「마감 포함」이 있다. */
+  if (tb === "end") curTab = "policy";
+  else if (tb && ["policy", "browse", "gap", "info"].includes(tb)) curTab = tb;
 }
 
 /* ── 뒤로가기 ── 설치형 앱에서 안드로이드 뒤로가기가 앱을 닫아버리던 문제 */
@@ -1506,20 +1513,9 @@ function renderYangsan() {
   /* 「올해 등록된 것」은 온통청년 전용 개념(최초등록일)이라 양산 화면에선 숨긴다 */
   $("newHead").hidden = true; $("list2").innerHTML = "";
 
-  /* 마감 탭도 같은 소스로 채운다. 안 채우면 온통청년 마감 92건이 그대로 남아
-     한 화면 안에서 두 소스가 섞인다. */
-  const ended = self.filter(p => p.st === "종료")
-    .sort((a, b) => (b.to || b.bizTo || "").localeCompare(a.to || a.bizTo || ""));
-  $("list3").innerHTML = ended.length
-    ? ended.slice(0, 60).map(ysCard).join("") +
-      (ended.length > 60 ? `<li class="more">60건 표시 · 전체 ${ended.length}건</li>` : "")
-    : `<li class="empty">시행종료로 판정된 정책이 없습니다.</li>`;
-  [...$("list3").querySelectorAll(".pcard")].forEach((b, i) =>
-    b.addEventListener("click", () => openYS(ended[i])));
-
   const live = self.filter(p => p.st === "진행" || p.st === "예정").length;
   $("c1").textContent = live; $("tc1").textContent = live;
-  $("c3").textContent = cnt("종료"); $("tc3").textContent = cnt("종료");
+  $("c3").textContent = cnt("종료");
 }
 
 /** 정책 상세 — 원문·조례 조문·담당부서를 한 장에 (요구 4·5) */
@@ -1672,13 +1668,9 @@ function renderPolicies() {
     "올해 등록된 우리 시·도 정책이 없습니다.");
   $("newNote").textContent = nw.length ? nw.length + "건 · 최초등록일 기준" : "없음";
 
-  const gn = closed.slice().sort((a, b) => (b.cl || "").localeCompare(a.cl || ""));
-  renderList($("list3"), gn, null, null, "마감된 우리 시·도 정책이 없습니다.");
-
   $("c1").textContent = live.length;
   $("c3").textContent = closed.length;
   $("tc1").textContent = live.length;
-  $("tc3").textContent = closed.length;
 }
 
 /* ═══════════ 비교 — 우리 조례에 없는 조문 ═══════════ */
@@ -2151,7 +2143,13 @@ function renderCentral() {
   if (m) m.addEventListener("click", () => { showAllCentral = !showAllCentral; renderCentral(); });
 }
 
-function render() { renderCard(); renderDist(); renderPolicies(); renderBrowse(); renderGap(); renderDesig(); renderCentral(); renderPast(); }
+function renderUpdated() {
+  $("updatedAt").innerHTML = (isYS()
+    ? `청년가까e <b>${YS.date}</b>`
+    : `온통청년 <b>${PD.date}</b>`) +
+    ` · 조례 <b>${DB.date}</b> · 화면 갱신 <b>${BUILT.slice(5, 16)}</b>`;
+}
+function render() { renderUpdated(); renderCard(); renderDist(); renderPolicies(); renderBrowse(); renderGap(); renderDesig(); renderCentral(); renderPast(); }
 
 /* URL 로 들어온 상태를 먼저 반영하고, 히스토리 시작점을 남긴다 */
 readUrl();
