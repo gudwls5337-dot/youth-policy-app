@@ -309,12 +309,29 @@ if (tNoSido) {
 }
 if (tSido) { click($$("#browseTypes [data-bt]").find(b => b.dataset.bt === tSido)); await wait(180); }
 
+/* 마감된 사업이 「다른 시는 이런 걸 합니다」에 섞이면 「이미 끝난 걸 왜 보여주나」가 된다 */
+const liveChips = $$("#browseLive [data-bl]");
+T("접수중/마감 토글", liveChips.length === 2, liveChips.map(b => b.textContent.trim()).join(" / "));
+T("기본은 접수중만", liveChips[0]?.getAttribute("aria-pressed") === "true");
+T("다른 시 목록에 마감 없음", $$("#browseList .pcard").every(c => !c.className.includes("closed")),
+  `${$$("#browseList .pcard").filter(c => c.className.includes("closed")).length}장 섞임`);
+click(liveChips[1]); await wait(180);
+T("마감 포함하면 늘어남", $$("#browseList .pcard").length >= bc.length, `${$$("#browseList .pcard").length}장`);
+click(liveChips[0]); await wait(180);
+
 const mineCards = $$("#browseMine .pcard");
 if (mineCards.length) {
   T("우리 시 것은 별도 구역", ($("#browseMine")?.textContent || "").includes("제안 대상 아님"),
     `${mineCards.length}장`);
+  /* 우리 시 탭은 청년가까e 인데 여기만 온통청년이면 같은 사업이 한쪽은 시행중,
+     한쪽은 마감으로 떠서 한 앱이 두 말을 한다(2026-07-31 신고). */
+  T("우리 시 구역도 청년가까e 기준", ($("#browseMine")?.textContent || "").includes("청년가까e"),
+    ($("#browseMine .subhead")?.textContent || "").replace(/\s+/g, " ").slice(0, 40));
+  T("시행 상태 배지를 씀", $$("#browseMine .bdg").some(e => /시행(중|예정|종료)/.test(e.textContent)),
+    $$("#browseMine .bdg").map(e => e.textContent.trim()).slice(0, 3).join(" / "));
   click(mineCards[0]); await wait(220);
   T("우리 시 카드엔 제안 버튼 없음", $("#dPropose")?.hidden === true, $("#dTitle")?.textContent?.slice(0, 26));
+  T("상세가 청년가까e 상세", ($("#dBody")?.textContent || "").includes("판정 근거"));
   click($("#dClose")); await wait(360);
 }
 /* 다른 시 정책 카드에 우리 시 전화가 붙으면 전화를 잘못 걸게 된다 */

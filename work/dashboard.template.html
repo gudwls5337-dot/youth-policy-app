@@ -464,6 +464,7 @@
       <!-- 범위 2단계 (요구 6). 같은 도 사례가 전국 사례보다 세다 — 도비 매칭 구조가
            같고 「거긴 사정이 다르잖아요」를 덜 듣는다. 그래서 도를 먼저 놓는다. -->
       <div class="chips" id="browseScope"></div>
+      <div class="chips" id="browseLive"></div>
       <div class="subhead"><h3 id="browseOtherHead">다른 시가 하는 것</h3><span id="browseOtherNote"></span></div>
       <ul class="cards" id="browseList"></ul>
     </section>
@@ -1271,6 +1272,8 @@ function openProposal(k, seedIdx) {
 let curBrowseType = null;
 /* 요구 6 — 사례를 「같은 도 → 전국」 2단계로 본다. 도가 0건이면 전국으로 자동 전환. */
 let browseScope = "sido";
+/* 「다른 시」 목록 기본은 접수중만. 마감된 걸 먼저 보여주면 화면이 낡아 보인다. */
+let browseLive = true;
 /** 「경상남도」→「경남」. 칩과 문장에 긴 이름을 그대로 쓰면 줄이 넘친다. */
 const sidoShortNm = s => String(s || "")
   .replace(/^(강원|전북|제주|세종)특별자치(도|시)$/, "$1")
@@ -1308,8 +1311,20 @@ function renderBrowse() {
   $$("#browseScope [data-bs]").forEach(b =>
     b.addEventListener("click", () => { browseScope = b.dataset.bs; renderBrowse(); }));
 
-  const list = (browseScope === "sido" ? inSido : outSido).slice()
+  /* 마감된 사업이 「다른 시는 이런 걸 합니다」에 섞이면 「이미 끝난 걸 왜 보여주나」가
+     된다. 기본은 접수중만. 다만 마감 사례도 제안 근거는 되므로 토글로 남긴다. */
+  const scoped = browseScope === "sido" ? inSido : outSido;
+  const scopedLive = scoped.filter(x => x.p.ov !== 1);
+  if (browseLive && !scopedLive.length) browseLive = false;   // 접수중이 0이면 마감이라도 보여준다
+  const list = (browseLive ? scopedLive : scoped).slice()
     .sort((a, b) => (rankOv(a.p) - rankOv(b.p)) || (b.p.r || "").localeCompare(a.p.r || ""));
+
+  $("browseLive").innerHTML =
+    '<button class="chip" aria-pressed="' + browseLive + '" data-bl="1"' +
+      (scopedLive.length ? "" : " disabled") + '>접수중 ' + scopedLive.length + '</button>' +
+    '<button class="chip" aria-pressed="' + (!browseLive) + '" data-bl="0">마감 포함 ' + scoped.length + '</button>';
+  $$("#browseLive [data-bl]").forEach(b =>
+    b.addEventListener("click", () => { browseLive = b.dataset.bl === "1"; renderBrowse(); }));
 
   $("browseNote").innerHTML =
     '<span class="note">' + esc(t2.label || t2.k) + ' · ' + t2.n + '곳 채택 · 접수중 ' + t2.nLive + '곳 · ' +
@@ -1341,17 +1356,24 @@ function renderBrowse() {
       : short + '는 이 유형으로 <b>등록된 정책이 없습니다</b> — 실제 시행 여부는 담당부서 확인이 먼저입니다. ' +
         '제안서에 사례 3건 · 우리 조례 근거 · 담당부서 · 창구가 한 장으로 들어갑니다.');
 
-  /* 우리 시 것은 목록에서 뺐으니 여기서 따로 보여준다 — 「제안하기」가 안 붙는다 */
-  $("browseMine").innerHTML = ours.length
-    ? '<div class="subhead"><h3>' + short + '가 하는 것</h3><span>' + ours.length + '건 · 제안 대상 아님</span></div>' +
-      '<ul class="cards">' + ours.slice(0, 5).map(({ p, org }) => polCard(p, null, org)).join("") + '</ul>'
+  /* 우리 시 것은 목록에서 뺐으니 여기서 따로 보여준다 — 「제안하기」가 안 붙는다.
+     **양산은 청년가까e 로 그린다.** 온통청년으로 그리면 우리 시 탭은 「시행중」인데
+     여기선 같은 사업이 「마감」으로 떠서, 한 앱이 두 말을 한다(2026-07-31 신고). */
+  const mineList = ysHit
+    ? ysHit.slice().sort((a, b) => (a.st === "종료") - (b.st === "종료") ||
+        (b.from || b.bizFrom || "").localeCompare(a.from || a.bizFrom || ""))
+    : ours;
+  const mineLive = ysHit ? ysHit.filter(p => p.st !== "종료").length : ours.filter(x => x.p.ov !== 1).length;
+  $("browseMine").innerHTML = mineList.length
+    ? '<div class="subhead"><h3>' + short + '가 하는 것</h3><span>' + mineList.length + '건' +
+      (ysHit ? ' · 시행중·예정 ' + mineLive : '') + ' · 제안 대상 아님</span></div>' +
+      '<ul class="cards">' + mineList.slice(0, 5).map(x => ysHit ? ysCard(x) : polCard(x.p, null, x.org)).join("") + '</ul>' +
+      (ysHit ? '<p class="ctanote">출처 <b>청년가까e</b> — 「우리 시」 탭과 같은 기준입니다.</p>' : "")
     : "";
   [...$("browseMine").querySelectorAll(".pcard")].forEach((b, i) =>
     b.addEventListener("click", () => {
-      const x = ours[i];
-      /* 양산이면 청년가까e 상세로 — 시행 상태·조례·공고문이 거기 있다 */
-      const y = isYS() && ysSelf().find(q => q.nm === x.p.n);
-      y ? openYS(y) : openPolicy(x.p, x.org, x.i);
+      const x = mineList[i];
+      ysHit ? openYS(x) : openPolicy(x.p, x.org, x.i);
     }));
 
   /* 도 안에 사례가 0건인 것도 정보다 — 「우리 도에선 아무도 안 한다」는
