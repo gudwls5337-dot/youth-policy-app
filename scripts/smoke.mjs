@@ -317,6 +317,21 @@ if (tNoSido) {
 if (tSido) { click($$("#browseTypes [data-bt]").find(b => b.dataset.bt === tSido)); await wait(180); }
 
 /* 마감된 사업이 「다른 시는 이런 걸 합니다」에 섞이면 「이미 끝난 걸 왜 보여주나」가 된다 */
+/* 상설 조직·시설은 정책 목록에 안 올라온다. 청년가까e 에 없다고 「안 한다」고 하면
+   실재하는 청년정책단·청담이 없는 게 된다(2026-07-31 지적). 조례로 판정해야 한다. */
+for (const inst of ["참여기구", "청년센터"]) {
+  const c = $$("#browseTypes [data-bt]").find(b => b.dataset.bt === inst);
+  if (!c) continue;
+  click(c); await wait(200);
+  const note = $("#proposeNote")?.textContent || "";
+  T(`${inst} — 없다고 안 함`, !/하지 않습니다|없습니다/.test(note.split("상설")[0]), note.slice(0, 44));
+  T(`${inst} — 조례 근거 표시`, /조례 제\d+조/.test(note), (note.match(/조례 제\d+조\([^)]*\)/) || ["없음"])[0]);
+  T(`${inst} — 목록 한계 밝힘`, note.includes("정책 목록에 올라오지 않습니다"));
+  T(`${inst} — 신규 도입이 아님`, ($("#btnPropose")?.textContent || "").includes("확대·개선"),
+    $("#btnPropose")?.textContent?.trim());
+}
+click($$("#browseTypes [data-bt]")[0]); await wait(200);
+
 const liveChips = $$("#browseLive [data-bl]");
 T("접수중/마감 토글", liveChips.length === 2, liveChips.map(b => b.textContent.trim()).join(" / "));
 T("기본은 접수중만", liveChips[0]?.getAttribute("aria-pressed") === "true");

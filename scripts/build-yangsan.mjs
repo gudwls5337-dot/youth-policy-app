@@ -233,12 +233,30 @@ const tally = list => list.reduce((a, p) => {
   return (a[k] = (a[k] || 0) + 1, a);
 }, {});
 
+/* ── 상설 조직·시설 ── (2026-07-31 지적)
+   청년정책단과 청년센터 청담은 **실재하는데** 「하지 않습니다」로 떴다.
+   청년가까e 는 **정책·사업 목록**이라 상설 조직·시설은 안 올라온다.
+   소스를 바꿨어도 「목록에 없다 ≠ 없다」는 그대로다 — 원칙 1의 새 판이다.
+   그래서 이 둘만은 **조례에서 판정**한다. */
+const ART = t => (BASE?.arts || []).find(a => (a.title || "").replace(/[ㆍ·]/g, "·").includes(t));
+const inst = (k, label, title, note) => {
+  const a = ART(title);
+  return a ? { k, label, article: a.label, title: a.title, quote: quoteOf(a, 260), note } : null;
+};
+const institutions = [
+  inst("참여기구", "청년정책단", "청년정책단",
+    "조례상 「구성하여 운영할 수 있다」 — 임의 규정입니다. 의무화가 조례비교 탭의 제안 소재입니다."),
+  inst("청년센터", "청년센터 청담", "청년센터",
+    "제15조(청년시설)에 근거해 설치·운영합니다."),
+].filter(Boolean);
+
 const doc = {
   city: "경상남도 양산시",
   date: POL.date,
   ordDate: ORD.date,
   source: { policy: POL.source, home: POL.home, ord: ORD.source },
   counts: { total: out.length, self: self.length, mirror: mirror.length, ...tally(self) },
+  institutions,
   ordinances: ORD.ordinances.map(o => ({
     name: o.name, mst: o.mst, dept: o.dept, tel: o.tel, arts: o.arts?.length || 0,
     revision: o.revision, effective: o.effective,
@@ -254,5 +272,6 @@ console.log(`  시 등록 상태: ${JSON.stringify(tally(self))}`);
 console.log(`  판정 근거: ${JSON.stringify(self.reduce((a, p) => (a[p.stSrc || "없음"] = (a[p.stSrc || "없음"] || 0) + 1, a), {}))}`);
 console.log(`  조례 연결: 주제 일치 ${out.filter(p => p.exact).length} · 기본조례 폴백 ${out.filter(p => !p.exact).length}`);
 console.log(`  조문 인용 확보 ${out.filter(p => p.art).length}/${out.length}`);
+console.log(`  상설 조직·시설 ${institutions.length}종: ${institutions.map(i => `${i.label}(${i.article})`).join(" · ")}`);
 console.log(`  정원 확보 ${out.filter(p => p.capacity != null).length}건 · 부서 전화 ${out.filter(p => p.tel).length}건`);
 console.log(`  ${(Buffer.byteLength(JSON.stringify(doc)) / 1024).toFixed(0)}KB → docs/data/yangsan.json`);

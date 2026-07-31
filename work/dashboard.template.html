@@ -1167,14 +1167,18 @@ function openProposal(k, seedIdx) {
 
   const ysHit = isYS() ? ysSelf().filter(p => typeSigOf(p.nm) === k) : null;
   const ysLive = ysHit ? ysHit.filter(p => p.st === "진행" || p.st === "예정") : null;
-  const isNew = ysHit ? ysHit.length === 0 : ours.length === 0;
+  /* 상설 조직·시설은 정책 목록에 없다. 「신규 도입」이라고 쓰면 안 된다. */
+  const ysInst = isYS() ? (YS.institutions || []).find(i => i.k === k) : null;
+  const isNew = ysInst ? false : (ysHit ? ysHit.length === 0 : ours.length === 0);
   const ourN = ysHit ? ysHit.length : ours.length;
   const ourLive = ysHit ? ysLive.length : ours.filter(x => x.p.ov !== 1).length;
   const srcNm = ysHit ? "청년가까e" : "온통청년 등록";
 
   const html =
     F("제안 요지", '<span class="adopt">' + nAdopt + '곳</span> / 자체 정책이 등록된 ' + denom + '곳이 이 유형을 운영' +
-      '<span class="sub">그중 <b>' + nLive + '곳</b>이 접수중으로 등록돼 있습니다. ' + (isNew
+      '<span class="sub">그중 <b>' + nLive + '곳</b>이 접수중으로 등록돼 있습니다. ' + (ysInst
+        ? esc(short) + '에는 이미 <b>' + esc(ysInst.label) + '</b>이 있습니다 (조례 ' + esc(ysInst.article) + '). 제안은 <b>운영 방식 개선</b>입니다.'
+        : isNew
         ? esc(short) + '는 이 유형으로 <b>' + (ysHit ? '시행하는 사업이 없습니다' : '등록된 정책이 없습니다') + '.</b>'
         : esc(short) + '도 <b>' + ourN + '건</b> ' + (ysHit ? '하고 있습니다' : '등록돼 있습니다') +
           (ourLive === 0
@@ -1359,14 +1363,24 @@ function renderBrowse() {
   const short = esc(curCity.split(" ").slice(-1)[0]);
   const ysHit = isYS() ? ysSelf().filter(p => typeSigOf(p.nm) === curBrowseType) : null;
   const ysLive = ysHit ? ysHit.filter(p => p.st === "진행" || p.st === "예정") : null;
-  const has = ysHit ? ysHit.length > 0 : mine.has(curBrowseType);
+  /* 상설 조직·시설(청년정책단·청년센터)은 **사업이 아니라 정책 목록에 안 올라온다.**
+     청년가까e 에 없다고 「안 한다」고 하면 실재하는 청담과 정책단이 없는 게 된다.
+     이 둘만은 조례로 판정한다(2026-07-31 지적). */
+  const ysInst = isYS() ? (YS.institutions || []).find(i => i.k === curBrowseType) : null;
+  const has = ysInst ? true : (ysHit ? ysHit.length > 0 : mine.has(curBrowseType));
   const btn = $("btnPropose");
   btn.textContent = has
     ? '「' + (t2.label || t2.k) + '」 확대·개선 제안서 만들기'
     : '「' + (t2.label || t2.k) + '」 ' + curCity.split(" ").slice(-1)[0] + '에 제안하기';
   btn.onclick = () => openProposal(curBrowseType);
   /* 양산은 청년가까e(시 공식 채널)라 「등록」이 아니라 「시행」을 말할 수 있다. */
-  $("proposeNote").innerHTML = ysHit
+  $("proposeNote").innerHTML = ysInst
+    ? '<b>' + short + '에는 이미 ' + esc(ysInst.label) + '이 있습니다</b> — 조례 ' +
+      esc(ysInst.article) + '(' + esc(ysInst.title) + ')에 근거합니다.' +
+      '<span class="sub">' + esc(ysInst.note) + '<br>' +
+      '<b>상설 조직·시설은 정책 목록에 올라오지 않습니다</b> — 청년가까e 에 안 보인다고 없는 게 아닙니다. ' +
+      '아래 다른 시 사례는 <b>운영 방식을 견주는 용도</b>입니다.</span>'
+    : ysHit
     ? (ysHit.length
       ? '<b>' + short + '는 이 유형을 이미 하고 있습니다</b> — 청년가까e 기준 ' + ysHit.length + '건' +
         (ysLive.length ? ', 그중 <b>' + ysLive.length + '건이 시행중·예정</b>' : ', <b>다만 시행중인 건은 없습니다</b>') +
