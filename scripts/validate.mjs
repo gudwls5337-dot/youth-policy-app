@@ -214,6 +214,59 @@ function validateGovernance() {
 }
 
 /* ═══════════ 3. 빌드 산출물 ═══════════ */
+/** 양산 청년가까e — 「현황」을 주장하는 유일한 축이라 검사를 더 엄하게 건다.
+ *  여기가 틀리면 화면이 「우리 시는 이걸 안 한다」는 거짓을 말하게 된다. */
+function validateYangsan() {
+  console.log("── 양산 (청년가까e) ──");
+  const p = "docs/data/yangsan.json";
+  ok("yangsan.json 존재", existsSync(join(ROOT, p)));
+  if (!existsSync(join(ROOT, p))) return;
+  const Y = J(p);
+  const P = Y.policies;
+  console.log(`  ${P.length}건 · 시 등록 ${Y.counts.self} · 미러 ${Y.counts.mirror} · 조례 ${Y.ordinances.length}건`);
+
+  ok("정책 존재", P.length > 50, `${P.length}건`);
+  ok("counts 합 일치", Y.counts.self + Y.counts.mirror === P.length,
+    `${Y.counts.self}+${Y.counts.mirror} vs ${P.length}`);
+  ok("id 중복 없음", new Set(P.map(x => x.id)).size === P.length);
+  every("id 존재", P, x => !!x.id, x => x.nm);
+  /* 숫자 id = 시 직접 등록, `R…` = 온통청년 미러. 이 구분이 무너지면 현황 숫자가 오염된다. */
+  every("origin 판정이 id 형식과 일치", P,
+    x => x.origin === (/^\d+$/.test(x.id) ? "self" : "ontong"), x => `${x.id}/${x.origin}`);
+
+  const self = P.filter(x => x.origin === "self");
+  every("상태값이 4종 안에 있음", P, x => ["진행", "예정", "종료", "미상"].includes(x.st), x => `${x.id}:${x.st}`);
+  /* 원칙 4 — 판정에는 근거가 따라와야 한다. 근거 없는 상태는 추정이다. */
+  every("판정에 근거가 붙어 있음", P.filter(x => x.st !== "미상"), x => !!x.stSrc, x => `${x.id} ${x.nm?.slice(0, 20)}`);
+  every("미상은 근거가 없어야", P.filter(x => x.st === "미상"), x => !x.stSrc, x => x.id);
+  every("상시는 진행일 때만", P, x => x.kind !== "상시" || x.st === "진행", x => `${x.id}:${x.st}/${x.kind}`);
+
+  /* 이 앱의 존재 이유 — 온통청년이 「전부 마감」이라 말하는 걸 반증하는 자리다.
+     0이 되면 데이터가 상해서 그런 건지 진짜 없는 건지 사람이 봐야 한다. */
+  const live = self.filter(x => x.st === "진행" || x.st === "예정").length;
+  warn("시 등록분에 진행·예정이 있음", live > 0, `${live}건`);
+
+  every("기간 형식", P.filter(x => x.from), x => /^\d{4}-\d{2}-\d{2}$/.test(x.from), x => `${x.id}:${x.from}`);
+  every("종료일이 시작일 이후", P.filter(x => x.from && x.to), x => x.to >= x.from, x => `${x.id}:${x.from}~${x.to}`);
+  every("정원은 양수", P.filter(x => x.capacity != null), x => x.capacity > 0 && x.applied >= 0,
+    x => `${x.id}:${x.applied}/${x.capacity}`);
+  every("전화 형식", P.filter(x => x.tel), x => TEL_RE.test(x.tel), x => `${x.id}:${x.tel}`);
+
+  /* 요구 4 — 조문을 붙였으면 인용이 있어야 한다. 번호만 있으면 검증이 안 된다. */
+  every("조문에 인용문 동반", P.filter(x => x.art), x => !!x.art.body && x.art.body.length > 10,
+    x => `${x.id}:${x.art?.label}`);
+  every("조문이 목적·정의가 아님", P.filter(x => x.art),
+    x => !/^(목적|정의|적용\s*범위|기본이념)/.test((x.art.title || "").trim()), x => `${x.id}:${x.art?.title}`);
+  every("조례 연결에 mst 있음", P.filter(x => x.ord), x => !!x.ord.mst, x => x.id);
+  const names = new Set(Y.ordinances.map(o => o.name));
+  every("연결된 조례가 수집 목록 안에 있음", P.filter(x => x.ord), x => names.has(x.ord.name), x => x.ord?.name);
+  ok("조례 전부 양산 것", Y.ordinances.every(o => o.name.startsWith("양산시")));
+  ok("조문 수집됨", Y.ordinances.every(o => o.arts > 0), Y.ordinances.filter(o => !o.arts).map(o => o.name).join(","));
+
+  /* 공고문 게시판은 robots.txt 차단이라 본문을 담으면 안 된다. URL 만 있어야 정상. */
+  every("공고문은 링크만", P.filter(x => x.link), x => /^https?:\/\/[^\s]+$/.test(x.link), x => x.id);
+}
+
 function validateBuild() {
   console.log("── 빌드 (docs/index.html) ──");
   const p = join(ROOT, "docs/index.html");
@@ -309,6 +362,7 @@ async function run() {
   const B = validateOrdinances();
   const P = validatePolicies(B);
   validateGovernance();
+  validateYangsan();
   validateBuild();
 
   let sample = null;

@@ -151,6 +151,8 @@
   .bdg.soon { background:var(--out-wk); color:var(--out); }
   .bdg.end  { background:var(--line-2); color:var(--ink-3); }
   .bdg.new  { background:var(--in-wk); color:var(--in-ink); }
+  /* 신청기간이 없어 사업기간으로 판정했음을 카드에서 밝힌다 — 판정과 선언은 다르다 */
+  .note2 { color:var(--ink-3); font-size:12px; }
   .bdg.lv   { background:var(--line-2); color:var(--ink-3); }
 
   /* 비교 화면 */
@@ -406,18 +408,21 @@
     <!-- 1. 정책 -->
     <section class="screen on" id="sc-policy">
       <div class="shead">
-        <h2>온통청년에 등록된 것</h2>
-        <p><b>「지금 신청 가능」이 아니라 「등록된 신청기간」입니다.</b>
+        <h2 id="pTitle">온통청년에 등록된 것</h2>
+        <p id="pLede"><b>「지금 신청 가능」이 아니라 「등록된 신청기간」입니다.</b>
           지자체가 몰아서 등록하고 갱신을 안 하는 경우가 많아, 등록 상태와 실제 시행이 다를 수 있습니다.
           중앙부처 정책은 전국이 같아 정보 탭으로 옮겼습니다.</p>
         <div class="warnbox" id="freshWarn"></div>
       </div>
+      <!-- 시행 상태 4분류. 양산(청년가까e)일 때만 나온다 — 시가 상태를 직접 밝히는
+           유일한 소스라서, 다른 시에 같은 칸을 만들면 추정이 된다. -->
+      <div class="chips" id="ysState" hidden></div>
       <div class="chips" id="levelbar"></div>
       <div class="chips" id="tabs"></div>
       <div class="segbar" id="statusbar"></div>
       <ul class="cards" id="list1"></ul>
 
-      <div class="subhead"><h3>올해 등록된 것</h3><span id="newNote"></span></div>
+      <div class="subhead" id="newHead"><h3>올해 등록된 것</h3><span id="newNote"></span></div>
       <ul class="cards" id="list2"></ul>
     </section>
 
@@ -618,6 +623,11 @@ const DB = /*__BOARD__*/null;
 const PD = /*__POLICIES__*/null;
 const CP = /*__COMPARE__*/null;
 const GV = /*__GOVCOMPARE__*/null;
+/* 양산시 청년가까e — 시 공식 채널. 양산에 한해 「현황」을 주장할 수 있다.
+   온통청년은 양산 9건을 전부 마감으로 말하지만 여기엔 9건이 살아 있다. */
+const YS = /*__YANGSAN__*/null;
+const YS_CITY = YS?.city || "경상남도 양산시";
+const isYS = () => curCity === YS_CITY && !!YS;
 
 const DESIG_A = [["서울특별시 관악구","1차 · 2024"],["부산광역시 부산진구","1차 · 2024"],["경상남도 거창군","1차 · 2024"],
   ["서울특별시 성동구","2차 · 2025"],["전남광주통합특별시 순천시","2차 · 2025"],["충청남도 공주시","2차 · 2025"]];
@@ -1181,7 +1191,180 @@ function renderBrowse() {
   $("tc6").textContent = types.length;
 }
 
+/* ═══════════ 양산 — 청년가까e ═══════════ §요구 2·3·4·5
+   온통청년은 양산 자체 9건을 **전부 마감**이라고 말한다. 시 홈페이지에는 9건이
+   살아 있다. 등록 데이터로 「현황」을 주장하면 안 된다는 원칙 1 은 그대로지만,
+   **시 공식 채널은 원칙 1의 예외**다 — 여기서는 「없다」를 말할 수 있다.
+
+   4분류의 근거를 카드마다 밝힌다(원칙 4). 「상시」는 신청기간이 비어 있고
+   사업기간이 오늘을 품는 경우이고, 그건 판정이지 사이트의 선언이 아니다. */
+const YS_ST = [
+  ["진행", "시행중", p => p.st === "진행" && p.kind !== "상시"],
+  ["상시", "시행중·상시", p => p.st === "진행" && p.kind === "상시"],
+  ["예정", "시행예정", p => p.st === "예정"],
+  ["종료", "시행종료", p => p.st === "종료"],
+];
+let ysState = "진행";
+const ysSelf = () => YS.policies.filter(p => p.origin === "self");
+
+/** 분야 칩. 양산(청년가까e)과 다른 시(온통청년)는 분야 이름 체계가 다르다.
+ *  한 번만 그리고 두던 판은 양산을 보다 다른 시로 넘어가면 「참여/권리」 칩이
+ *  그대로 남아 아무것도 안 걸리는 화면을 만들었다. 그릴 때마다 목록에서 뽑는다. */
+function fieldChips(fields, countOf, total, onPick) {
+  if (curField !== "전체" && !fields.includes(curField)) curField = "전체";
+  $("tabs").innerHTML = [["전체", total], ...fields.map(f => [f, countOf(f)])]
+    .map(([f, n]) => `<button class="chip" aria-pressed="${curField === f}" data-f="${esc(f)}">${esc(f)} ${n}</button>`).join("");
+  $$("#tabs [data-f]").forEach(b =>
+    b.addEventListener("click", () => { curField = b.dataset.f; onPick(); }));
+}
+const ysPeriod = p =>
+  p.from ? `${p.from} ~ ${p.to || "미정"}` :
+  p.bizFrom ? `${p.bizFrom} ~ ${p.bizTo || "미정"} <span class="note2">(사업기간)</span>` : "기간 정보 없음";
+
+function ysCard(p) {
+  const cls = p.st === "종료" ? " closed" : p.st === "예정" ? " soon" : "";
+  const full = p.capacity != null && p.applied != null && p.applied >= p.capacity;
+  return `<li><button class="pcard${cls}">
+    <span class="top"><span class="nm">${esc(p.nm)}</span><span class="go">›</span></span>
+    <span class="amt">${esc((p.body || "").split("\n").find(x => x.trim()) || p.field || "내용 확인 필요").replace(/^[○·\-★❍\s]+/, "").slice(0, 46)}</span>
+    <div class="badges">
+      <span class="bdg ${p.st === "종료" ? "end" : p.st === "예정" ? "soon" : "live"}">${esc(YS_ST.find(s => s[0] === (p.kind === "상시" && p.st === "진행" ? "상시" : p.st))?.[1] || p.st)}</span>
+      ${p.field ? `<span class="bdg lv">${esc(p.field)}</span>` : ""}
+      ${p.capacity != null ? `<span class="bdg ${full ? "end" : "new"}">신청 ${p.applied}/${p.capacity}${full ? " 초과" : ""}</span>` : ""}
+    </div>
+    <span class="meta">
+      <span><i>신청</i>${ysPeriod(p)}</span>
+      <span><i>담당</i>${esc(p.dept || p.ord?.dept || "—")}</span>
+      <span><i>문의</i><span class="tel">${esc(p.tel || p.telFallback || "—")}</span></span>
+    </span></button></li>`;
+}
+
+function renderYangsan() {
+  const self = ysSelf();
+  const cnt = k => self.filter(YS_ST.find(s => s[0] === k)[2]).length;
+  $("pTitle").textContent = "양산시가 시행하는 청년정책";
+  $("pLede").innerHTML =
+    `출처는 <b>양산시 청년가까e</b>입니다 — 시가 직접 운영하는 채널이라 <b>여기 없으면 없는 것</b>으로 봐도 됩니다.
+     <span class="sub">참고로 국가 플랫폼(온통청년)에는 양산 자체 정책이 <b>9건뿐이고 전부 마감</b>으로 올라 있습니다.
+     같은 시점 청년가까e 에는 <b>${self.length}건</b>이 있습니다.</span>`;
+
+  $("ysState").hidden = false;
+  $("ysState").innerHTML = YS_ST.map(([k, label]) =>
+    `<button class="chip" aria-pressed="${ysState === k}" data-ys="${k}"${cnt(k) === 0 ? " disabled" : ""}>${label} ${cnt(k)}</button>`).join("");
+  $$("#ysState [data-ys]").forEach(b =>
+    b.addEventListener("click", () => { ysState = b.dataset.ys; renderYangsan(); }));
+
+  const pick = self.filter(YS_ST.find(s => s[0] === ysState)[2])
+    .filter(p => curField === "전체" || p.field === curField)
+    .sort((a, b) => (b.from || b.bizFrom || "").localeCompare(a.from || a.bizFrom || ""));
+
+  $("list1").innerHTML = pick.length
+    ? pick.slice(0, 60).map(ysCard).join("") +
+      (pick.length > 60 ? `<li class="more">60건 표시 · 전체 ${pick.length}건</li>` : "")
+    : `<li class="empty">이 상태에 해당하는 정책이 없습니다.
+       <span class="esub">위 칩을 바꿔 보십시오. 「시행종료」에 ${cnt("종료")}건이 있습니다.</span></li>`;
+  [...$("list1").querySelectorAll(".pcard")].forEach((b, i) =>
+    b.addEventListener("click", () => openYS(pick[i])));
+
+  /* 분야 칩 — 청년가까e 분류(복지/문화·일자리·참여/권리)를 그대로 쓴다.
+     온통청년 분야명과 다르므로 시를 바꿔 오면 남은 선택을 「전체」로 되돌린다. */
+  const fields = [...new Set(self.map(p => p.field).filter(Boolean))];
+  fieldChips(fields, f => self.filter(p => p.field === f).length, self.length, renderYangsan);
+
+  $("levelbar").innerHTML = "";
+  $("statusbar").innerHTML = `<span class="note">기준일 ${YS.date} · 조례 ${YS.ordDate}</span>`;
+  const mirror = YS.policies.length - self.length;
+  $("freshWarn").innerHTML =
+    `이 목록은 <b>양산시가 직접 등록</b>한 ${self.length}건입니다.
+     <br>청년가까e 목록에는 온통청년에서 가져온 <b>${mirror}건</b>이 더 있으나 상태·기간이 비어 있어 <b>현황에서 뺐습니다.</b>
+     <br>「시행중·상시」는 신청기간이 명시되지 않고 사업기간이 오늘을 포함하는 경우입니다 — <b>시가 선언한 상태가 아니라 판정</b>입니다.`;
+
+  /* 「올해 등록된 것」은 온통청년 전용 개념(최초등록일)이라 양산 화면에선 숨긴다 */
+  $("newHead").hidden = true; $("list2").innerHTML = "";
+
+  /* 마감 탭도 같은 소스로 채운다. 안 채우면 온통청년 마감 92건이 그대로 남아
+     한 화면 안에서 두 소스가 섞인다. */
+  const ended = self.filter(p => p.st === "종료")
+    .sort((a, b) => (b.to || b.bizTo || "").localeCompare(a.to || a.bizTo || ""));
+  $("list3").innerHTML = ended.length
+    ? ended.slice(0, 60).map(ysCard).join("") +
+      (ended.length > 60 ? `<li class="more">60건 표시 · 전체 ${ended.length}건</li>` : "")
+    : `<li class="empty">시행종료로 판정된 정책이 없습니다.</li>`;
+  [...$("list3").querySelectorAll(".pcard")].forEach((b, i) =>
+    b.addEventListener("click", () => openYS(ended[i])));
+
+  const live = self.filter(p => p.st === "진행" || p.st === "예정").length;
+  $("c1").textContent = live; $("tc1").textContent = live;
+  $("c3").textContent = cnt("종료"); $("tc3").textContent = cnt("종료");
+}
+
+/** 정책 상세 — 원문·조례 조문·담당부서를 한 장에 (요구 4·5) */
+function openYS(p) {
+  const tel = p.tel || p.telFallback;
+  const telNote = p.telSrc === "조례소관"
+    ? '<span class="sub">이 번호는 <b>조례 소관 부서</b>입니다. 사업 담당이 다르면 연결을 요청하십시오.</span>' : "";
+  const full = p.capacity != null && p.applied != null && p.applied >= p.capacity;
+
+  /* 양산은 자격증·면접비·활동포인트가 **월별/차수별로 반복**된다. 종료를 그냥
+     종료라고만 하면 다음 회차를 놓친다 — 같은 이름의 뒷 회차가 있으면 짚어 준다. */
+  const base = p.nm.replace(/\s*\(?\d+\s*(월|차)\)?.*$/, "").replace(/^\[[^\]]*\]\s*/, "").trim();
+  const next = p.st === "종료" && base.length > 4
+    ? ysSelf().find(q => q.id !== p.id && (q.st === "진행" || q.st === "예정") &&
+        q.nm.replace(/^\[[^\]]*\]\s*/, "").startsWith(base.slice(0, Math.min(base.length, 14))))
+    : null;
+
+  const html =
+    (p.st === "종료" ? F("", `<div class="warnbox">이 사업은 <b>종료</b>로 판정됐습니다 (근거: ${esc(p.stSrc || "없음")}).` +
+      (next ? ` 같은 사업의 <b>다음 회차가 있습니다</b> — 「${esc(next.nm)}」.`
+            : ` 후속 회차 여부는 <b>양산시 청년가까e</b> 또는 담당부서에 확인하십시오.`) + `</div>`) : "") +
+    F("시행 상태", `<b>${esc(YS_ST.find(s => s[0] === (p.kind === "상시" && p.st === "진행" ? "상시" : p.st))?.[1] || p.st)}</b>` +
+      `<span class="sub">판정 근거: <b>${esc(p.stSrc || "없음")}</b>` +
+      (p.raw ? ` · 사이트 표시 「${esc(p.raw)}」` : "") + "</span>") +
+    F("신청기간", ysPeriod(p) + (p.bizFrom && p.from ? `<span class="sub">사업기간 ${p.bizFrom} ~ ${p.bizTo || "미정"}</span>` : "")) +
+    (p.capacity != null ? F("신청 현황",
+      `<b>${p.applied} / ${p.capacity}명</b>${full ? ' <b style="color:var(--out)">정원 초과</b>' : ""}` +
+      '<span class="sub">신청자가 정원을 넘었다면 <b>증원 제안의 근거</b>가 됩니다.</span>') : "") +
+    (p.body ? F("지원 내용 — 원문 그대로", nl2br(p.body)) : "") +
+    (p.howto ? F("신청 안내 — 원문 그대로", nl2br(p.howto)) : "") +
+    F("담당부서", esc(p.dept || p.ord?.dept || "미상") +
+      (tel ? `<br><a class="ptel" href="tel:${tel.replace(/\D/g, "")}">${esc(tel)}</a>` : "") + telNote) +
+    (p.ord ? F("근거 조례", `「${esc(p.ord.name)}」` +
+      (p.art ? `<br><b>${esc(p.art.label)} ${esc(p.art.title || "")}</b>
+        <div class="pquote">${esc(p.art.body || "")}</div>` : '<span class="sub">이 사업에 직접 대응하는 조문은 <b>찾지 못했습니다.</b> 조례 전문을 확인하십시오.</span>') +
+      `<span class="sub">${p.exact ? "이 주제 전담 조례입니다." : "이 주제 전담 조례가 없어 <b>기본 조례</b>를 답니다."}
+       · <a class="lnk" href="${lawUrl(p.ord.mst)}" target="_blank" rel="noopener">법제처 원문</a></span>`) : "") +
+    (p.link ? F("공고문 원문", `<a class="lnk" href="${esc(p.link)}" target="_blank" rel="noopener">${esc(p.link.slice(0, 52))}…</a>
+      <span class="sub">양산시 공고문입니다. 첨부파일·서식은 여기에 있습니다.</span>`) : "") +
+    F("출처", `양산시 청년가까e (수집 ${YS.date}) · 조례는 법제처 국가법령정보센터 (수집 ${YS.ordDate})`);
+
+  const plain = [
+    `[양산시 청년정책] ${p.nm}`,
+    `시행 상태: ${YS_ST.find(s => s[0] === (p.kind === "상시" && p.st === "진행" ? "상시" : p.st))?.[1] || p.st} (판정 근거: ${p.stSrc || "없음"}${p.raw ? `, 사이트 표시 「${p.raw}」` : ""})`,
+    `신청기간: ${p.from ? `${p.from} ~ ${p.to || "미정"}` : p.bizFrom ? `${p.bizFrom} ~ ${p.bizTo || "미정"} (사업기간)` : "정보 없음"}`,
+    ...(p.capacity != null ? [`신청 현황: ${p.applied} / ${p.capacity}명${full ? " (정원 초과)" : ""}`] : []),
+    "", "■ 지원 내용", p.body || "-",
+    ...(p.howto ? ["", "■ 신청 안내", p.howto] : []),
+    "", "■ 담당부서", `${p.dept || p.ord?.dept || "미상"}  ${tel || ""}`,
+    ...(p.telSrc === "조례소관" ? ["  ※ 조례 소관 부서 번호입니다. 사업 담당이 다를 수 있습니다."] : []),
+    ...(p.ord ? ["", "■ 근거 조례", `「${p.ord.name}」`,
+      p.art ? `${p.art.label} ${p.art.title || ""}\n${p.art.body || ""}` : "직접 대응 조문 미확인",
+      `법제처 원문: ${lawUrl(p.ord.mst)}`] : []),
+    ...(p.link ? ["", "■ 공고문", p.link] : []),
+    "", `출처: 양산시 청년가까e (수집 ${YS.date}) · 조례 법제처 (수집 ${YS.ordDate})`,
+  ].join("\n");
+
+  openDrawer(`${p.field || "청년정책"} · ${YS_ST.find(s => s[0] === (p.kind === "상시" && p.st === "진행" ? "상시" : p.st))?.[1] || p.st}`,
+    p.nm, html, plain, null);
+}
+
 function renderPolicies() {
+  /* 양산은 시 공식 채널이 있다. 온통청년으로 그리면 「진행 0건」이라는 거짓이 나온다. */
+  if (isYS()) return renderYangsan();
+  $("ysState").hidden = true; $("newHead").hidden = false;
+  $("pTitle").textContent = "온통청년에 등록된 것";
+  $("pLede").innerHTML = `<b>「지금 신청 가능」이 아니라 「등록된 신청기간」입니다.</b>
+    지자체가 몰아서 등록하고 갱신을 안 하는 경우가 많아, 등록 상태와 실제 시행이 다를 수 있습니다.
+    중앙부처 정책은 전국이 같아 정보 탭으로 옮겼습니다.`;
   const all = policiesFor(curCity);
   const live = all.filter(p => p.ov !== 1);
   const closed = all.filter(p => p.ov === 1);
@@ -1192,6 +1375,10 @@ function renderPolicies() {
   const cnt = lv => live.filter(p => p.lv === lv).length;
   const LEVELS = [["전체", live.length], ["기초", cnt("기초")], ["광역", cnt("광역")]];
   const LABEL = { "전체": "전체", "기초": basic, "광역": sido };
+
+  /* 분야 칩은 매번 다시 그린다 — 양산에서 넘어오면 분야 체계가 다르다 */
+  fieldChips(FIELDS.filter(f => live.some(p => p.f === f)),
+    f => live.filter(p => p.f === f).length, live.length, renderPolicies);
 
   const byField = a => curField === "전체" ? a : a.filter(p => p.f === curField);
   const byLevel = a => curLevel === "전체" ? a : a.filter(p => p.lv === curLevel);

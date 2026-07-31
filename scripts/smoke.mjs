@@ -87,16 +87,74 @@ T("결과 없을 때 안내", !!$("#pickList .empty"));
 click($("#pickClose")); await wait(320);
 T("검색 시트 닫힘", $("#picker")?.hidden === true);
 
-console.log("\n── 정책 화면 ──");
-tab("policy"); await wait(220);
+/* ══ 양산 = 청년가까e ══
+   기본 지자체가 양산이고, 양산은 시 공식 채널을 쓴다. 온통청년으로 그리면
+   「진행 0건」이라는 거짓이 나오므로 화면 소스 자체가 다르다. */
+console.log("\n── 우리 시 화면 (양산 · 청년가까e) ──");
+tab("policy"); await wait(260);
+T("제목이 청년가까e 기준", ($("#pTitle")?.textContent || "").includes("시행하는"), $("#pTitle")?.textContent);
+T("출처 명시", ($("#pLede")?.textContent || "").includes("청년가까e"));
+T("온통청년 한계도 같이 밝힘", ($("#pLede")?.textContent || "").includes("전부 마감"));
+
+const ysChips = $$("#ysState [data-ys]");
+T("시행 상태 4분류", ysChips.length === 4, ysChips.map(b => b.textContent.trim()).join(" / "));
+T("시행중이 기본 선택", ysChips[0]?.getAttribute("aria-pressed") === "true");
 const c1 = $$("#list1 .pcard");
 T("카드 렌더", c1.length > 0, `${c1.length}장`);
-T("제목·금액 채워짐", c1.every(c => (c.querySelector(".nm")?.textContent || "").trim() && (c.querySelector(".amt")?.textContent || "").trim()));
+T("제목·요약 채워짐", c1.every(c => (c.querySelector(".nm")?.textContent || "").trim() && (c.querySelector(".amt")?.textContent || "").trim()));
 T("종료 안 섞임", c1.every(c => !c.className.includes("closed")), `${c1.filter(c => c.className.includes("closed")).length}장 섞임`);
-T("첫 카드가 진행 중", c1.length > 0 && !c1[0].className.includes("closed"), c1[0]?.querySelector(".nm")?.textContent.slice(0, 26));
 T("상태 배지 있음", c1.every(c => c.querySelector(".bdg")));
-T("전화 표시", c1.some(c => /\d{2,3}-\d{3,4}-\d{3,4}/.test(c.querySelector(".tel")?.textContent || "")));
+/* 온통청년으로 그렸다면 여기가 0건이었다. 이 검사가 회귀의 핵심이다. */
+T("온통청년이 못 보여주는 진행 건이 보인다", c1.length > 0,
+  c1[0]?.querySelector(".nm")?.textContent.slice(0, 30));
+T("정원 대비 신청자 노출", $$("#list1 .badges").some(e => /신청 \d+\/\d+/.test(e.textContent)),
+  ($$("#list1 .badges").map(e => (e.textContent.match(/신청 \d+\/\d+/) || [])[0]).filter(Boolean)[0]) || "없음");
+T("판정 근거 안내", ($("#freshWarn")?.textContent || "").includes("판정"),
+  ($("#freshWarn")?.textContent || "").slice(0, 40));
+T("미러 분리 명시", ($("#freshWarn")?.textContent || "").includes("현황에서 뺐습니다"));
 
+/* 4분류가 실제로 서로 다른 목록인가 */
+const ysCounts = {};
+for (const b of ysChips) {
+  click(b); await wait(160);
+  ysCounts[b.dataset.ys] = $$("#list1 .pcard").length;
+}
+T("상태별 목록이 다름", new Set(Object.values(ysCounts)).size >= 2, JSON.stringify(ysCounts));
+T("시행종료가 가장 많음", ysCounts["종료"] >= Math.max(ysCounts["진행"], ysCounts["예정"]),
+  `종료 ${ysCounts["종료"]} vs 진행 ${ysCounts["진행"]}`);
+click(ysChips[0]); await wait(180);
+
+console.log("\n── 양산 정책 상세 (조례·원문·연락처) ──");
+click($("#list1 .pcard")); await wait(240);
+const yd = $("#dBody")?.textContent || "";
+T("상세 열림", $("#drawer")?.hidden === false, $("#dTitle")?.textContent?.slice(0, 30));
+T("시행 상태 + 판정 근거", yd.includes("판정 근거"));
+T("지원 내용 원문", yd.includes("원문 그대로"));
+T("근거 조례 표시", yd.includes("근거 조례") && /「양산시 .+조례」/.test(yd),
+  (yd.match(/「양산시 [^」]+」/) || ["없음"])[0]);
+T("조문 인용 블록", !!$("#dBody .pquote"), ($("#dBody .pquote")?.textContent || "").slice(0, 30) + "…");
+T("법제처 원문 링크", ($("#dBody")?.innerHTML || "").includes("law.go.kr/DRF"));
+T("담당부서 전화", !!$("#dBody .ptel"), $("#dBody .ptel")?.textContent);
+T("공고문 원문 링크", ($("#dBody")?.innerHTML || "").includes("yangsan.go.kr"));
+click($("#dCopy")); await wait(120);
+const ycp = window.__copied || "";
+T("복사 텍스트", ycp.startsWith("[양산시 청년정책]"), ycp.split("\n")[0]?.slice(0, 40));
+T("복사본에 근거 조례", ycp.includes("■ 근거 조례"));
+T("복사본에 판정 근거", ycp.includes("판정 근거"));
+click($("#dClose")); await wait(360);
+
+/* ══ 온통청년 경로 — 다른 시에서 검사한다 ══ */
+console.log("\n── 온통청년 화면 (관악구) ──");
+async function pickCity(v) {
+  const s = $("#city"); s.value = v; s.dispatchEvent(new window.Event("change", { bubbles: true })); await wait(240);
+}
+await pickCity("서울특별시 관악구");
+T("제목이 온통청년 기준", ($("#pTitle")?.textContent || "").includes("온통청년"), $("#pTitle")?.textContent);
+T("4분류 칩 숨김 (추정 금지)", $("#ysState")?.hidden === true);
+const g1 = $$("#list1 .pcard");
+T("카드 렌더", g1.length > 0, `${g1.length}장`);
+T("종료 안 섞임", g1.every(c => !c.className.includes("closed")));
+T("전화 표시", g1.some(c => /\d{2,3}-\d{3,4}-\d{3,4}/.test(c.querySelector(".tel")?.textContent || "")));
 T("등록 신선도 경고", ($("#freshWarn")?.textContent || "").length > 20,
   ($("#freshWarn")?.textContent || "").slice(0, 42));
 T("상태 문구가 단정형 아님", !($("#statusbar")?.textContent || "").includes("신청 가능"),
@@ -104,7 +162,7 @@ T("상태 문구가 단정형 아님", !($("#statusbar")?.textContent || "").inc
 T("중복 병합 수치 노출", /\d/.test($("#uniqCnt")?.textContent || ""),
   `원본 ${$("#recCnt")?.textContent} → 실질 ${$("#uniqCnt")?.textContent}`);
 
-console.log("\n── 레벨 필터 ──");
+console.log("\n── 레벨 필터 (관악구) ──");
 T("레벨 칩 3개 (중앙 제외)", $$("#levelbar [data-lv]").length === 3, $$("#levelbar [data-lv]").map(b => b.textContent).join(" / "));
 T("우리 시 목록에 중앙 없음", $$("#list1 .pcard .badges").every(e => !e.textContent.includes("중앙")),
   `${$$("#list1 .pcard .badges").filter(e => e.textContent.includes("중앙")).length}장 섞임`);
@@ -120,26 +178,9 @@ if (lvBasic && !lvBasic.disabled) {
 T("우리 시 것이 맨 위", ($("#list1 .pcard .badges")?.textContent || "").match(/기초|광역/) !== null,
   $("#list1 .pcard .badges")?.textContent.replace(/\s+/g, " "));
 
-console.log("\n── 지자체별 목록이 실제로 다른가 ──");
-function top10() {
-  return $$("#list1 .pcard .nm").slice(0, 10).map(e => e.textContent);
-}
-async function pickCity(v) {
-  const s = $("#city"); s.value = v; s.dispatchEvent(new window.Event("change", { bubbles: true })); await wait(200);
-}
-await pickCity("경상남도 양산시"); const tA = top10();
-await pickCity("서울특별시 관악구"); const tB = top10();
-await pickCity("전남광주통합특별시 순천시"); const tC = top10();
-const overlap = (x, y) => x.filter(v => y.includes(v)).length;
-T("양산 ∩ 관악 겹침 3건 이하", overlap(tA, tB) <= 3, `${overlap(tA, tB)}/10`);
-T("양산 ∩ 순천 겹침 3건 이하", overlap(tA, tC) <= 3, `${overlap(tA, tC)}/10`);
-T("세 도시 상위 1건이 서로 다름", new Set([tA[0], tB[0], tC[0]]).size === 3,
-  [tA[0], tB[0], tC[0]].map(s => (s || "").slice(0, 18)).join(" / "));
-await pickCity("경상남도 양산시");
-
-console.log("\n── 분야 칩 ──");
-click($$("#tabs .chip").find(b => b.textContent === "주거"));
-await wait(150);
+console.log("\n── 분야 칩 (관악구) ──");
+click($$("#tabs .chip").find(b => b.textContent.startsWith("주거")));
+await wait(160);
 /* 0건일 수 있다 — 중앙을 뺐으니 분야별로 비는 게 정상이다.
    중요한 건 "빈 화면이 아니라 이유가 적힌 안내"가 나오는 것. */
 T("주거 필터 결과 또는 안내", $$("#list1 .pcard").length > 0 || !!$("#list1 .empty"),
@@ -148,10 +189,10 @@ if (!$$("#list1 .pcard").length) {
   T("필터 안내에 이유 있음", ($("#list1 .empty")?.textContent || "").includes("정보 탭"),
     ($("#list1 .empty")?.textContent || "").slice(0, 40));
 }
-click($$("#tabs .chip").find(b => b.textContent === "전체"));
-await wait(150);
+click($$("#tabs .chip").find(b => b.textContent.startsWith("전체")));
+await wait(160);
 
-console.log("\n── 종료 토글 ──");
+console.log("\n── 종료 토글 (관악구) ──");
 T("토글 2개", $$("#statusbar [data-sc]").length === 2, $$("#statusbar [data-sc]").map(b => b.textContent).join(" / "));
 click($$("#statusbar [data-sc]").find(b => b.dataset.sc === "1"));
 await wait(180);
@@ -160,13 +201,43 @@ click($$("#statusbar [data-sc]").find(b => b.dataset.sc === "0"));
 await wait(180);
 T("다시 숨김", $$("#list1 .pcard").every(c => !c.className.includes("closed")));
 
-console.log("\n── 탭 전환 ──");
-
-tab("end"); await wait(150);
+console.log("\n── 마감 탭 (관악구 · 온통청년) ──");
+tab("end"); await wait(160);
 T("종료 화면", $("#sc-end")?.classList.contains("on"));
 const l3 = $$("#list3 .pcard");
 T("전부 종료", l3.length > 0 && l3.every(c => c.className.includes("closed")), `${l3.length}장`);
 T("마감일·사유", /(신청마감|사업종료|종료)\s*\d{4}-\d{2}-\d{2}/.test($("#list3 .meta")?.textContent || ""));
+
+console.log("\n── 지자체별 목록이 실제로 다른가 ──");
+const top10 = () => $$("#list1 .pcard .nm").slice(0, 10).map(e => e.textContent);
+tab("policy"); await wait(160);
+await pickCity("경상남도 양산시"); const tA = top10();
+await pickCity("서울특별시 관악구"); const tB = top10();
+await pickCity("전남광주통합특별시 순천시"); const tC = top10();
+const overlap = (x, y) => x.filter(v => y.includes(v)).length;
+T("양산 ∩ 관악 겹침 3건 이하", overlap(tA, tB) <= 3, `${overlap(tA, tB)}/10`);
+T("양산 ∩ 순천 겹침 3건 이하", overlap(tA, tC) <= 3, `${overlap(tA, tC)}/10`);
+T("세 도시 상위 1건이 서로 다름", new Set([tA[0], tB[0], tC[0]]).size === 3,
+  [tA[0], tB[0], tC[0]].map(s => (s || "").slice(0, 18)).join(" / "));
+
+/* 양산 → 다른 시로 넘어갈 때 분야 칩이 남으면 아무것도 안 걸리는 화면이 된다.
+   분야 이름 체계가 두 소스에서 다르기 때문이다(청년가까e 「참여/권리」 vs 온통청년 「참여·권리」). */
+await pickCity("경상남도 양산시"); await wait(120);
+const ysField = $$("#tabs .chip")[1];
+click(ysField); await wait(160);
+const ysFieldName = ysField?.textContent.trim();
+await pickCity("서울특별시 관악구"); await wait(160);
+T("시 전환 시 분야 칩 재구성", $$("#list1 .pcard").length > 0,
+  `양산에서 「${ysFieldName}」 선택 후 관악 ${$$("#list1 .pcard").length}장`);
+T("남은 분야 선택은 전체로 복귀", $("#tabs .chip")?.getAttribute("aria-pressed") === "true",
+  $$("#tabs .chip").map(b => b.textContent.trim()).slice(0, 3).join(" / "));
+
+/* 마감 탭도 소스를 따라가야 한다 — 안 그러면 한 화면에 두 소스가 섞인다 */
+await pickCity("경상남도 양산시"); await wait(160);
+tab("end"); await wait(160);
+T("양산 마감 탭도 청년가까e", $$("#list3 .pcard").length > 0 &&
+  !/신청마감\s*\d{4}/.test($("#list3 .meta")?.textContent || ""), `${$$("#list3 .pcard").length}장`);
+tab("policy"); await wait(160);
 
 console.log("\n── 둘러보기 ──");
 tab("browse"); await wait(240);
@@ -339,7 +410,7 @@ T("닫힘", $("#drawer")?.hidden === true);
 
 tab("end"); await wait(150);
 click($("#list3 .pcard")); await wait(180);
-T("종료 상세 경고", ($("#dBody")?.textContent || "").includes("이미 종료"),
+T("종료 상세 경고", /이미 종료|<b>종료<\/b>로 판정/.test($("#dBody")?.innerHTML || ""),
   ($("#dBody .keynote")?.textContent || "").slice(0, 40));
 click($("#dClose")); await wait(360);
 

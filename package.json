@@ -19,7 +19,10 @@
     "refresh": "npm run collect:policies && npm run build && npm run check",
     "deploy": "node scripts/deploy.mjs",
     "pwa": "node scripts/make-pwa.mjs",
-    "collect:governance": "node scripts/extract-governance.mjs"
+    "collect:governance": "node scripts/extract-governance.mjs",
+    "collect:yangsan": "node scripts/collect-yangsan.mjs",
+    "collect:yangsan-ord": "node scripts/collect-yangsan-ordinances.mjs",
+    "build:yangsan": "node scripts/build-yangsan.mjs"
   },
   "dependencies": {
     "jsdom": "^29.1.1"

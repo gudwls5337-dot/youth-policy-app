@@ -34,40 +34,10 @@ const PEEK = process.argv.includes("--peek") ? +(process.argv[process.argv.index
 const SNAPSHOT_DATE = process.env.SNAPSHOT_DATE || new Date().toISOString().slice(0, 10);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-const cdata = s => s.replace(/<!\[CDATA\[|\]\]>/g, "").trim();
-const pick = (xml, tag) => {
-  const m = xml.match(new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`));
-  return m ? cdata(m[1]) : "";
-};
-/* 조례는 가운뎃점을 `·` 와 `ㆍ` 두 글자로 섞어 쓴다. 정규식이 한쪽만 보면 놓친다. */
-const flat = s => String(s || "").replace(/ㆍ/g, "·").replace(/\s+/g, " ").trim();
-
-async function fetchBody(mst) {
-  for (let a = 1; a <= 3; a++) {
-    try {
-      const res = await fetch(`https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=${mst}&type=XML`,
-        { signal: AbortSignal.timeout(30000) });
-      const x = await res.text();
-      if (!x.includes("<LawService>")) throw new Error("비정상 응답");
-      return x;
-    } catch (e) { if (a === 3) return null; await sleep(900 * a); }
-  }
-}
-
-function articles(xml) {
-  return [...xml.matchAll(/<조\s[^>]*>([\s\S]*?)<\/조>/g)].map(([, b]) => ({
-    no: pick(b, "조문번호"),
-    title: pick(b, "조제목"),
-    body: flat(pick(b, "조내용")),
-  /* 조문번호는 6자리다: 앞 4자리 조번호 + 뒤 2자리 가지번호.
-     철원군 `000902` = 제9조의2. 8자리로 가정하면 가지번호를 통째로 놓친다.
-     조문번호를 인용하는 자료이므로 「제9조」와 「제9조의2」를 섞으면 안 된다. */
-  })).map(a => {
-    const main = a.no ? parseInt(a.no.slice(0, 4), 10) : null;
-    const sub = a.no && a.no.length >= 6 ? parseInt(a.no.slice(4, 6), 10) : 0;
-    return { ...a, num: main, sub, label: main ? `제${main}조${sub ? `의${sub}` : ""}` : null };
-  });
-}
+/* XML 파싱·조문 분해는 scripts/lib/law.mjs 로 옮겼다.
+   양산 조례 전문 수집기(collect-yangsan-ordinances.mjs)가 같은 로직을 쓰는데,
+   각자 구현하면 조문번호 6자리 함정이 한쪽에서만 고쳐진다. */
+import { cdata, pick, flat, fetchBody, articles } from "./lib/law.mjs";
 
 /** 인용문 — 근거 문장만 잘라낸다. 판정과 함께 저장해야 검증이 된다. */
 const quoteAround = (text, re, span = 130) => {
