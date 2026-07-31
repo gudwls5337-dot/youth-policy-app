@@ -1,0 +1,2457 @@
+{
+  "snapshotDate": "2026-07-31",
+  "note": "지자체별 '청년 기본 조례' 자동 판정. confidence=낮음 은 반드시 사람이 원문 대조할 것.",
+  "orgCount": 245,
+  "candidates": [
+    {
+      "org": "(구)광주광역시",
+      "confidence": "높음",
+      "name": "광주광역시 청년기본조례",
+      "mst": "2049869",
+      "promulgated": "20250701",
+      "effective": "20250701",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2049869&type=HTML"
+    },
+    {
+      "org": "(구)전라남도",
+      "confidence": "높음",
+      "name": "전라남도 청년 기본 조례",
+      "mst": "2094045",
+      "promulgated": "20251218",
+      "effective": "20251218",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2094045&type=HTML"
+    },
+    {
+      "org": "강원특별자치도",
+      "confidence": "높음",
+      "name": "강원특별자치도 청년 기본 조례",
+      "mst": "1897165",
+      "promulgated": "20231229",
+      "effective": "20231229",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1897165&type=HTML"
+    },
+    {
+      "org": "강원특별자치도 강릉시",
+      "confidence": "높음",
+      "name": "강릉시 청년 기본 조례",
+      "mst": "2081987",
+      "promulgated": "20251105",
+      "effective": "20251105",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2081987&type=HTML"
+    },
+    {
+      "org": "강원특별자치도 고성군",
+      "confidence": "보통",
+      "name": "고성군 청년 지원 기본 조례",
+      "mst": "2118961",
+      "promulgated": "20260403",
+      "effective": "20260403",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2118961&type=HTML"
+    },
+    {
+      "org": "강원특별자치도 동해시",
+      "confidence": "높음",
+      "name": "동해시 청년 기본 조례",
+      "mst": "1959581",
+      "promulgated": "20240726",
+      "effective": "20240726",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1959581&type=HTML"
+    },
+    {
+      "org": "강원특별자치도 삼척시",
+      "confidence": "보통",
+      "name": "삼척시 청년지원 기본 조례",
+      "mst": "2055685",
+      "promulgated": "20250711",
+      "effective": "20250711",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2055685&type=HTML"
+    },
+    {
+      "org": "강원특별자치도 속초시",
+      "confidence": "높음",
+      "name": "속초시 청년 기본 조례",
+      "mst": "1953561",
+      "promulgated": "20240712",
+      "effective": "20240712",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1953561&type=HTML"
+    },
+    {
+      "org": "강원특별자치도 양구군",
+      "confidence": "높음",
+      "name": "양구군 청년 기본 조례",
+      "mst": "2123997",
+      "promulgated": "20260417",
+      "effective": "20260417",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2123997&type=HTML"
+    },
+    {
+      "org": "강원특별자치도 양양군",
+      "confidence": "높음",
+      "name": "양양군 청년 기본 조례",
+      "mst": "1987259",
+      "promulgated": "20241114",
+      "effective": "20250101",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1987259&type=HTML"
+    },
+    {
+      "org": "강원특별자치도 영월군",
+      "confidence": "높음",
+      "name": "영월군 청년 기본 조례",
+      "mst": "2082869",
+      "promulgated": "20251107",
+      "effective": "20251107",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2082869&type=HTML"
+    },
+    {
+      "org": "강원특별자치도 원주시",
+      "confidence": "높음",
+      "name": "원주시 청년 기본 조례",
+      "mst": "1749681",
+      "promulgated": "20221118",
+      "effective": "20221118",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1749681&type=HTML"
+    },
+    {
+      "org": "강원특별자치도 인제군",
+      "confidence": "높음",
+      "name": "인제군 청년기본 조례",
+      "mst": "2021407",
+      "promulgated": "20250313",
+      "effective": "20250313",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2021407&type=HTML"
+    },
+    {
+      "org": "강원특별자치도 정선군",
+      "confidence": "보통",
+      "name": "정선군 청년 지원 기본 조례",
+      "mst": "1391433",
+      "promulgated": "20190415",
+      "effective": "20190415",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1391433&type=HTML"
+    },
+    {
+      "org": "강원특별자치도 철원군",
+      "confidence": "높음",
+      "name": "철원군 청년 기본 조례",
+      "mst": "2034541",
+      "promulgated": "20250507",
+      "effective": "20250507",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2034541&type=HTML"
+    },
+    {
+      "org": "강원특별자치도 춘천시",
+      "confidence": "높음",
+      "name": "춘천시 청년 기본 조례",
+      "mst": "2102557",
+      "promulgated": "20251231",
+      "effective": "20251231",
+      "revision": "전부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2102557&type=HTML"
+    },
+    {
+      "org": "강원특별자치도 태백시",
+      "confidence": "높음",
+      "name": "태백시 청년 기본 조례",
+      "mst": "1906541",
+      "promulgated": "20240208",
+      "effective": "20240208",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1906541&type=HTML"
+    },
+    {
+      "org": "강원특별자치도 평창군",
+      "confidence": "높음",
+      "name": "평창군 청년 기본 조례",
+      "mst": "1768923",
+      "promulgated": "20221230",
+      "effective": "20221230",
+      "revision": "제정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1768923&type=HTML"
+    },
+    {
+      "org": "강원특별자치도 홍천군",
+      "confidence": "높음",
+      "name": "홍천군 청년 기본 조례",
+      "mst": "2121129",
+      "promulgated": "20260410",
+      "effective": "20260410",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2121129&type=HTML"
+    },
+    {
+      "org": "강원특별자치도 화천군",
+      "confidence": "높음",
+      "name": "화천군 청년 기본 조례",
+      "mst": "2117203",
+      "promulgated": "20260327",
+      "effective": "20260327",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2117203&type=HTML"
+    },
+    {
+      "org": "강원특별자치도 횡성군",
+      "confidence": "높음",
+      "name": "횡성군 청년 기본 조례",
+      "mst": "1940717",
+      "promulgated": "20240626",
+      "effective": "20240626",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1940717&type=HTML"
+    },
+    {
+      "org": "경기도",
+      "confidence": "높음",
+      "name": "경기도 청년 기본 조례",
+      "mst": "2151167",
+      "promulgated": "20260714",
+      "effective": "20260714",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2151167&type=HTML"
+    },
+    {
+      "org": "경기도 가평군",
+      "confidence": "보통",
+      "name": "가평군 청년정책 및 지원에 관한 기본 조례",
+      "mst": "2039603",
+      "promulgated": "20250519",
+      "effective": "20250519",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2039603&type=HTML"
+    },
+    {
+      "org": "경기도 고양시",
+      "confidence": "높음",
+      "name": "고양시 청년 기본 조례",
+      "mst": "1872255",
+      "promulgated": "20231110",
+      "effective": "20231110",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1872255&type=HTML"
+    },
+    {
+      "org": "경기도 과천시",
+      "confidence": "높음",
+      "name": "과천시 청년 기본 조례",
+      "mst": "2078657",
+      "promulgated": "20251010",
+      "effective": "20251010",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2078657&type=HTML"
+    },
+    {
+      "org": "경기도 광명시",
+      "confidence": "높음",
+      "name": "광명시 청년 기본 조례",
+      "mst": "2027489",
+      "promulgated": "20250407",
+      "effective": "20250407",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2027489&type=HTML"
+    },
+    {
+      "org": "경기도 광주시",
+      "confidence": "높음",
+      "name": "광주시 청년 기본 조례",
+      "mst": "2016735",
+      "promulgated": "20250226",
+      "effective": "20250226",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2016735&type=HTML"
+    },
+    {
+      "org": "경기도 구리시",
+      "confidence": "높음",
+      "name": "구리시 청년 기본 조례",
+      "mst": "1939707",
+      "promulgated": "20240621",
+      "effective": "20240621",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1939707&type=HTML"
+    },
+    {
+      "org": "경기도 군포시",
+      "confidence": "높음",
+      "name": "군포시 청년 기본 조례",
+      "mst": "2106153",
+      "promulgated": "20260107",
+      "effective": "20260107",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2106153&type=HTML"
+    },
+    {
+      "org": "경기도 김포시",
+      "confidence": "높음",
+      "name": "김포시 청년 기본 조례",
+      "mst": "2064823",
+      "promulgated": "20250814",
+      "effective": "20250814",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2064823&type=HTML"
+    },
+    {
+      "org": "경기도 남양주시",
+      "confidence": "높음",
+      "name": "남양주시 청년 기본 조례",
+      "mst": "2079159",
+      "promulgated": "20251014",
+      "effective": "20251014",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2079159&type=HTML"
+    },
+    {
+      "org": "경기도 동두천시",
+      "confidence": "높음",
+      "name": "동두천시 청년 기본 조례",
+      "mst": "2127659",
+      "promulgated": "20260506",
+      "effective": "20260506",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2127659&type=HTML"
+    },
+    {
+      "org": "경기도 부천시",
+      "confidence": "높음",
+      "name": "부천시 청년 기본 조례",
+      "mst": "2144493",
+      "promulgated": "20260706",
+      "effective": "20260706",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2144493&type=HTML"
+    },
+    {
+      "org": "경기도 성남시",
+      "confidence": "높음",
+      "name": "성남시 청년 기본 조례",
+      "mst": "2027395",
+      "promulgated": "20250407",
+      "effective": "20250407",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2027395&type=HTML"
+    },
+    {
+      "org": "경기도 수원시",
+      "confidence": "높음",
+      "name": "수원시 청년 기본 조례",
+      "mst": "2085419",
+      "promulgated": "20251113",
+      "effective": "20251113",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2085419&type=HTML"
+    },
+    {
+      "org": "경기도 시흥시",
+      "confidence": "높음",
+      "name": "시흥시 청년 기본 조례",
+      "mst": "2042701",
+      "promulgated": "20250605",
+      "effective": "20250605",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2042701&type=HTML"
+    },
+    {
+      "org": "경기도 안산시",
+      "confidence": "높음",
+      "name": "안산시 청년 기본 조례",
+      "mst": "1982075",
+      "promulgated": "20241106",
+      "effective": "20241106",
+      "revision": "전부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1982075&type=HTML"
+    },
+    {
+      "org": "경기도 안성시",
+      "confidence": "높음",
+      "name": "안성시 청년 기본 조례",
+      "mst": "1930313",
+      "promulgated": "20240517",
+      "effective": "20240517",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1930313&type=HTML"
+    },
+    {
+      "org": "경기도 안양시",
+      "confidence": "높음",
+      "name": "안양시 청년 기본 조례",
+      "mst": "1953045",
+      "promulgated": "20240710",
+      "effective": "20240710",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1953045&type=HTML"
+    },
+    {
+      "org": "경기도 양주시",
+      "confidence": "높음",
+      "name": "양주시 청년 기본 조례",
+      "mst": "1933829",
+      "promulgated": "20240527",
+      "effective": "20240527",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1933829&type=HTML"
+    },
+    {
+      "org": "경기도 양평군",
+      "confidence": "높음",
+      "name": "양평군 청년 기본 조례",
+      "mst": "2069625",
+      "promulgated": "20250924",
+      "effective": "20250924",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2069625&type=HTML"
+    },
+    {
+      "org": "경기도 여주시",
+      "confidence": "높음",
+      "name": "여주시 청년 기본 조례",
+      "mst": "1947021",
+      "promulgated": "20240627",
+      "effective": "20240627",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1947021&type=HTML"
+    },
+    {
+      "org": "경기도 연천군",
+      "confidence": "높음",
+      "name": "연천군 청년 기본 조례",
+      "mst": "2018571",
+      "promulgated": "20250306",
+      "effective": "20250306",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2018571&type=HTML"
+    },
+    {
+      "org": "경기도 오산시",
+      "confidence": "높음",
+      "name": "오산시 청년 기본 조례",
+      "mst": "1678587",
+      "promulgated": "20220113",
+      "effective": "20220113",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1678587&type=HTML"
+    },
+    {
+      "org": "경기도 용인시",
+      "confidence": "높음",
+      "name": "용인시 청년 기본 조례",
+      "mst": "1827447",
+      "promulgated": "20230630",
+      "effective": "20230630",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1827447&type=HTML"
+    },
+    {
+      "org": "경기도 의왕시",
+      "confidence": "높음",
+      "name": "의왕시 청년 기본 조례",
+      "mst": "1830065",
+      "promulgated": "20230630",
+      "effective": "20230630",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1830065&type=HTML"
+    },
+    {
+      "org": "경기도 의정부시",
+      "confidence": "높음",
+      "name": "의정부시 청년 기본 조례",
+      "mst": "2027437",
+      "promulgated": "20250407",
+      "effective": "20250407",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2027437&type=HTML"
+    },
+    {
+      "org": "경기도 이천시",
+      "confidence": "보통",
+      "name": "이천시 청년지원 기본 조례",
+      "mst": "1998371",
+      "promulgated": "20241226",
+      "effective": "20241226",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1998371&type=HTML"
+    },
+    {
+      "org": "경기도 파주시",
+      "confidence": "높음",
+      "name": "파주시 청년 기본 조례",
+      "mst": "1935387",
+      "promulgated": "20240603",
+      "effective": "20240603",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1935387&type=HTML"
+    },
+    {
+      "org": "경기도 평택시",
+      "confidence": "높음",
+      "name": "평택시 청년 기본 조례",
+      "mst": "1908451",
+      "promulgated": "20240220",
+      "effective": "20240220",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1908451&type=HTML"
+    },
+    {
+      "org": "경기도 포천시",
+      "confidence": "높음",
+      "name": "포천시 청년 기본 조례",
+      "mst": "2121985",
+      "promulgated": "20260410",
+      "effective": "20260410",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2121985&type=HTML"
+    },
+    {
+      "org": "경기도 하남시",
+      "confidence": "높음",
+      "name": "하남시 청년 기본 조례",
+      "mst": "1812343",
+      "promulgated": "20230501",
+      "effective": "20230501",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1812343&type=HTML"
+    },
+    {
+      "org": "경기도 화성시",
+      "confidence": "높음",
+      "name": "화성시 청년 기본 조례",
+      "mst": "2087413",
+      "promulgated": "20251112",
+      "effective": "20251112",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2087413&type=HTML"
+    },
+    {
+      "org": "경상남도",
+      "confidence": "높음",
+      "name": "경상남도 청년 기본 조례",
+      "mst": "2043761",
+      "promulgated": "20250612",
+      "effective": "20250612",
+      "revision": "전부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2043761&type=HTML"
+    },
+    {
+      "org": "경상남도 거제시",
+      "confidence": "높음",
+      "name": "거제시 청년 기본 조례",
+      "mst": "2120811",
+      "promulgated": "20260409",
+      "effective": "20260409",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2120811&type=HTML"
+    },
+    {
+      "org": "경상남도 거창군",
+      "confidence": "높음",
+      "name": "거창군 청년기본 조례",
+      "mst": "2116489",
+      "promulgated": "20260325",
+      "effective": "20260325",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2116489&type=HTML"
+    },
+    {
+      "org": "경상남도 고성군",
+      "confidence": "높음",
+      "name": "고성군 청년 기본 조례",
+      "mst": "1973547",
+      "promulgated": "20240930",
+      "effective": "20240930",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1973547&type=HTML"
+    },
+    {
+      "org": "경상남도 김해시",
+      "confidence": "높음",
+      "name": "김해시 청년 기본 조례",
+      "mst": "2016699",
+      "promulgated": "20250226",
+      "effective": "20250701",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2016699&type=HTML"
+    },
+    {
+      "org": "경상남도 남해군",
+      "confidence": "높음",
+      "name": "남해군 청년 기본 조례",
+      "mst": "2119911",
+      "promulgated": "20260407",
+      "effective": "20260407",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2119911&type=HTML"
+    },
+    {
+      "org": "경상남도 밀양시",
+      "confidence": "높음",
+      "name": "밀양시 청년 기본 조례",
+      "mst": "1861883",
+      "promulgated": "20231006",
+      "effective": "20231006",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1861883&type=HTML"
+    },
+    {
+      "org": "경상남도 사천시",
+      "confidence": "높음",
+      "name": "사천시 청년 기본 조례",
+      "mst": "2096375",
+      "promulgated": "20251224",
+      "effective": "20251224",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2096375&type=HTML"
+    },
+    {
+      "org": "경상남도 산청군",
+      "confidence": "높음",
+      "name": "산청군 청년 기본 조례",
+      "mst": "1792239",
+      "promulgated": "20230323",
+      "effective": "20230323",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1792239&type=HTML"
+    },
+    {
+      "org": "경상남도 양산시",
+      "confidence": "높음",
+      "name": "양산시 청년 기본 조례",
+      "mst": "2028669",
+      "promulgated": "20250410",
+      "effective": "20250410",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2028669&type=HTML"
+    },
+    {
+      "org": "경상남도 의령군",
+      "confidence": "높음",
+      "name": "의령군 청년 기본 조례",
+      "mst": "1874267",
+      "promulgated": "20231115",
+      "effective": "20231115",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1874267&type=HTML"
+    },
+    {
+      "org": "경상남도 진주시",
+      "confidence": "높음",
+      "name": "진주시 청년 기본 조례",
+      "mst": "1887007",
+      "promulgated": "20231221",
+      "effective": "20231221",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1887007&type=HTML"
+    },
+    {
+      "org": "경상남도 창녕군",
+      "confidence": "높음",
+      "name": "창녕군 청년 기본 조례",
+      "mst": "1826153",
+      "promulgated": "20230629",
+      "effective": "20230629",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1826153&type=HTML"
+    },
+    {
+      "org": "경상남도 창원시",
+      "confidence": "높음",
+      "name": "창원시 청년 기본 조례",
+      "mst": "2129867",
+      "promulgated": "20260515",
+      "effective": "20260515",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2129867&type=HTML"
+    },
+    {
+      "org": "경상남도 통영시",
+      "confidence": "높음",
+      "name": "통영시 청년 기본 조례",
+      "mst": "1928939",
+      "promulgated": "20240516",
+      "effective": "20240516",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1928939&type=HTML"
+    },
+    {
+      "org": "경상남도 하동군",
+      "confidence": "높음",
+      "name": "하동군 청년 기본 조례",
+      "mst": "1852773",
+      "promulgated": "20230920",
+      "effective": "20230920",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1852773&type=HTML"
+    },
+    {
+      "org": "경상남도 함안군",
+      "confidence": "높음",
+      "name": "함안군 청년 기본 조례",
+      "mst": "2127059",
+      "promulgated": "20260430",
+      "effective": "20260430",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2127059&type=HTML"
+    },
+    {
+      "org": "경상남도 함양군",
+      "confidence": "높음",
+      "name": "함양군 청년 기본 조례",
+      "mst": "2051637",
+      "promulgated": "20250701",
+      "effective": "20250701",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2051637&type=HTML"
+    },
+    {
+      "org": "경상남도 합천군",
+      "confidence": "높음",
+      "name": "합천군 청년 기본 조례",
+      "mst": "2093913",
+      "promulgated": "20251218",
+      "effective": "20251218",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2093913&type=HTML"
+    },
+    {
+      "org": "경상북도",
+      "confidence": "높음",
+      "name": "경상북도 청년 기본조례",
+      "mst": "1861289",
+      "promulgated": "20231005",
+      "effective": "20231005",
+      "revision": "전부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1861289&type=HTML"
+    },
+    {
+      "org": "경상북도 경산시",
+      "confidence": "높음",
+      "name": "경산시 청년 기본조례",
+      "mst": "2146277",
+      "promulgated": "20260708",
+      "effective": "20260708",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2146277&type=HTML"
+    },
+    {
+      "org": "경상북도 경주시",
+      "confidence": "높음",
+      "name": "경주시 청년 기본 조례",
+      "mst": "1778595",
+      "promulgated": "20221229",
+      "effective": "20221229",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1778595&type=HTML"
+    },
+    {
+      "org": "경상북도 고령군",
+      "confidence": "보통",
+      "name": "고령군 청년 지원 기본 조례",
+      "mst": "1906837",
+      "promulgated": "20231231",
+      "effective": "20231231",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1906837&type=HTML"
+    },
+    {
+      "org": "경상북도 구미시",
+      "confidence": "높음",
+      "name": "구미시 청년 기본 조례",
+      "mst": "1769961",
+      "promulgated": "20221230",
+      "effective": "20221230",
+      "revision": "전부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1769961&type=HTML"
+    },
+    {
+      "org": "경상북도 김천시",
+      "confidence": "높음",
+      "name": "김천시 청년 기본 조례",
+      "mst": "2076651",
+      "promulgated": "20251002",
+      "effective": "20251002",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2076651&type=HTML"
+    },
+    {
+      "org": "경상북도 문경시",
+      "confidence": "높음",
+      "name": "문경시 청년 기본 조례",
+      "mst": "1925531",
+      "promulgated": "20240508",
+      "effective": "20240508",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1925531&type=HTML"
+    },
+    {
+      "org": "경상북도 봉화군",
+      "confidence": "높음",
+      "name": "봉화군 청년 기본 조례",
+      "mst": "2058575",
+      "promulgated": "20250717",
+      "effective": "20250717",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2058575&type=HTML"
+    },
+    {
+      "org": "경상북도 상주시",
+      "confidence": "높음",
+      "name": "상주시 청년 기본 조례",
+      "mst": "2105083",
+      "promulgated": "20251231",
+      "effective": "20251231",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2105083&type=HTML"
+    },
+    {
+      "org": "경상북도 성주군",
+      "confidence": "높음",
+      "name": "성주군 청년 기본 조례",
+      "mst": "1395288",
+      "promulgated": "20190523",
+      "effective": "20190523",
+      "revision": "제정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1395288&type=HTML"
+    },
+    {
+      "org": "경상북도 안동시",
+      "confidence": "높음",
+      "name": "안동시 청년 기본 조례",
+      "mst": "1854069",
+      "promulgated": "20230922",
+      "effective": "20231013",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1854069&type=HTML"
+    },
+    {
+      "org": "경상북도 영덕군",
+      "confidence": "높음",
+      "name": "영덕군 청년 기본 조례",
+      "mst": "1814989",
+      "promulgated": "20230531",
+      "effective": "20230628",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1814989&type=HTML"
+    },
+    {
+      "org": "경상북도 영양군",
+      "confidence": "높음",
+      "name": "영양군 청년 기본조례",
+      "mst": "1564529",
+      "promulgated": "20201231",
+      "effective": "20201231",
+      "revision": "제정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1564529&type=HTML"
+    },
+    {
+      "org": "경상북도 영주시",
+      "confidence": "높음",
+      "name": "영주시 청년기본 조례",
+      "mst": "2068901",
+      "promulgated": "20250922",
+      "effective": "20250922",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2068901&type=HTML"
+    },
+    {
+      "org": "경상북도 영천시",
+      "confidence": "높음",
+      "name": "영천시 청년 기본 조례",
+      "mst": "2020995",
+      "promulgated": "20250312",
+      "effective": "20250312",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2020995&type=HTML"
+    },
+    {
+      "org": "경상북도 예천군",
+      "confidence": "높음",
+      "name": "예천군 청년 기본 조례",
+      "mst": "1925563",
+      "promulgated": "20240509",
+      "effective": "20240701",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1925563&type=HTML"
+    },
+    {
+      "org": "경상북도 울릉군",
+      "confidence": "높음",
+      "name": "울릉군 청년 기본 조례",
+      "mst": "2040999",
+      "promulgated": "20250521",
+      "effective": "20250521",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2040999&type=HTML"
+    },
+    {
+      "org": "경상북도 울진군",
+      "confidence": "높음",
+      "name": "울진군 청년 기본 조례",
+      "mst": "2072937",
+      "promulgated": "20250929",
+      "effective": "20250929",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2072937&type=HTML"
+    },
+    {
+      "org": "경상북도 의성군",
+      "confidence": "보통",
+      "name": "의성군 청년발전 기본 조례",
+      "mst": "2103633",
+      "promulgated": "20251231",
+      "effective": "20260101",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2103633&type=HTML"
+    },
+    {
+      "org": "경상북도 청도군",
+      "confidence": "높음",
+      "name": "청도군 청년 기본 조례",
+      "mst": "2057447",
+      "promulgated": "20250715",
+      "effective": "20250715",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2057447&type=HTML"
+    },
+    {
+      "org": "경상북도 청송군",
+      "confidence": "높음",
+      "name": "청송군 청년 기본 조례",
+      "mst": "1979185",
+      "promulgated": "20241025",
+      "effective": "20241025",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1979185&type=HTML"
+    },
+    {
+      "org": "경상북도 칠곡군",
+      "confidence": "높음",
+      "name": "칠곡군 청년 기본 조례",
+      "mst": "1855999",
+      "promulgated": "20230926",
+      "effective": "20230926",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1855999&type=HTML"
+    },
+    {
+      "org": "경상북도 포항시",
+      "confidence": "높음",
+      "name": "포항시 청년 기본 조례",
+      "mst": "1940021",
+      "promulgated": "20240621",
+      "effective": "20240701",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1940021&type=HTML"
+    },
+    {
+      "org": "대구광역시",
+      "confidence": "높음",
+      "name": "대구광역시 청년 기본 조례",
+      "mst": "2117833",
+      "promulgated": "20260330",
+      "effective": "20260330",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2117833&type=HTML"
+    },
+    {
+      "org": "대구광역시 군위군",
+      "confidence": "높음",
+      "name": "대구광역시 군위군 청년 기본 조례",
+      "mst": "1917057",
+      "promulgated": "20240329",
+      "effective": "20240329",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1917057&type=HTML"
+    },
+    {
+      "org": "대구광역시 남구",
+      "confidence": "높음",
+      "name": "대구광역시 남구 청년 기본 조례",
+      "mst": "2001661",
+      "promulgated": "20241230",
+      "effective": "20241230",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2001661&type=HTML"
+    },
+    {
+      "org": "대구광역시 달서구",
+      "confidence": "높음",
+      "name": "대구광역시달서구 청년 기본 조례",
+      "mst": "1917469",
+      "promulgated": "20240401",
+      "effective": "20240401",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1917469&type=HTML"
+    },
+    {
+      "org": "대구광역시 달성군",
+      "confidence": "높음",
+      "name": "대구광역시 달성군 청년 기본 조례",
+      "mst": "2083657",
+      "promulgated": "20251110",
+      "effective": "20251110",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2083657&type=HTML"
+    },
+    {
+      "org": "대구광역시 동구",
+      "confidence": "높음",
+      "name": "대구광역시 동구 청년 기본 조례",
+      "mst": "1879591",
+      "promulgated": "20231211",
+      "effective": "20231211",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1879591&type=HTML"
+    },
+    {
+      "org": "대구광역시 북구",
+      "confidence": "높음",
+      "name": "대구광역시 북구 청년 기본 조례",
+      "mst": "2113011",
+      "promulgated": "20260227",
+      "effective": "20260227",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2113011&type=HTML"
+    },
+    {
+      "org": "대구광역시 서구",
+      "confidence": "높음",
+      "name": "대구광역시 서구 청년 기본조례",
+      "mst": "1937579",
+      "promulgated": "20240610",
+      "effective": "20240701",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1937579&type=HTML"
+    },
+    {
+      "org": "대구광역시 수성구",
+      "confidence": "높음",
+      "name": "대구광역시 수성구 청년 기본조례",
+      "mst": "1941937",
+      "promulgated": "20240628",
+      "effective": "20240628",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1941937&type=HTML"
+    },
+    {
+      "org": "대구광역시 중구",
+      "confidence": "높음",
+      "name": "대구광역시 중구 청년기본조례",
+      "mst": "2017151",
+      "promulgated": "20250228",
+      "effective": "20250228",
+      "revision": "전부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2017151&type=HTML"
+    },
+    {
+      "org": "대전광역시",
+      "confidence": "높음",
+      "name": "대전광역시 청년 기본 조례",
+      "mst": "2098227",
+      "promulgated": "20251226",
+      "effective": "20251226",
+      "revision": "전부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2098227&type=HTML"
+    },
+    {
+      "org": "대전광역시 대덕구",
+      "confidence": "높음",
+      "name": "대전광역시 대덕구 청년 기본 조례",
+      "mst": "2121017",
+      "promulgated": "20260410",
+      "effective": "20260410",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2121017&type=HTML"
+    },
+    {
+      "org": "대전광역시 동구",
+      "confidence": "높음",
+      "name": "대전광역시 동구 청년 기본 조례",
+      "mst": "2118913",
+      "promulgated": "20260403",
+      "effective": "20260403",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2118913&type=HTML"
+    },
+    {
+      "org": "대전광역시 서구",
+      "confidence": "높음",
+      "name": "대전광역시 서구 청년 기본 조례",
+      "mst": "1891081",
+      "promulgated": "20231228",
+      "effective": "20240101",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1891081&type=HTML"
+    },
+    {
+      "org": "대전광역시 유성구",
+      "confidence": "높음",
+      "name": "대전광역시 유성구 청년 기본조례",
+      "mst": "2015245",
+      "promulgated": "20250212",
+      "effective": "20250212",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2015245&type=HTML"
+    },
+    {
+      "org": "대전광역시 중구",
+      "confidence": "높음",
+      "name": "대전광역시 중구 청년 기본 조례",
+      "mst": "2097381",
+      "promulgated": "20251223",
+      "effective": "20251223",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2097381&type=HTML"
+    },
+    {
+      "org": "부산광역시",
+      "confidence": "높음",
+      "name": "부산광역시 청년 기본 조례",
+      "mst": "2029865",
+      "promulgated": "20250416",
+      "effective": "20260101",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2029865&type=HTML"
+    },
+    {
+      "org": "부산광역시 강서구",
+      "confidence": "높음",
+      "name": "부산광역시 강서구 청년 기본 조례",
+      "mst": "2074845",
+      "promulgated": "20251001",
+      "effective": "20260101",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2074845&type=HTML"
+    },
+    {
+      "org": "부산광역시 금정구",
+      "confidence": "높음",
+      "name": "부산광역시 금정구 청년 기본 조례",
+      "mst": "1960143",
+      "promulgated": "20240731",
+      "effective": "20240731",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1960143&type=HTML"
+    },
+    {
+      "org": "부산광역시 기장군",
+      "confidence": "높음",
+      "name": "부산광역시 기장군 청년 기본 조례",
+      "mst": "2069485",
+      "promulgated": "20250924",
+      "effective": "20260101",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2069485&type=HTML"
+    },
+    {
+      "org": "부산광역시 남구",
+      "confidence": "높음",
+      "name": "부산광역시 남구 청년 기본 조례",
+      "mst": "2027343",
+      "promulgated": "20250407",
+      "effective": "20250407",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2027343&type=HTML"
+    },
+    {
+      "org": "부산광역시 동구",
+      "confidence": "높음",
+      "name": "부산광역시 동구 청년 기본 조례",
+      "mst": "2051077",
+      "promulgated": "20250701",
+      "effective": "20250701",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2051077&type=HTML"
+    },
+    {
+      "org": "부산광역시 동래구",
+      "confidence": "높음",
+      "name": "부산광역시동래구 청년 기본 조례",
+      "mst": "1867723",
+      "promulgated": "20231101",
+      "effective": "20231101",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1867723&type=HTML"
+    },
+    {
+      "org": "부산광역시 부산진구",
+      "confidence": "높음",
+      "name": "부산광역시 부산진구 청년 기본 조례",
+      "mst": "2109829",
+      "promulgated": "20260213",
+      "effective": "20260213",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2109829&type=HTML"
+    },
+    {
+      "org": "부산광역시 북구",
+      "confidence": "보통",
+      "name": "부산광역시 북구 청년지원 기본 조례",
+      "mst": "1978627",
+      "promulgated": "20241023",
+      "effective": "20241023",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1978627&type=HTML"
+    },
+    {
+      "org": "부산광역시 사상구",
+      "confidence": "높음",
+      "name": "부산광역시 사상구 청년 기본 조례",
+      "mst": "1845079",
+      "promulgated": "20230808",
+      "effective": "20230808",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1845079&type=HTML"
+    },
+    {
+      "org": "부산광역시 사하구",
+      "confidence": "낮음",
+      "name": "부산광역시 사하구 청년 지원 조례",
+      "mst": "2029043",
+      "promulgated": "20250414",
+      "effective": "20250414",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2029043&type=HTML"
+    },
+    {
+      "org": "부산광역시 서구",
+      "confidence": "높음",
+      "name": "부산광역시 서구 청년 기본 조례",
+      "mst": "2080051",
+      "promulgated": "20251014",
+      "effective": "20251014",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2080051&type=HTML"
+    },
+    {
+      "org": "부산광역시 수영구",
+      "confidence": "높음",
+      "name": "부산광역시 수영구 청년 기본 조례",
+      "mst": "1931363",
+      "promulgated": "20240520",
+      "effective": "20250101",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1931363&type=HTML"
+    },
+    {
+      "org": "부산광역시 연제구",
+      "confidence": "높음",
+      "name": "부산광역시 연제구 청년 기본 조례",
+      "mst": "1910159",
+      "promulgated": "20240301",
+      "effective": "20240301",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1910159&type=HTML"
+    },
+    {
+      "org": "부산광역시 영도구",
+      "confidence": "높음",
+      "name": "부산광역시 영도구 청년 기본 조례",
+      "mst": "1963267",
+      "promulgated": "20240814",
+      "effective": "20240814",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1963267&type=HTML"
+    },
+    {
+      "org": "부산광역시 중구",
+      "confidence": "높음",
+      "name": "부산광역시 중구 청년 기본 조례",
+      "mst": "1864031",
+      "promulgated": "20231013",
+      "effective": "20231013",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1864031&type=HTML"
+    },
+    {
+      "org": "부산광역시 해운대구",
+      "confidence": "높음",
+      "name": "부산광역시 해운대구 청년 기본 조례",
+      "mst": "1856339",
+      "promulgated": "20230927",
+      "effective": "20230927",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1856339&type=HTML"
+    },
+    {
+      "org": "서울특별시",
+      "confidence": "높음",
+      "name": "서울특별시 청년 기본 조례",
+      "mst": "2054497",
+      "promulgated": "20250714",
+      "effective": "20250714",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2054497&type=HTML"
+    },
+    {
+      "org": "서울특별시 강남구",
+      "confidence": "높음",
+      "name": "서울특별시 강남구 청년 기본 조례",
+      "mst": "2147829",
+      "promulgated": "20260710",
+      "effective": "20260710",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2147829&type=HTML"
+    },
+    {
+      "org": "서울특별시 강동구",
+      "confidence": "높음",
+      "name": "서울특별시 강동구 청년 기본 조례",
+      "mst": "1984689",
+      "promulgated": "20241113",
+      "effective": "20241113",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1984689&type=HTML"
+    },
+    {
+      "org": "서울특별시 강북구",
+      "confidence": "높음",
+      "name": "서울특별시 강북구 청년 기본 조례",
+      "mst": "2061699",
+      "promulgated": "20250801",
+      "effective": "20250801",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2061699&type=HTML"
+    },
+    {
+      "org": "서울특별시 강서구",
+      "confidence": "보통",
+      "name": "서울특별시 강서구 청년지원 기본 조례",
+      "mst": "1853703",
+      "promulgated": "20230922",
+      "effective": "20230922",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1853703&type=HTML"
+    },
+    {
+      "org": "서울특별시 관악구",
+      "confidence": "보통",
+      "name": "서울특별시 관악구 청년 지원 기본 조례",
+      "mst": "2100211",
+      "promulgated": "20251230",
+      "effective": "20251230",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2100211&type=HTML"
+    },
+    {
+      "org": "서울특별시 광진구",
+      "confidence": "높음",
+      "name": "서울특별시 광진구 청년 기본 조례",
+      "mst": "1852343",
+      "promulgated": "20230920",
+      "effective": "20230920",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1852343&type=HTML"
+    },
+    {
+      "org": "서울특별시 구로구",
+      "confidence": "보통",
+      "name": "서울특별시 구로구 청년 지원 기본 조례",
+      "mst": "1941339",
+      "promulgated": "20240627",
+      "effective": "20240627",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1941339&type=HTML"
+    },
+    {
+      "org": "서울특별시 금천구",
+      "confidence": "높음",
+      "name": "서울특별시 금천구 청년 기본 조례",
+      "mst": "2112327",
+      "promulgated": "20260226",
+      "effective": "20260226",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2112327&type=HTML"
+    },
+    {
+      "org": "서울특별시 노원구",
+      "confidence": "높음",
+      "name": "서울특별시 노원구 청년 기본 조례",
+      "mst": "2071383",
+      "promulgated": "20250926",
+      "effective": "20250926",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2071383&type=HTML"
+    },
+    {
+      "org": "서울특별시 도봉구",
+      "confidence": "높음",
+      "name": "서울특별시 도봉구 청년 기본 조례",
+      "mst": "1815195",
+      "promulgated": "20230601",
+      "effective": "20230601",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1815195&type=HTML"
+    },
+    {
+      "org": "서울특별시 동대문구",
+      "confidence": "높음",
+      "name": "서울특별시 동대문구 청년 기본 조례",
+      "mst": "2082331",
+      "promulgated": "20251106",
+      "effective": "20251106",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2082331&type=HTML"
+    },
+    {
+      "org": "서울특별시 동작구",
+      "confidence": "높음",
+      "name": "서울특별시 동작구 청년 기본 조례",
+      "mst": "1952769",
+      "promulgated": "20240711",
+      "effective": "20240711",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1952769&type=HTML"
+    },
+    {
+      "org": "서울특별시 마포구",
+      "confidence": "높음",
+      "name": "서울특별시 마포구 청년 기본 조례",
+      "mst": "1965855",
+      "promulgated": "20240912",
+      "effective": "20240912",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1965855&type=HTML"
+    },
+    {
+      "org": "서울특별시 서대문구",
+      "confidence": "높음",
+      "name": "서울특별시 서대문구 청년 기본 조례",
+      "mst": "2052801",
+      "promulgated": "20250709",
+      "effective": "20260101",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2052801&type=HTML"
+    },
+    {
+      "org": "서울특별시 서초구",
+      "confidence": "높음",
+      "name": "서울특별시 서초구 청년 기본 조례",
+      "mst": "2021293",
+      "promulgated": "20250313",
+      "effective": "20250313",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2021293&type=HTML"
+    },
+    {
+      "org": "서울특별시 성동구",
+      "confidence": "높음",
+      "name": "서울특별시 성동구 청년 기본 조례",
+      "mst": "2084529",
+      "promulgated": "20251112",
+      "effective": "20260101",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2084529&type=HTML"
+    },
+    {
+      "org": "서울특별시 성북구",
+      "confidence": "보통",
+      "name": "서울특별시 성북구 청년지원 기본 조례",
+      "mst": "1920237",
+      "promulgated": "20240411",
+      "effective": "20240411",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1920237&type=HTML"
+    },
+    {
+      "org": "서울특별시 송파구",
+      "confidence": "보통",
+      "name": "서울특별시 송파구 청년정책 기본 조례",
+      "mst": "2004519",
+      "promulgated": "20241231",
+      "effective": "20241231",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2004519&type=HTML"
+    },
+    {
+      "org": "서울특별시 양천구",
+      "confidence": "높음",
+      "name": "서울특별시 양천구 청년 기본 조례",
+      "mst": "1987715",
+      "promulgated": "20241121",
+      "effective": "20250101",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1987715&type=HTML"
+    },
+    {
+      "org": "서울특별시 영등포구",
+      "confidence": "높음",
+      "name": "서울특별시 영등포구 청년 기본 조례",
+      "mst": "2106735",
+      "promulgated": "20260108",
+      "effective": "20260108",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2106735&type=HTML"
+    },
+    {
+      "org": "서울특별시 용산구",
+      "confidence": "높음",
+      "name": "서울특별시 용산구 청년 기본 조례",
+      "mst": "1893417",
+      "promulgated": "20231229",
+      "effective": "20231229",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1893417&type=HTML"
+    },
+    {
+      "org": "서울특별시 은평구",
+      "confidence": "높음",
+      "name": "서울특별시 은평구 청년 기본 조례",
+      "mst": "1871249",
+      "promulgated": "20231109",
+      "effective": "20231109",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1871249&type=HTML"
+    },
+    {
+      "org": "서울특별시 종로구",
+      "confidence": "보통",
+      "name": "서울특별시 종로구 청년발전 및 지원 기본 조례",
+      "mst": "2050929",
+      "promulgated": "20250704",
+      "effective": "20250801",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2050929&type=HTML"
+    },
+    {
+      "org": "서울특별시 중구",
+      "confidence": "높음",
+      "name": "서울특별시 중구 청년 기본 조례",
+      "mst": "2058709",
+      "promulgated": "20250717",
+      "effective": "20250717",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2058709&type=HTML"
+    },
+    {
+      "org": "서울특별시 중랑구",
+      "confidence": "높음",
+      "name": "서울특별시 중랑구 청년 기본 조례",
+      "mst": "1860331",
+      "promulgated": "20231005",
+      "effective": "20231005",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1860331&type=HTML"
+    },
+    {
+      "org": "서울특별시교육청",
+      "confidence": "낮음",
+      "name": "서울특별시교육청 2027 제41차 서울 세계청년대회 지원 조례",
+      "mst": "2134527",
+      "promulgated": "20260709",
+      "effective": "20260709",
+      "revision": "제정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2134527&type=HTML"
+    },
+    {
+      "org": "세종특별자치시",
+      "confidence": "높음",
+      "name": "세종특별자치시 청년기본 조례",
+      "mst": "2092583",
+      "promulgated": "20251215",
+      "effective": "20251215",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2092583&type=HTML"
+    },
+    {
+      "org": "울산광역시",
+      "confidence": "높음",
+      "name": "울산광역시 청년 기본 조례",
+      "mst": "2110545",
+      "promulgated": "20260219",
+      "effective": "20260219",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2110545&type=HTML"
+    },
+    {
+      "org": "울산광역시 남구",
+      "confidence": "높음",
+      "name": "울산광역시 남구 청년 기본 조례",
+      "mst": "1856781",
+      "promulgated": "20230927",
+      "effective": "20230927",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1856781&type=HTML"
+    },
+    {
+      "org": "울산광역시 동구",
+      "confidence": "높음",
+      "name": "울산광역시 동구 청년 기본 조례",
+      "mst": "2010541",
+      "promulgated": "20241128",
+      "effective": "20241128",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2010541&type=HTML"
+    },
+    {
+      "org": "울산광역시 북구",
+      "confidence": "높음",
+      "name": "울산광역시 북구 청년 기본 조례",
+      "mst": "1910651",
+      "promulgated": "20240307",
+      "effective": "20240307",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1910651&type=HTML"
+    },
+    {
+      "org": "울산광역시 울주군",
+      "confidence": "높음",
+      "name": "울산광역시 울주군 청년 기본 조례",
+      "mst": "1966575",
+      "promulgated": "20240912",
+      "effective": "20240912",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1966575&type=HTML"
+    },
+    {
+      "org": "울산광역시 중구",
+      "confidence": "높음",
+      "name": "울산광역시 중구 청년 기본 조례",
+      "mst": "1951799",
+      "promulgated": "20240708",
+      "effective": "20240708",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1951799&type=HTML"
+    },
+    {
+      "org": "인천광역시",
+      "confidence": "보통",
+      "name": "인천광역시 청년정책 및 지원에 관한 기본 조례",
+      "mst": "2104417",
+      "promulgated": "20251231",
+      "effective": "20251231",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2104417&type=HTML"
+    },
+    {
+      "org": "인천광역시 강화군",
+      "confidence": "높음",
+      "name": "강화군 청년 기본 조례",
+      "mst": "2111121",
+      "promulgated": "20260223",
+      "effective": "20260223",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2111121&type=HTML"
+    },
+    {
+      "org": "인천광역시 검단구",
+      "confidence": "높음",
+      "name": "인천광역시 검단구 청년 기본 조례",
+      "mst": "2142531",
+      "promulgated": "20260701",
+      "effective": "20260701",
+      "revision": "제정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2142531&type=HTML"
+    },
+    {
+      "org": "인천광역시 계양구",
+      "confidence": "높음",
+      "name": "인천광역시 계양구 청년 기본 조례",
+      "mst": "1875101",
+      "promulgated": "20231117",
+      "effective": "20231117",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1875101&type=HTML"
+    },
+    {
+      "org": "인천광역시 남동구",
+      "confidence": "높음",
+      "name": "남동구 청년 기본 조례",
+      "mst": "2095093",
+      "promulgated": "20251222",
+      "effective": "20251222",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2095093&type=HTML"
+    },
+    {
+      "org": "인천광역시 미추홀구",
+      "confidence": "높음",
+      "name": "인천광역시 미추홀구 청년 기본 조례",
+      "mst": "2111145",
+      "promulgated": "20260223",
+      "effective": "20260223",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2111145&type=HTML"
+    },
+    {
+      "org": "인천광역시 부평구",
+      "confidence": "높음",
+      "name": "인천광역시부평구 청년 기본 조례",
+      "mst": "1856633",
+      "promulgated": "20230927",
+      "effective": "20230927",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1856633&type=HTML"
+    },
+    {
+      "org": "인천광역시 서해구",
+      "confidence": "높음",
+      "name": "인천광역시 서해구 청년 기본 조례",
+      "mst": "2135389",
+      "promulgated": "20260629",
+      "effective": "20260701",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2135389&type=HTML"
+    },
+    {
+      "org": "인천광역시 연수구",
+      "confidence": "높음",
+      "name": "인천광역시 연수구 청년 기본 조례",
+      "mst": "2039377",
+      "promulgated": "20250519",
+      "effective": "20250519",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2039377&type=HTML"
+    },
+    {
+      "org": "인천광역시 영종구",
+      "confidence": "높음",
+      "name": "인천광역시 영종구 청년 기본 조례",
+      "mst": "2143441",
+      "promulgated": "20260701",
+      "effective": "20260701",
+      "revision": "제정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2143441&type=HTML"
+    },
+    {
+      "org": "인천광역시 옹진군",
+      "confidence": "높음",
+      "name": "옹진군 청년 기본 조례",
+      "mst": "1956125",
+      "promulgated": "20240715",
+      "effective": "20240715",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1956125&type=HTML"
+    },
+    {
+      "org": "인천광역시 제물포구",
+      "confidence": "높음",
+      "name": "인천광역시 제물포구 청년 기본 조례",
+      "mst": "2145991",
+      "promulgated": "20260701",
+      "effective": "20260701",
+      "revision": "제정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2145991&type=HTML"
+    },
+    {
+      "org": "전남광주통합특별시 강진군",
+      "confidence": "높음",
+      "name": "강진군 청년 기본 조례",
+      "mst": "1416250",
+      "promulgated": "20230713",
+      "effective": "20230713",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1416250&type=HTML"
+    },
+    {
+      "org": "전남광주통합특별시 고흥군",
+      "confidence": "보통",
+      "name": "고흥군 청년발전 기본 조례",
+      "mst": "1845211",
+      "promulgated": "20230804",
+      "effective": "20230804",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1845211&type=HTML"
+    },
+    {
+      "org": "전남광주통합특별시 곡성군",
+      "confidence": "보통",
+      "name": "곡성군 청년발전 기본 조례",
+      "mst": "1957655",
+      "promulgated": "20240717",
+      "effective": "20240717",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1957655&type=HTML"
+    },
+    {
+      "org": "전남광주통합특별시 광산구",
+      "confidence": "높음",
+      "name": "전남광주통합특별시 광산구 청년 기본 조례",
+      "mst": "2138927",
+      "promulgated": "20260630",
+      "effective": "20260701",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2138927&type=HTML"
+    },
+    {
+      "org": "전남광주통합특별시 광양시",
+      "confidence": "높음",
+      "name": "광양시 청년 기본 조례",
+      "mst": "1869907",
+      "promulgated": "20231106",
+      "effective": "20231106",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1869907&type=HTML"
+    },
+    {
+      "org": "전남광주통합특별시 구례군",
+      "confidence": "보통",
+      "name": "구례군 청년발전 기본 조례",
+      "mst": "1878583",
+      "promulgated": "20231204",
+      "effective": "20231204",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1878583&type=HTML"
+    },
+    {
+      "org": "전남광주통합특별시 나주시",
+      "confidence": "높음",
+      "name": "나주시 청년 기본 조례",
+      "mst": "2113923",
+      "promulgated": "20260303",
+      "effective": "20260303",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2113923&type=HTML"
+    },
+    {
+      "org": "전남광주통합특별시 남구",
+      "confidence": "높음",
+      "name": "전남광주통합특별시 남구 청년 기본 조례",
+      "mst": "2140897",
+      "promulgated": "20260630",
+      "effective": "20260701",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2140897&type=HTML"
+    },
+    {
+      "org": "전남광주통합특별시 담양군",
+      "confidence": "높음",
+      "name": "담양군 청년 기본 조례",
+      "mst": "1854907",
+      "promulgated": "20230925",
+      "effective": "20230925",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1854907&type=HTML"
+    },
+    {
+      "org": "전남광주통합특별시 동구",
+      "confidence": "높음",
+      "name": "전남광주통합특별시 동구 청년 기본 조례",
+      "mst": "2149771",
+      "promulgated": "20260701",
+      "effective": "20260701",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2149771&type=HTML"
+    },
+    {
+      "org": "전남광주통합특별시 목포시",
+      "confidence": "보통",
+      "name": "목포시 청년발전 기본 조례",
+      "mst": "1786149",
+      "promulgated": "20230227",
+      "effective": "20230227",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1786149&type=HTML"
+    },
+    {
+      "org": "전남광주통합특별시 무안군",
+      "confidence": "높음",
+      "name": "무안군 청년 기본 조례",
+      "mst": "1536955",
+      "promulgated": "20201012",
+      "effective": "20201012",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1536955&type=HTML"
+    },
+    {
+      "org": "전남광주통합특별시 보성군",
+      "confidence": "낮음",
+      "name": "보성군 청년발전 지원 조례",
+      "mst": "2133817",
+      "promulgated": "20260625",
+      "effective": "20260625",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2133817&type=HTML"
+    },
+    {
+      "org": "전남광주통합특별시 북구",
+      "confidence": "보통",
+      "name": "전남광주통합특별시 북구 청년친화도시 기본 조례",
+      "mst": "2145559",
+      "promulgated": "20260630",
+      "effective": "20260701",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2145559&type=HTML"
+    },
+    {
+      "org": "전남광주통합특별시 서구",
+      "confidence": "높음",
+      "name": "전남광주통합특별시 서구 청년 기본 조례",
+      "mst": "2132593",
+      "promulgated": "20260616",
+      "effective": "20260701",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2132593&type=HTML"
+    },
+    {
+      "org": "전남광주통합특별시 순천시",
+      "confidence": "높음",
+      "name": "순천시 청년 기본 조례",
+      "mst": "1986219",
+      "promulgated": "20241115",
+      "effective": "20241115",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1986219&type=HTML"
+    },
+    {
+      "org": "전남광주통합특별시 신안군",
+      "confidence": "낮음",
+      "name": "신안군 청년 지원 조례",
+      "mst": "1897437",
+      "promulgated": "20231229",
+      "effective": "20231229",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1897437&type=HTML"
+    },
+    {
+      "org": "전남광주통합특별시 여수시",
+      "confidence": "높음",
+      "name": "여수시 청년 기본 조례",
+      "mst": "1852233",
+      "promulgated": "20230919",
+      "effective": "20230919",
+      "revision": "전부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1852233&type=HTML"
+    },
+    {
+      "org": "전남광주통합특별시 영광군",
+      "confidence": "높음",
+      "name": "영광군 청년 기본 조례",
+      "mst": "2006387",
+      "promulgated": "20241231",
+      "effective": "20250101",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2006387&type=HTML"
+    },
+    {
+      "org": "전남광주통합특별시 영암군",
+      "confidence": "보통",
+      "name": "영암군 청년발전 기본 조례",
+      "mst": "1925425",
+      "promulgated": "20240509",
+      "effective": "20240509",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1925425&type=HTML"
+    },
+    {
+      "org": "전남광주통합특별시 완도군",
+      "confidence": "보통",
+      "name": "완도군 청년발전 기본 조례",
+      "mst": "1922501",
+      "promulgated": "20240424",
+      "effective": "20240424",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1922501&type=HTML"
+    },
+    {
+      "org": "전남광주통합특별시 장성군",
+      "confidence": "보통",
+      "name": "장성군 청년발전 기본 조례",
+      "mst": "2059927",
+      "promulgated": "20250723",
+      "effective": "20250723",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2059927&type=HTML"
+    },
+    {
+      "org": "전남광주통합특별시 장흥군",
+      "confidence": "보통",
+      "name": "장흥군 청년발전 기본 조례",
+      "mst": "2052251",
+      "promulgated": "20250707",
+      "effective": "20250707",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2052251&type=HTML"
+    },
+    {
+      "org": "전남광주통합특별시 진도군",
+      "confidence": "보통",
+      "name": "진도군 청년 발전 기본 조례",
+      "mst": "1939315",
+      "promulgated": "20240619",
+      "effective": "20240619",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1939315&type=HTML"
+    },
+    {
+      "org": "전남광주통합특별시 함평군",
+      "confidence": "보통",
+      "name": "함평군 청년발전 기본 조례",
+      "mst": "2000499",
+      "promulgated": "20241227",
+      "effective": "20241227",
+      "revision": "전부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2000499&type=HTML"
+    },
+    {
+      "org": "전남광주통합특별시 해남군",
+      "confidence": "보통",
+      "name": "해남군 청년 발전 기본 조례",
+      "mst": "2087261",
+      "promulgated": "20251117",
+      "effective": "20251117",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2087261&type=HTML"
+    },
+    {
+      "org": "전남광주통합특별시 화순군",
+      "confidence": "높음",
+      "name": "화순군 청년기본 조례",
+      "mst": "2081327",
+      "promulgated": "20250925",
+      "effective": "20250925",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2081327&type=HTML"
+    },
+    {
+      "org": "전북특별자치도",
+      "confidence": "높음",
+      "name": "전북특별자치도 청년 기본 조례",
+      "mst": "2030807",
+      "promulgated": "20250418",
+      "effective": "20250418",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2030807&type=HTML"
+    },
+    {
+      "org": "전북특별자치도 고창군",
+      "confidence": "높음",
+      "name": "고창군 청년 기본 조례",
+      "mst": "1960965",
+      "promulgated": "20240801",
+      "effective": "20240801",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1960965&type=HTML"
+    },
+    {
+      "org": "전북특별자치도 군산시",
+      "confidence": "높음",
+      "name": "군산시 청년 기본 조례",
+      "mst": "2015423",
+      "promulgated": "20250203",
+      "effective": "20250203",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2015423&type=HTML"
+    },
+    {
+      "org": "전북특별자치도 김제시",
+      "confidence": "높음",
+      "name": "김제시 청년 기본 조례",
+      "mst": "1628339",
+      "promulgated": "20230810",
+      "effective": "20230810",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1628339&type=HTML"
+    },
+    {
+      "org": "전북특별자치도 남원시",
+      "confidence": "높음",
+      "name": "남원시 청년 기본 조례",
+      "mst": "2059005",
+      "promulgated": "20250718",
+      "effective": "20250718",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2059005&type=HTML"
+    },
+    {
+      "org": "전북특별자치도 무주군",
+      "confidence": "높음",
+      "name": "무주군 청년 기본 조례",
+      "mst": "2054333",
+      "promulgated": "20250709",
+      "effective": "20250709",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2054333&type=HTML"
+    },
+    {
+      "org": "전북특별자치도 부안군",
+      "confidence": "높음",
+      "name": "부안군 청년 기본 조례",
+      "mst": "1953871",
+      "promulgated": "20240710",
+      "effective": "20240710",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1953871&type=HTML"
+    },
+    {
+      "org": "전북특별자치도 순창군",
+      "confidence": "높음",
+      "name": "순창군 청년 기본 조례",
+      "mst": "1806917",
+      "promulgated": "20230428",
+      "effective": "20230428",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1806917&type=HTML"
+    },
+    {
+      "org": "전북특별자치도 완주군",
+      "confidence": "높음",
+      "name": "완주군 청년 기본 조례",
+      "mst": "2093591",
+      "promulgated": "20251218",
+      "effective": "20251218",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2093591&type=HTML"
+    },
+    {
+      "org": "전북특별자치도 익산시",
+      "confidence": "낮음",
+      "name": "익산시 청년 탈모 치료 지원 조례",
+      "mst": "2122937",
+      "promulgated": "20260415",
+      "effective": "20260415",
+      "revision": "제정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2122937&type=HTML"
+    },
+    {
+      "org": "전북특별자치도 임실군",
+      "confidence": "높음",
+      "name": "임실군 청년 기본 조례",
+      "mst": "2039705",
+      "promulgated": "20250519",
+      "effective": "20250519",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2039705&type=HTML"
+    },
+    {
+      "org": "전북특별자치도 장수군",
+      "confidence": "높음",
+      "name": "장수군 청년 기본 조례",
+      "mst": "2123009",
+      "promulgated": "20260415",
+      "effective": "20260415",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2123009&type=HTML"
+    },
+    {
+      "org": "전북특별자치도 전주시",
+      "confidence": "낮음",
+      "name": "전주시 청년 문화예술 육성 및 지원 조례",
+      "mst": "2111281",
+      "promulgated": "20260223",
+      "effective": "20260223",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2111281&type=HTML"
+    },
+    {
+      "org": "전북특별자치도 정읍시",
+      "confidence": "높음",
+      "name": "정읍시 청년 기본 조례",
+      "mst": "2063457",
+      "promulgated": "20250808",
+      "effective": "20250808",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2063457&type=HTML"
+    },
+    {
+      "org": "전북특별자치도 진안군",
+      "confidence": "높음",
+      "name": "진안군 청년 기본 조례",
+      "mst": "2032935",
+      "promulgated": "20250430",
+      "effective": "20250430",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2032935&type=HTML"
+    },
+    {
+      "org": "제주특별자치도",
+      "confidence": "높음",
+      "name": "제주특별자치도 청년 기본 조례",
+      "mst": "2120483",
+      "promulgated": "20260408",
+      "effective": "20270101",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2120483&type=HTML"
+    },
+    {
+      "org": "충청남도",
+      "confidence": "높음",
+      "name": "충청남도 청년 기본 조례",
+      "mst": "2055147",
+      "promulgated": "20250710",
+      "effective": "20250710",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2055147&type=HTML"
+    },
+    {
+      "org": "충청남도 계룡시",
+      "confidence": "보통",
+      "name": "계룡시 청년 정책 기본 조례",
+      "mst": "1780301",
+      "promulgated": "20230125",
+      "effective": "20230125",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1780301&type=HTML"
+    },
+    {
+      "org": "충청남도 공주시",
+      "confidence": "높음",
+      "name": "공주시 청년 기본 조례",
+      "mst": "2087103",
+      "promulgated": "20251117",
+      "effective": "20251117",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2087103&type=HTML"
+    },
+    {
+      "org": "충청남도 금산군",
+      "confidence": "낮음",
+      "name": "금산군 청년지원 조례",
+      "mst": "1923063",
+      "promulgated": "20240430",
+      "effective": "20240430",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1923063&type=HTML"
+    },
+    {
+      "org": "충청남도 논산시",
+      "confidence": "보통",
+      "name": "논산시 청년지원 기본 조례",
+      "mst": "1980033",
+      "promulgated": "20241030",
+      "effective": "20250101",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1980033&type=HTML"
+    },
+    {
+      "org": "충청남도 당진시",
+      "confidence": "높음",
+      "name": "당진시 청년 기본 조례",
+      "mst": "1636621",
+      "promulgated": "20211029",
+      "effective": "20211029",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1636621&type=HTML"
+    },
+    {
+      "org": "충청남도 보령시",
+      "confidence": "높음",
+      "name": "보령시 청년 기본 조례",
+      "mst": "2013445",
+      "promulgated": "20250131",
+      "effective": "20250131",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2013445&type=HTML"
+    },
+    {
+      "org": "충청남도 부여군",
+      "confidence": "보통",
+      "name": "부여군 청년지원 기본 조례",
+      "mst": "1581001",
+      "promulgated": "20210317",
+      "effective": "20210317",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1581001&type=HTML"
+    },
+    {
+      "org": "충청남도 서산시",
+      "confidence": "높음",
+      "name": "서산시 청년 기본 조례",
+      "mst": "1990529",
+      "promulgated": "20241210",
+      "effective": "20250101",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1990529&type=HTML"
+    },
+    {
+      "org": "충청남도 서천군",
+      "confidence": "보통",
+      "name": "서천군 청년지원 기본 조례",
+      "mst": "1926451",
+      "promulgated": "20240510",
+      "effective": "20240510",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1926451&type=HTML"
+    },
+    {
+      "org": "충청남도 아산시",
+      "confidence": "높음",
+      "name": "아산시 청년 기본 조례",
+      "mst": "2039221",
+      "promulgated": "20250515",
+      "effective": "20250515",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2039221&type=HTML"
+    },
+    {
+      "org": "충청남도 예산군",
+      "confidence": "높음",
+      "name": "예산군 청년 기본 조례",
+      "mst": "2022137",
+      "promulgated": "20250317",
+      "effective": "20250317",
+      "revision": "전부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2022137&type=HTML"
+    },
+    {
+      "org": "충청남도 천안시",
+      "confidence": "높음",
+      "name": "천안시 청년 기본 조례",
+      "mst": "2002583",
+      "promulgated": "20241230",
+      "effective": "20250101",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2002583&type=HTML"
+    },
+    {
+      "org": "충청남도 청양군",
+      "confidence": "보통",
+      "name": "청양군 청년지원에 관한 기본 조례",
+      "mst": "1924435",
+      "promulgated": "20240507",
+      "effective": "20240507",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1924435&type=HTML"
+    },
+    {
+      "org": "충청남도 태안군",
+      "confidence": "높음",
+      "name": "태안군 청년 기본 조례",
+      "mst": "1914919",
+      "promulgated": "20240325",
+      "effective": "20240325",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1914919&type=HTML"
+    },
+    {
+      "org": "충청남도 홍성군",
+      "confidence": "보통",
+      "name": "홍성군 청년지원 기본 조례",
+      "mst": "2045585",
+      "promulgated": "20250530",
+      "effective": "20250530",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2045585&type=HTML"
+    },
+    {
+      "org": "충청북도",
+      "confidence": "높음",
+      "name": "충청북도 청년 기본 조례",
+      "mst": "2083123",
+      "promulgated": "20251107",
+      "effective": "20251107",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2083123&type=HTML"
+    },
+    {
+      "org": "충청북도 괴산군",
+      "confidence": "높음",
+      "name": "괴산군 청년 기본 조례",
+      "mst": "2097757",
+      "promulgated": "20251226",
+      "effective": "20260101",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2097757&type=HTML"
+    },
+    {
+      "org": "충청북도 단양군",
+      "confidence": "낮음",
+      "name": "단양군 청년새마을조직 지원 조례",
+      "mst": "2068115",
+      "promulgated": "20250919",
+      "effective": "20250919",
+      "revision": "제정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2068115&type=HTML"
+    },
+    {
+      "org": "충청북도 보은군",
+      "confidence": "높음",
+      "name": "보은군 청년 기본 조례",
+      "mst": "1960833",
+      "promulgated": "20240802",
+      "effective": "20240802",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1960833&type=HTML"
+    },
+    {
+      "org": "충청북도 영동군",
+      "confidence": "높음",
+      "name": "영동군 청년 기본 조례",
+      "mst": "1869811",
+      "promulgated": "20231106",
+      "effective": "20231106",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1869811&type=HTML"
+    },
+    {
+      "org": "충청북도 옥천군",
+      "confidence": "높음",
+      "name": "옥천군 청년 기본 조례",
+      "mst": "1922995",
+      "promulgated": "20240430",
+      "effective": "20240430",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1922995&type=HTML"
+    },
+    {
+      "org": "충청북도 음성군",
+      "confidence": "높음",
+      "name": "음성군 청년 기본 조례",
+      "mst": "1573465",
+      "promulgated": "20210205",
+      "effective": "20210205",
+      "revision": "제정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1573465&type=HTML"
+    },
+    {
+      "org": "충청북도 제천시",
+      "confidence": "높음",
+      "name": "제천시 청년 기본 조례",
+      "mst": "1888709",
+      "promulgated": "20231222",
+      "effective": "20231222",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=1888709&type=HTML"
+    },
+    {
+      "org": "충청북도 증평군",
+      "confidence": "높음",
+      "name": "증평군 청년 기본 조례",
+      "mst": "2151451",
+      "promulgated": "20260508",
+      "effective": "20260508",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2151451&type=HTML"
+    },
+    {
+      "org": "충청북도 진천군",
+      "confidence": "높음",
+      "name": "진천군 청년 기본 조례",
+      "mst": "2047517",
+      "promulgated": "20250630",
+      "effective": "20250630",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2047517&type=HTML"
+    },
+    {
+      "org": "충청북도 청주시",
+      "confidence": "높음",
+      "name": "청주시 청년 기본 조례",
+      "mst": "2094901",
+      "promulgated": "20251219",
+      "effective": "20251219",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2094901&type=HTML"
+    },
+    {
+      "org": "충청북도 충주시",
+      "confidence": "높음",
+      "name": "충주시 청년 기본 조례",
+      "mst": "2106839",
+      "promulgated": "20251231",
+      "effective": "20251231",
+      "revision": "일부개정",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=test&target=ordin&MST=2106839&type=HTML"
+    }
+  ]
+}
