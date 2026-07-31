@@ -33,7 +33,10 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function fetchPage(page) {
   const url = `${BASE}?OC=test&target=ordin&query=${encodeURIComponent("청년")}&type=XML&display=${PAGE_SIZE}&page=${page}`;
-  for (let attempt = 1; attempt <= 4; attempt++) {
+  /* 재시도를 넉넉히 준다. `AbortSignal.timeout` 은 **연결 단계 타임아웃을 못 늘린다** —
+     undici 기본 10초에서 끊긴다. GitHub Actions(해외 IP)에서 법제처가 느릴 때
+     4회로는 모자랐다(2026-07-31 실측: 4회 전부 ConnectTimeout). */
+  for (let attempt = 1; attempt <= 8; attempt++) {
     try {
       const res = await fetch(url, { signal: AbortSignal.timeout(30000) });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
