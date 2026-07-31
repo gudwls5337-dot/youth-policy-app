@@ -1,0 +1,14 @@
+name: probe
+on: { workflow_dispatch: }
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 접속 가능 여부
+        run: |
+          for u in "https://www.law.go.kr/DRF/lawSearch.do?OC=test&target=ordin&type=XML&display=1" \
+                   "https://www.youthcenter.go.kr/go/ythip/getPlcy" \
+                   "https://www.yangsan.go.kr/youth/main.do"; do
+            code=$(curl -s -o /dev/null -m 25 -w "%{http_code}" "$u" || echo "FAIL")
+            echo "$code  $u"
+          done
